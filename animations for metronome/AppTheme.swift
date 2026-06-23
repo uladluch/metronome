@@ -37,6 +37,35 @@ extension View {
     }
 }
 
+// MARK: - Shimmer Effect
+
+extension View {
+
+    /// Добавляет мерцание (shimmer) эффект к элементу.
+    func shimmer() -> some View {
+        self
+            .modifier(ShimmerModifier())
+    }
+}
+
+private struct ShimmerModifier: ViewModifier {
+
+    @State private var isShimmering = false
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(isShimmering ? 0.8 : 1.0)
+            .animation(
+                Animation.easeInOut(duration: 1.5)
+                    .repeatForever(autoreverses: true),
+                value: isShimmering
+            )
+            .onAppear {
+                isShimmering = true
+            }
+    }
+}
+
 // MARK: - Цвета
 
 extension Color {
