@@ -52,6 +52,7 @@ struct GlassPanel: View {
                     .frame(maxWidth: .infinity)
                     .frame(height: 200)
                     .appGlass(in: RoundedRectangle(cornerRadius: 20), interactive: false)
+                    .shimmer()
                     .padding(20)
 
                     if position == .left {
