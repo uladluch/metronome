@@ -67,9 +67,8 @@ struct ContentView: View {
         }
     }
 
-    // Пружина .bouncy — нативный «жидкий» отклик. Баунс снижен (extraBounce 0.04)
-    // и чуть короче — морф мягче, без заметной «пружинистости».
-    private let morphAnimation: Animation = .bouncy(duration: 0.45, extraBounce: 0.04)
+    // Морф почти без пружины: .smooth — мягкое затухание без «отскока».
+    private let morphAnimation: Animation = .smooth(duration: 0.4)
 
     private func open(_ panel: PanelPosition) {
         withAnimation(morphAnimation) {
