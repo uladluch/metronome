@@ -17,10 +17,11 @@ import SwiftUI
 enum AppGlass {
 
     /// Базовый материал Liquid Glass.
-    /// `.regular` — плотное стекло: на нём виден нативный отклик `.interactive()`
-    /// (scaling + shimmer при нажатии). На `.clear` поверх чёрного фона эффект
-    /// почти не читается. Поменяй на `.clear`, если нужно максимально прозрачное.
-    static let style: Glass = .regular
+    /// `.clear` — почти прозрачное стекло: не заливает контент блюром, а
+    /// преломляет свет по кромке (lensing по периметру). Радужное переливание
+    /// даёт цветной слой под стеклом (см. GlassBackdrop). `.regular` — наоборот,
+    /// плотное матовое стекло.
+    static let style: Glass = .clear
 }
 
 extension View {
