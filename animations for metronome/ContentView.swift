@@ -35,6 +35,14 @@ struct ContentView: View {
                     .padding(.horizontal, 16)
                     .padding(.top, 8)
 
+                    // Закрытие по тапу мимо окна (нижняя часть экрана).
+                    if openPanel != nil {
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .ignoresSafeArea()
+                            .onTapGesture { close() }
+                    }
+
                     // Окна. У каждого тот же glassEffectID, что у его кнопки,
                     // поэтому стекло кнопки морфит в окно и обратно.
                     if openPanel == .left {

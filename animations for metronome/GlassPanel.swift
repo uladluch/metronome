@@ -62,9 +62,13 @@ struct GlassPanel: View {
             Spacer()
         }
         .padding(24)
-        // Тянем окно на весь контейнер.
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .appGlass(in: RoundedRectangle(cornerRadius: 40), interactive: false)
+        // На всю ширину (перекрывает все кнопки) и на половину высоты экрана,
+        // прижато к верху.
+        .containerRelativeFrame([.horizontal, .vertical], alignment: .top) { length, axis in
+            axis == .vertical ? length / 2 : length
+        }
+        // То же стекло, что у кнопок (interactive), форма — скруглённый прямоугольник.
+        .appGlass(in: RoundedRectangle(cornerRadius: 40), interactive: true)
         .glassEffectID(position.glassID, in: namespace)
     }
 }
