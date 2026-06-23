@@ -8,41 +8,66 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var showLeftPanel = false
-    @State private var showRightPanel = false
-    @State private var showCenterPanel = false
+
+    /// Общий namespace для морфинга Liquid Glass между кнопками и панелями.
+    @Namespace private var glassNS
+
+    /// Какая панель сейчас открыта (nil — закрыты все).
+    @State private var openPanel: PanelPosition?
 
     var body: some View {
-        ZStack {
+        ZStack(alignment: .top) {
+            // Тёмная тема: основной фон полностью чёрный.
             Color.appBackground
                 .ignoresSafeArea()
 
-            VStack(spacing: 0) {
-                TopToolbar(
-                    onLeftTap: { showLeftPanel = true },
-                    onRightTap: { showRightPanel = true },
-                    onCenterTap: { showCenterPanel = true }
-                )
-                .padding(.horizontal, 16)
-                .padding(.top, 8)
+            // Один контейнер на тулбар + панели — обязательное условие морфинга:
+            // стекло может «перетекать» только внутри одного GlassEffectContainer.
+            GlassEffectContainer(spacing: 16) {
+                ZStack(alignment: .top) {
+                    TopToolbar(
+                        namespace: glassNS,
+                        openPanel: openPanel,
+                        onLeft: { open(.left) },
+                        onCenter: { open(.center) },
+                        onRight: { open(.right) }
+                    )
+                    .padding(.horizontal, 16)
+                    .padding(.top, 8)
 
-                Spacer()
-            }
+                    // Прозрачный слой для закрытия по тапу мимо панели.
+                    if openPanel != nil {
+                        Color.clear
+                            .contentShape(Rectangle())
+                            .ignoresSafeArea()
+                            .onTapGesture { close() }
+                    }
 
-            if showLeftPanel {
-                GlassPanel(position: .left, isPresented: $showLeftPanel)
-                    .glassEffectTransition(.identity)
+                    // Панели. У каждой тот же glassEffectID, что у её кнопки,
+                    // поэтому стекло кнопки морфит в панель и обратно.
+                    if openPanel == .left {
+                        GlassPanel(position: .left, namespace: glassNS, onClose: close)
+                    }
+                    if openPanel == .center {
+                        GlassPanel(position: .center, namespace: glassNS, onClose: close)
+                    }
+                    if openPanel == .right {
+                        GlassPanel(position: .right, namespace: glassNS, onClose: close)
+                    }
+                }
             }
+        }
+    }
 
-            if showRightPanel {
-                GlassPanel(position: .right, isPresented: $showRightPanel)
-                    .glassEffectTransition(.identity)
-            }
+    private func open(_ panel: PanelPosition) {
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.82)) {
+            openPanel = panel
+        }
+    }
 
-            if showCenterPanel {
-                GlassPanel(position: .center, isPresented: $showCenterPanel)
-                    .glassEffectTransition(.identity)
-            }
+    private func close() {
+        withAnimation(.spring(response: 0.45, dampingFraction: 0.82)) {
+            openPanel = nil
         }
     }
 }
