@@ -42,7 +42,7 @@ struct TopToolbar: View {
 
 // MARK: - Кнопка тулбара
 
-/// Стеклянная кнопка 60×60 с серой SF-иконкой по центру.
+/// Стеклянная кнопка 60×60 с белой SF-иконкой по центру.
 private struct ToolbarIconButton: View {
 
     let systemName: String
@@ -52,7 +52,7 @@ private struct ToolbarIconButton: View {
         Button(action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 22, weight: .medium))
-                .foregroundStyle(.secondary)
+                .foregroundStyle(.white)
                 .frame(width: 60, height: 60)
                 .appGlass(in: .circle, interactive: true)
         }

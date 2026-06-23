@@ -20,9 +20,9 @@ enum AppGlass {
     /// Поменяй на `.regular`, если нужно более плотное стекло.
     static let style: Glass = .clear
 
-    /// Фоновый цвет для glass материала: 1F1F1F с прозрачностью 30%.
+    /// Фоновый цвет для glass материала: 1F1F1F с прозрачностью 40%.
     static let backgroundColor = Color(red: 0x1F / 255, green: 0x1F / 255, blue: 0x1F / 255)
-        .opacity(0.3)
+        .opacity(0.4)
 }
 
 // MARK: - Inner Shadow
@@ -38,13 +38,15 @@ struct GlassInnerShadow {
 extension View {
 
     /// Применяет единый Liquid Glass приложения в заданной форме.
-    /// Автоматически добавляет inner shadow (белый, прозрачность 0.08, смещение y = -4).
+    /// Автоматически добавляет фон (1F1F1F, 40%), inner shadow (белый, прозрачность 0.08, смещение y = -4).
     ///
     /// - Parameters:
     ///   - shape: форма стекла (по умолчанию — капсула).
     ///   - interactive: включает «живой» отклик стекла на нажатие (для кнопок).
     func appGlass(in shape: some Shape = .capsule, interactive: Bool = false) -> some View {
-        glassEffect(interactive ? AppGlass.style.interactive() : AppGlass.style, in: shape)
+        self
+            .background(AppGlass.backgroundColor)
+            .glassEffect(interactive ? AppGlass.style.interactive() : AppGlass.style, in: shape)
             .appGlassInnerShadow()
     }
 
