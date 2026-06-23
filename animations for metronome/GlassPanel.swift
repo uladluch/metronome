@@ -32,6 +32,15 @@ enum PanelPosition {
         case .center: return "Center Panel"
         }
     }
+
+    /// Иконка-tile панели — совпадает с иконкой её кнопки в тулбаре.
+    var icon: String {
+        switch self {
+        case .left:   return "gearshape"
+        case .right:  return "ellipsis"
+        case .center: return "metronome"
+        }
+    }
 }
 
 struct GlassPanel: View {
@@ -42,7 +51,11 @@ struct GlassPanel: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            HStack {
+            HStack(spacing: 12) {
+                Image(systemName: position.icon)
+                    .font(.system(size: 26, weight: .semibold))
+                    .foregroundStyle(.white)
+
                 Text(position.title)
                     .font(.title2.bold())
                     .foregroundStyle(.white)
