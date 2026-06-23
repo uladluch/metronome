@@ -38,15 +38,13 @@ struct GlassInnerShadow {
 extension View {
 
     /// Применяет единый Liquid Glass приложения в заданной форме.
-    /// Автоматически добавляет фон (1F1F1F, 40%), inner shadow (белый, прозрачность 0.08, смещение y = -4).
+    /// Автоматически добавляет inner shadow (белый, прозрачность 0.08, смещение y = -4).
     ///
     /// - Parameters:
     ///   - shape: форма стекла (по умолчанию — капсула).
     ///   - interactive: включает «живой» отклик стекла на нажатие (для кнопок).
     func appGlass(in shape: some Shape = .capsule, interactive: Bool = false) -> some View {
-        self
-            .background(AppGlass.backgroundColor)
-            .glassEffect(interactive ? AppGlass.style.interactive() : AppGlass.style, in: shape)
+        glassEffect(interactive ? AppGlass.style.interactive() : AppGlass.style, in: shape)
             .appGlassInnerShadow()
     }
 
