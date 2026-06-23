@@ -31,7 +31,8 @@ enum AppGlass {
 struct GlassInnerShadow {
     let color: Color = Color.white
     let opacity: Double = 0.08
-    let offsetY: CGFloat = 4
+    let offsetY: CGFloat = -4
+    let blurRadius: CGFloat = 12
 }
 
 extension View {
@@ -50,7 +51,7 @@ extension View {
     }
 
     /// Добавляет inner shadow к glass-элементу.
-    /// Параметры: белый (#FFFFFF) с opacity 0.08, смещение по Y = 4.
+    /// Параметры: белый (#FFFFFF) с opacity 0.08, смещение по Y = -4, blur = 12.
     private func appGlassInnerShadow() -> some View {
         let params = GlassInnerShadow()
         return self
@@ -64,7 +65,7 @@ extension View {
                     endPoint: .bottom
                 )
                 .offset(y: params.offsetY / 2)
-                .blur(radius: 10)
+                .blur(radius: params.blurRadius)
             )
     }
 }
