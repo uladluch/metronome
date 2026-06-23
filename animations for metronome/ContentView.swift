@@ -45,28 +45,35 @@ struct ContentView: View {
 
                     // Окна. У каждого тот же glassEffectID, что у его кнопки,
                     // поэтому стекло кнопки морфит в окно и обратно.
+                    // zIndex(1) — окно гарантированно поверх тулбара и слоя-закрытия.
                     if openPanel == .left {
                         GlassPanel(position: .left, namespace: glassNS, onClose: close)
+                            .zIndex(1)
                     }
                     if openPanel == .center {
                         GlassPanel(position: .center, namespace: glassNS, onClose: close)
+                            .zIndex(1)
                     }
                     if openPanel == .right {
                         GlassPanel(position: .right, namespace: glassNS, onClose: close)
+                            .zIndex(1)
                     }
                 }
             }
         }
     }
 
+    // Пружина .bouncy — нативный «жидкий» отклик, который ожидается от Liquid Glass.
+    private let morphAnimation: Animation = .bouncy(duration: 0.5, extraBounce: 0.1)
+
     private func open(_ panel: PanelPosition) {
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.82)) {
+        withAnimation(morphAnimation) {
             openPanel = panel
         }
     }
 
     private func close() {
-        withAnimation(.spring(response: 0.45, dampingFraction: 0.82)) {
+        withAnimation(morphAnimation) {
             openPanel = nil
         }
     }

@@ -78,6 +78,10 @@ struct TopToolbar: View {
 // MARK: - Кнопка-иконка 60×60
 
 /// Стеклянная кнопка 60×60 с белой SF-иконкой по центру.
+///
+/// Без обёртки `Button`: касание получает само `.interactive()`-стекло —
+/// иначе кнопка перехватывала бы тап, и не было бы ни нативного свечения
+/// на нажатии, ни корректного зацепления морфинга через glassEffectID.
 private struct GlassIconButton: View {
 
     let systemName: String
@@ -86,16 +90,15 @@ private struct GlassIconButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Image(systemName: systemName)
-                .font(.system(size: 22, weight: .medium))
-                .foregroundStyle(.white)
-                .frame(width: 60, height: 60)
-                .contentShape(Circle())
-                .appGlass(in: .circle, interactive: true)
-                .glassEffectID(glassID, in: namespace)
-        }
-        .buttonStyle(.plain)
+        Image(systemName: systemName)
+            .font(.system(size: 22, weight: .medium))
+            .foregroundStyle(.white)
+            .frame(width: 60, height: 60)
+            .appGlass(in: .circle, interactive: true)
+            .glassEffectID(glassID, in: namespace)
+            .contentShape(Circle())
+            .onTapGesture(perform: action)
+            .accessibilityAddTraits(.isButton)
     }
 }
 
@@ -109,13 +112,12 @@ private struct GlassCapsuleButton: View {
     let action: () -> Void
 
     var body: some View {
-        Button(action: action) {
-            Color.clear
-                .frame(width: 180, height: 60)
-                .contentShape(Capsule())
-                .appGlass(in: .capsule, interactive: true)
-                .glassEffectID(glassID, in: namespace)
-        }
-        .buttonStyle(.plain)
+        Color.clear
+            .frame(width: 180, height: 60)
+            .appGlass(in: .capsule, interactive: true)
+            .glassEffectID(glassID, in: namespace)
+            .contentShape(Capsule())
+            .onTapGesture(perform: action)
+            .accessibilityAddTraits(.isButton)
     }
 }
