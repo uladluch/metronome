@@ -28,7 +28,7 @@ struct TopToolbar: View {
                 // Центральная капсула Liquid Glass.
                 Color.clear
                     .frame(width: 180, height: 60)
-                    .appGlass(in: .capsule)
+                    .appGlass(in: .capsule, interactive: true)
 
                 Spacer(minLength: 0)
 
