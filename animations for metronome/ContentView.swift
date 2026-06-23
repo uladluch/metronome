@@ -21,6 +21,10 @@ struct ContentView: View {
             Color.appBackground
                 .ignoresSafeArea()
 
+            // Цветной свет под стеклом — стеклу есть что преломлять,
+            // отсюда радужное переливание на кромке.
+            GlassBackdrop()
+
             // Один контейнер на тулбар + панели — обязательное условие морфинга:
             // стекло может «перетекать» только внутри одного GlassEffectContainer.
             GlassEffectContainer(spacing: 16) {
@@ -63,8 +67,9 @@ struct ContentView: View {
         }
     }
 
-    // Пружина .bouncy — нативный «жидкий» отклик, который ожидается от Liquid Glass.
-    private let morphAnimation: Animation = .bouncy(duration: 0.5, extraBounce: 0.1)
+    // Пружина .bouncy — нативный «жидкий» отклик. Баунс снижен (extraBounce 0.04)
+    // и чуть короче — морф мягче, без заметной «пружинистости».
+    private let morphAnimation: Animation = .bouncy(duration: 0.45, extraBounce: 0.04)
 
     private func open(_ panel: PanelPosition) {
         withAnimation(morphAnimation) {
