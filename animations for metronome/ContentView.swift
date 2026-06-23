@@ -8,20 +8,40 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var showLeftPanel = false
+    @State private var showRightPanel = false
+    @State private var showCenterPanel = false
+
     var body: some View {
         ZStack {
-            // Тёмная тема: основной фон полностью чёрный.
             Color.appBackground
                 .ignoresSafeArea()
 
             VStack(spacing: 0) {
-                TopToolbar()
-                    .padding(.horizontal, 16)
-                    .padding(.top, 8)
+                TopToolbar(
+                    onLeftTap: { showLeftPanel = true },
+                    onRightTap: { showRightPanel = true },
+                    onCenterTap: { showCenterPanel = true }
+                )
+                .padding(.horizontal, 16)
+                .padding(.top, 8)
 
                 Spacer()
+            }
 
-                // Здесь позже появится нижний тулбар.
+            if showLeftPanel {
+                GlassPanel(position: .left, isPresented: $showLeftPanel)
+                    .glassEffectTransition(.identity)
+            }
+
+            if showRightPanel {
+                GlassPanel(position: .right, isPresented: $showRightPanel)
+                    .glassEffectTransition(.identity)
+            }
+
+            if showCenterPanel {
+                GlassPanel(position: .center, isPresented: $showCenterPanel)
+                    .glassEffectTransition(.identity)
             }
         }
     }

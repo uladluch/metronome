@@ -10,25 +10,21 @@ import SwiftUI
 
 struct TopToolbar: View {
 
-    /// Шаблонные SF Symbols — заменим на финальные иконки позже.
+    let onLeftTap: () -> Void
+    let onRightTap: () -> Void
+    let onCenterTap: () -> Void
+
     private let leftIcon = "gearshape"
     private let rightIcon = "ellipsis"
 
     var body: some View {
-        // Контейнер позволяет стеклянным элементам корректно
-        // взаимодействовать и плавно «перетекать» друг в друга.
         GlassEffectContainer(spacing: 16) {
             HStack(spacing: 0) {
-                ToolbarIconButton(systemName: leftIcon) {
-                    // действие добавим позже
-                }
+                ToolbarIconButton(systemName: leftIcon, action: onLeftTap)
 
                 Spacer(minLength: 0)
 
-                // Центральная капсула Liquid Glass.
-                Button(action: {
-                    // действие добавим позже
-                }) {
+                Button(action: onCenterTap) {
                     Color.clear
                         .frame(width: 180, height: 60)
                         .appGlass(in: .capsule, interactive: true)
@@ -37,9 +33,7 @@ struct TopToolbar: View {
 
                 Spacer(minLength: 0)
 
-                ToolbarIconButton(systemName: rightIcon) {
-                    // действие добавим позже
-                }
+                ToolbarIconButton(systemName: rightIcon, action: onRightTap)
             }
         }
     }
@@ -69,8 +63,12 @@ private struct ToolbarIconButton: View {
     ZStack {
         Color.appBackground.ignoresSafeArea()
         VStack {
-            TopToolbar()
-                .padding(.horizontal, 16)
+            TopToolbar(
+                onLeftTap: { },
+                onRightTap: { },
+                onCenterTap: { }
+            )
+            .padding(.horizontal, 16)
             Spacer()
         }
     }
