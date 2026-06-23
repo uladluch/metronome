@@ -58,7 +58,7 @@ extension View {
                     endPoint: .bottom
                 )
                 .offset(y: params.offsetY / 2)
-                .blur(radius: 2)
+                .blur(radius: 10)
             )
     }
 }
