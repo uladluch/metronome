@@ -16,9 +16,11 @@ import SwiftUI
 /// Хочешь сменить вид стекла во всём приложении — правишь только `AppGlass.style`.
 enum AppGlass {
 
-    /// Базовый материал Liquid Glass. Сейчас — «clear» (максимально прозрачный вариант).
-    /// Поменяй на `.regular`, если нужно более плотное стекло.
-    static let style: Glass = .clear
+    /// Базовый материал Liquid Glass.
+    /// `.regular` — плотное стекло: на нём виден нативный отклик `.interactive()`
+    /// (scaling + shimmer при нажатии). На `.clear` поверх чёрного фона эффект
+    /// почти не читается. Поменяй на `.clear`, если нужно максимально прозрачное.
+    static let style: Glass = .regular
 }
 
 extension View {

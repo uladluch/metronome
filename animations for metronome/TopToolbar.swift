@@ -91,6 +91,7 @@ private struct GlassIconButton: View {
                 .font(.system(size: 22, weight: .medium))
                 .foregroundStyle(.white)
                 .frame(width: 60, height: 60)
+                .contentShape(Circle())
                 .appGlass(in: .circle, interactive: true)
                 .glassEffectID(glassID, in: namespace)
         }
@@ -111,6 +112,7 @@ private struct GlassCapsuleButton: View {
         Button(action: action) {
             Color.clear
                 .frame(width: 180, height: 60)
+                .contentShape(Capsule())
                 .appGlass(in: .capsule, interactive: true)
                 .glassEffectID(glassID, in: namespace)
         }

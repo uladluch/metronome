@@ -2,9 +2,11 @@
 //  GlassPanel.swift
 //  animations for metronome
 //
-//  Модальная панель из Liquid Glass, в которую морфит кнопка тулбара.
-//  Панель несёт тот же glassEffectID, что и её кнопка, и живёт в том же
-//  GlassEffectContainer — за счёт этого стекло «перетекает» кнопка ⇄ панель.
+//  Полноэкранное окно из Liquid Glass, в которое морфит кнопка тулбара.
+//  Окно несёт тот же glassEffectID, что и его кнопка, и живёт в том же
+//  GlassEffectContainer — поэтому стекло «вытягивается» из кнопки на весь
+//  контейнер и обратно. Origin морфинга определяется кадром кнопки-источника:
+//  слева тянется слева, справа — справа, центр — из центра.
 //
 
 import SwiftUI
@@ -14,28 +16,12 @@ enum PanelPosition {
     case right
     case center
 
-    /// Якорь морфинга — общий для кнопки и её панели.
+    /// Якорь морфинга — общий для кнопки и её окна.
     var glassID: String {
         switch self {
         case .left:   return "panel.left"
         case .right:  return "panel.right"
         case .center: return "panel.center"
-        }
-    }
-
-    /// Где панель прикрепляется по горизонтали (морфит из своей кнопки).
-    var alignment: Alignment {
-        switch self {
-        case .left:   return .topLeading
-        case .right:  return .topTrailing
-        case .center: return .top
-        }
-    }
-
-    var width: CGFloat {
-        switch self {
-        case .center: return 300
-        case .left, .right: return 260
         }
     }
 
@@ -55,29 +41,30 @@ struct GlassPanel: View {
     let onClose: () -> Void
 
     var body: some View {
-        VStack(spacing: 16) {
-            Text(position.title)
-                .font(.headline)
-                .foregroundStyle(.white)
+        VStack(spacing: 24) {
+            HStack {
+                Text(position.title)
+                    .font(.title2.bold())
+                    .foregroundStyle(.white)
+
+                Spacer()
+
+                Button(action: onClose) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .contentShape(Circle())
+                }
+                .buttonStyle(.plain)
+            }
 
             Spacer()
-
-            Button(action: onClose) {
-                Image(systemName: "xmark")
-                    .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.white)
-                    .frame(width: 44, height: 44)
-                    .appGlass(in: .circle, interactive: true)
-            }
-            .buttonStyle(.plain)
         }
-        .padding(20)
-        .frame(width: position.width, height: 320)
-        .appGlass(in: RoundedRectangle(cornerRadius: 28), interactive: true)
+        .padding(24)
+        // Тянем окно на весь контейнер.
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .appGlass(in: RoundedRectangle(cornerRadius: 40), interactive: false)
         .glassEffectID(position.glassID, in: namespace)
-        // Прижимаем панель к стороне её кнопки.
-        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: position.alignment)
-        .padding(.horizontal, 16)
-        .padding(.top, 8)
     }
 }
