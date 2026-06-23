@@ -27,37 +27,29 @@ struct TopToolbar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // Левая кнопка
-            if openPanel == .left {
-                placeholder(width: 60)
-            } else {
+            // Кнопки видны, только пока все панели закрыты. Как только панель
+            // открыта — все три кнопки скрываются: активная морфит в панель,
+            // остальные не должны проступать сквозь стекло панели
+            // (внутри GlassEffectContainer стекло рисуется единым проходом,
+            //  и zIndex не перекрывает одно стекло другим).
+            if openPanel == nil {
                 GlassIconButton(
                     systemName: leftIcon,
                     glassID: PanelPosition.left.glassID,
                     namespace: namespace,
                     action: onLeft
                 )
-            }
 
-            Spacer(minLength: 0)
+                Spacer(minLength: 0)
 
-            // Центральная капсула
-            if openPanel == .center {
-                placeholder(width: 180)
-            } else {
                 GlassCapsuleButton(
                     glassID: PanelPosition.center.glassID,
                     namespace: namespace,
                     action: onCenter
                 )
-            }
 
-            Spacer(minLength: 0)
+                Spacer(minLength: 0)
 
-            // Правая кнопка
-            if openPanel == .right {
-                placeholder(width: 60)
-            } else {
                 GlassIconButton(
                     systemName: rightIcon,
                     glassID: PanelPosition.right.glassID,
@@ -66,12 +58,7 @@ struct TopToolbar: View {
                 )
             }
         }
-    }
-
-    /// Прозрачная «дырка» размером с кнопку — держит раскладку, пока кнопка
-    /// превратилась в панель.
-    private func placeholder(width: CGFloat) -> some View {
-        Color.clear.frame(width: width, height: 60)
+        .frame(height: 60)
     }
 }
 
