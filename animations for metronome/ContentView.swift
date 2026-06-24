@@ -18,14 +18,18 @@ struct ContentView: View {
     /// Подсветка (свечение Path) вкл/выкл. По умолчанию выключена.
     @State private var glowOn = false
 
-    /// Размер экрана (для размера контента панели).
+    /// Размер экрана (для высоты панели).
     @State private var screenSize: CGSize = .zero
+
+    /// Фактическая ширина тулбара — панель делаем РОВНО такой же, чтобы отступы
+    /// слева и справа были одинаковые (16pt по бокам).
+    @State private var toolbarWidth: CGFloat = 0
 
     // Spring морфинга: правильный выбор для liquid glass morphing.
     private let morphAnimation: Animation = .spring(response: 0.6, dampingFraction: 0.8)
 
     var body: some View {
-        let panelW = max(screenSize.width - 32, 0)
+        let panelW = max(toolbarWidth, 0)
         let panelH = max(screenSize.height * 0.45, 0)
 
         // Тулбар угасает при раскрытии панели (0→0.25 морфа).
@@ -74,6 +78,7 @@ struct ContentView: View {
                 onRight: {}
             )
             .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
+            .onGeometryChange(for: CGFloat.self, of: { $0.size.width }, action: { toolbarWidth = $0 })
             .opacity(toolbarFade)
             .overlay(alignment: .topLeading) {
                 ExpandableGlassMenu(
