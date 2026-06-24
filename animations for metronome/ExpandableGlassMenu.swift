@@ -4,8 +4,10 @@
 //
 //  Стеклянное меню, которое вырастает из кнопки (label) в полноразмерный контент.
 //  ОДИН стеклянный элемент: рамка растёт от labelSize до измеренного размера
-//  контента по мере progress 0→1, контент проявляется, label угасает. Стекло —
-//  своё (внутренний GlassEffectContainer), якорь роста — alignment (угол кнопки).
+//  контента по мере progress 0→1, контент проявляется, label угасает.
+//  Якорь роста — alignment (угол кнопки). Стекло — прямой .glassEffect (без
+//  GlassEffectContainer: одиночному элементу он не нужен, а «жадный» контейнер
+//  ломает позицию).
 //
 
 import SwiftUI
@@ -32,41 +34,38 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
         let rWidth = (contentSize.width - labelSize.width) * progress
         let rHeight = (contentSize.height - labelSize.height) * progress
 
-        GlassEffectContainer {
-            ZStack(alignment: alignment) {
-                // Контент в натуральную величину; рамка обрезает его по мере роста.
-                content
-                    .fixedSize()
-                    .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { contentSize = $0 })
-                    .opacity(contentOpacity)
+        ZStack(alignment: alignment) {
+            // Контент в натуральную величину; рамка обрезает его по мере роста.
+            content
+                .fixedSize()
+                .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { contentSize = $0 })
+                .opacity(contentOpacity)
 
-                // Кнопка-источник (шестерёнка) + dome-блик, угасает по мере открытия.
-                ZStack(alignment: .topLeading) {
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [.white.opacity(0.12), .white.opacity(0)],
-                                center: .center,
-                                startRadius: 0,
-                                endRadius: 26
-                            )
+            // Кнопка-источник (шестерёнка) + dome-блик, угасает по мере открытия.
+            ZStack(alignment: .topLeading) {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [.white.opacity(0.12), .white.opacity(0)],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 26
                         )
-                        .frame(width: 52, height: 52)
-                        .offset(x: -6, y: -6)
+                    )
+                    .frame(width: 52, height: 52)
+                    .offset(x: -6, y: -6)
 
-                    label
-                }
-                .frame(width: labelSize.width, height: labelSize.height)
-                .opacity(1 - labelOpacity)
+                label
             }
-            // Рамка-окно: от кнопки до полного размера, якорь — угол кнопки.
-            .frame(width: labelSize.width + rWidth,
-                   height: labelSize.height + rHeight,
-                   alignment: alignment)
-            .clipShape(.rect(cornerRadius: cornerRadius))
-            .contentShape(.rect(cornerRadius: cornerRadius))  // тапы только по видимой форме
-            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
+            .frame(width: labelSize.width, height: labelSize.height)
+            .opacity(1 - labelOpacity)
         }
+        // Рамка-окно: от кнопки до полного размера, якорь — угол кнопки.
+        .frame(width: labelSize.width + rWidth,
+               height: labelSize.height + rHeight,
+               alignment: alignment)
+        .clipShape(.rect(cornerRadius: cornerRadius))
+        .glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
     }
 
     // MARK: - Производные от progress (зажаты в [0,1] чтобы spring bounce не ломал)
