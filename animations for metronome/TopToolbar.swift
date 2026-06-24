@@ -28,46 +28,48 @@ struct TopToolbar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // Шестерёнка — единственная кнопка с морф-расширением.
-            if openPanel == .left {
-                placeholder(width: 60)
-            } else {
+            // Пока панель открыта — кнопки убираются полностью (а не прячутся по
+            // opacity: на стеклянном элементе opacity не гасит иконку надёжно).
+            // Placeholder держит ширину слота, поэтому раскладка не «разъезжается».
+            if openPanel == nil {
                 GlassIconButton(
                     systemName: leftIcon,
                     glassID: PanelPosition.left.glassID,
                     namespace: namespace,
                     action: onLeft
                 )
-                .opacity(openPanel == nil ? 1 : 0)
+            } else {
+                placeholder(width: 60)
             }
 
             Spacer(minLength: 0)
 
-            // Центр — декоративный, без взаимодействия. Свой glassID сохраняем,
-            // чтобы стекло рисовалось (морфа не будет — его панель не открывается).
-            GlassCapsuleButton(
-                glassID: PanelPosition.center.glassID,
-                namespace: namespace,
-                action: {}
-            )
-            .allowsHitTesting(false)
-            .opacity(openPanel == nil ? 1 : 0)
+            if openPanel == nil {
+                GlassCapsuleButton(
+                    glassID: PanelPosition.center.glassID,
+                    namespace: namespace,
+                    action: {}
+                )
+                .allowsHitTesting(false)
+            } else {
+                placeholder(width: 180)
+            }
 
             Spacer(minLength: 0)
 
-            // Право — декоративное, без взаимодействия.
-            GlassIconButton(
-                systemName: rightIcon,
-                glassID: PanelPosition.right.glassID,
-                namespace: namespace,
-                action: {}
-            )
-            .allowsHitTesting(false)
-            .opacity(openPanel == nil ? 1 : 0)
+            if openPanel == nil {
+                GlassIconButton(
+                    systemName: rightIcon,
+                    glassID: PanelPosition.right.glassID,
+                    namespace: namespace,
+                    action: {}
+                )
+                .allowsHitTesting(false)
+            } else {
+                placeholder(width: 60)
+            }
         }
         .frame(height: 60)
-        // Анимация opacity — чтобы кнопки плавно исчезали/появлялись.
-        .animation(.easeInOut(duration: 0.2), value: openPanel)
     }
 
     /// Прозрачная «дырка» размером с кнопку — держит раскладку, пока

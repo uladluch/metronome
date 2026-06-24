@@ -71,8 +71,8 @@ struct ContentView: View {
         }
     }
 
-    // Морф почти без пружины: .smooth — мягкое затухание без «отскока».
-    private let morphAnimation: Animation = .smooth(duration: 0.4)
+    // Чистая кривая без пружины — нулевой «отскок», баунс незаметен.
+    private let morphAnimation: Animation = .easeInOut(duration: 0.35)
 
     private func open(_ panel: PanelPosition) {
         withAnimation(morphAnimation) {
