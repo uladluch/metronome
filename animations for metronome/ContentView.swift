@@ -40,13 +40,14 @@ struct ContentView: View {
             // Шестерёнка слева (overlay), капсула в центре, три точки справа.
             GlassEffectContainer(spacing: 16) {
                 ZStack(alignment: .topLeading) {
+                    // Капсула + три точки (TopToolbar) позади.
                     TopToolbar(
                         namespace: glassNS,
                         onCenter: {},
                         onRight: {}
                     )
 
-                    // Шестерёнка → панель (overlay слева).
+                    // Шестерёнка → панель (спереди, z-order выше).
                     ExpandableGlassMenu(
                         alignment: .topLeading,
                         progress: morphProgress,
@@ -64,6 +65,9 @@ struct ContentView: View {
                             .onTapGesture { open() }
                             .allowsHitTesting(morphProgress == 0)
                     }
+                    .compositingGroup()
+                    .clipShape(.rect(cornerRadius: 50))
+                    .glassEffect(.regular.interactive(), in: .rect(cornerRadius: 50))
                     .zIndex(1)
                 }
                 .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
