@@ -145,7 +145,9 @@ private struct GlassCapsuleButton: View {
     let action: () -> Void
 
     var body: some View {
-        Color.clear
+        Text("Hello")
+            .font(.headline)
+            .foregroundStyle(.white)
             .frame(width: 180, height: 60)
             // Мягкий белый blur ПОД капсулой (белый, opacity 8%).
             .background {
