@@ -35,21 +35,29 @@ struct GlassButton<Label: View>: View {
 
     var body: some View {
         ZStack {
-            // «Полусфера» ПОД стеклом — отдельный слой позади, поэтому
-            // прозрачное стекло реально показывает/преломляет её.
+            // «Полусфера» ПОД стеклом — фиксированный блик, жёстко привязанный к
+            // верхнему левому углу и обрезанный по форме. Так он одинаково лежит
+            // на любой форме (круг/капсула/прямоугольник) и не «уезжает».
             shape
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            .white.opacity(isPressed ? 0.22 : 0.10),
-                            .white.opacity(0)
-                        ],
-                        center: UnitPoint(x: 0.22, y: 0.22),
-                        startRadius: 0,
-                        endRadius: 60
-                    )
-                )
-                .animation(.easeOut(duration: 0.22), value: isPressed)
+                .fill(.clear)
+                .overlay(alignment: .topLeading) {
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [
+                                    .white.opacity(isPressed ? 0.24 : 0.12),
+                                    .white.opacity(0)
+                                ],
+                                center: .center,
+                                startRadius: 0,
+                                endRadius: 26
+                            )
+                        )
+                        .frame(width: 52, height: 52)
+                        .offset(x: -6, y: -6)
+                        .animation(.easeOut(duration: 0.22), value: isPressed)
+                }
+                .clipShape(shape)
 
             // Стекло поверх полусферы.
             label

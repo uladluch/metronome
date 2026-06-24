@@ -12,13 +12,17 @@ import SwiftUI
 
 struct GlassBackdrop: View {
 
+    /// Подсветка вкл/выкл — управляет видимостью свечения Path.
+    var glowOn: Bool
+
     var body: some View {
         ZStack(alignment: .top) {
             Image("Path")
                 .resizable()
                 .scaledToFit()
                 .frame(width: 440)
-                .opacity(0.5)
+                .opacity(glowOn ? 0.5 : 0)
+                .animation(.easeInOut(duration: 0.35), value: glowOn)
                 // Верхняя кромка картинки начинается под капсулой.
                 // Тулбар: padding.top 8, капсула height 60 → нижняя точка на ~68pt.
                 .offset(y: 75)

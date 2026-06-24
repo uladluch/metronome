@@ -15,6 +15,9 @@ struct ContentView: View {
     /// Какая панель сейчас открыта (nil — закрыты все).
     @State private var openPanel: PanelPosition?
 
+    /// Подсветка (свечение Path) вкл/выкл. По умолчанию выключена.
+    @State private var glowOn = false
+
     var body: some View {
         ZStack(alignment: .top) {
             // Тёмная тема: основной фон полностью чёрный.
@@ -23,7 +26,7 @@ struct ContentView: View {
 
             // Цветной свет под стеклом — стеклу есть что преломлять,
             // отсюда радужное переливание на кромке.
-            GlassBackdrop()
+            GlassBackdrop(glowOn: glowOn)
 
             // Один контейнер на тулбар + панели — обязательное условие морфинга:
             // стекло может «перетекать» только внутри одного GlassEffectContainer.
@@ -68,6 +71,20 @@ struct ContentView: View {
                     }
                 }
             }
+
+            // Кнопка по центру: включает/выключает подсветку (свечение Path).
+            GlassButton(
+                shape: Capsule(),
+                namespace: glassNS,
+                action: { withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() } }
+            ) {
+                Text(glowOn ? "Turn off glow" : "Turn on glow")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 24)
+                    .frame(height: 50)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
 
             // Нижний тулбар — прижат к низу.
             BottomToolbar()
