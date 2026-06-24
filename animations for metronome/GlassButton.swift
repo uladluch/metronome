@@ -56,8 +56,14 @@ struct GlassButton<Label: View>: View {
                         .frame(width: 52, height: 52)
                         .offset(x: -6, y: -6)
                         .animation(.easeOut(duration: 0.22), value: isPressed)
+                        .onAppear {
+                            print("[GlassButton] \(String(describing: shape)): sphere positioned at topLeading, offset(-6,-6)")
+                        }
                 }
                 .clipShape(shape)
+                .onAppear {
+                    print("[GlassButton] ClipShape: \(String(describing: shape))")
+                }
 
             // Стекло поверх полусферы.
             label
@@ -85,10 +91,14 @@ struct GlassButton<Label: View>: View {
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
-                    if !isPressed { withAnimation(.easeOut(duration: 0.12)) { isPressed = true } }
+                    if !isPressed {
+                        withAnimation(.easeOut(duration: 0.12)) { isPressed = true }
+                        print("[GlassButton] Press: isPressed=true")
+                    }
                 }
                 .onEnded { _ in
                     withAnimation(.easeOut(duration: 0.3)) { isPressed = false }
+                    print("[GlassButton] Release: isPressed=false")
                 }
         )
         .accessibilityAddTraits(.isButton)

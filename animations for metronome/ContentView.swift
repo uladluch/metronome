@@ -76,7 +76,12 @@ struct ContentView: View {
             GlassButton(
                 shape: Capsule(),
                 namespace: glassNS,
-                action: { withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() } }
+                action: {
+                    withAnimation(.easeInOut(duration: 0.35)) {
+                        glowOn.toggle()
+                        print("[ContentView] GlowOn toggled: \(glowOn)")
+                    }
+                }
             ) {
                 Text(glowOn ? "Turn off glow" : "Turn on glow")
                     .font(.headline)
