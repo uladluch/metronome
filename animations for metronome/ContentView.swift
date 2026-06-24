@@ -37,14 +37,15 @@ struct ContentView: View {
             GlassBackdrop(glowOn: glowOn)
 
             // Верхний тулбар (капсула + три точки). Угасает по мере раскрытия панели.
-            TopToolbar(
-                namespace: glassNS,
-                onCenter: {},
-                onRight: {}
-            )
-            .padding(.horizontal, 16)
-            .padding(.top, 8)
-            .frame(maxWidth: .infinity, alignment: .top)
+            GlassEffectContainer(spacing: 16) {
+                TopToolbar(
+                    namespace: glassNS,
+                    onCenter: {},
+                    onRight: {}
+                )
+                .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
+                .padding(.top, 8)
+            }
             .opacity(1 - min(morphProgress / 0.25, 1))
 
             // Кнопка по центру: включает/выключает подсветку (свечение Path).

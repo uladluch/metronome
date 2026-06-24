@@ -59,11 +59,31 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
             .glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
 
             // Кнопка-источник (шестерёнка) сверху — видна в начале, угасает по мере открытия.
-            label
-                .compositingGroup()
-                .blur(radius: 14 * blurProgress)
-                .opacity(1 - labelOpacity)
-                .frame(width: labelSize.width, height: labelSize.height)
+            // Dome-эффект (белый блик в верхнем левом углу) — как на других стеклянных кнопках.
+            ZStack(alignment: .topLeading) {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                .white.opacity(0.12),
+                                .white.opacity(0)
+                            ],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 26
+                        )
+                    )
+                    .frame(width: 52, height: 52)
+                    .offset(x: -6, y: -6)
+                    .opacity(1 - labelOpacity)  // Блик угасает вместе с кнопкой
+
+                label
+                    .compositingGroup()
+                    .blur(radius: 14 * blurProgress)
+                    .opacity(1 - labelOpacity)
+                    .frame(width: labelSize.width, height: labelSize.height)
+            }
+            .frame(width: labelSize.width, height: labelSize.height)
         }
     }
 
