@@ -62,26 +62,20 @@ struct ContentView: View {
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 8)
 
-            // СЛОЙ 1: Тулбар (капсула + три точки). Слева — прозрачный слот под
-            // шестерёнку. containerRelativeFrame даёт конкретную ширину (экран−32),
-            // центрируется корневым ZStack → слот слева ровно на x=16. УГАСАЕТ.
-            GlassEffectContainer(spacing: 16) {
-                TopToolbar(
-                    namespace: glassNS,
-                    onCenter: {},
-                    onRight: {}
-                )
-                .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
-            }
-            .padding(.top, 8)
+            // Тулбар (капсула + три точки) + шестерёнка-оверлей.
+            // Шестерёнка — overlay НА тулбаре, выровнена по его topLeading (= слот
+            // шестерёнки слева, x=16). Привязка к кадру тулбара гарантирует
+            // совпадение позиций, а панель растёт ровно в ширину тулбара
+            // (экран−32 = 16pt по бокам).
+            // .opacity ДО .overlay → угасает только тулбар, шестерёнка НЕ угасает.
+            TopToolbar(
+                namespace: glassNS,
+                onCenter: {},
+                onRight: {}
+            )
+            .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
             .opacity(toolbarFade)
-
-            // СЛОЙ 2: Шестерёнка → панель. Своё стекло, НЕ угасает.
-            // Clear-филлер заполняет экран, меню крепится в левом верхнем углу и
-            // сохраняет свой (растущий) размер. padding 16/8 = позиция слота тулбара.
-            ZStack(alignment: .topLeading) {
-                Color.clear
-
+            .overlay(alignment: .topLeading) {
                 ExpandableGlassMenu(
                     alignment: .topLeading,
                     progress: morphProgress,
@@ -100,9 +94,8 @@ struct ContentView: View {
                         .onTapGesture { open() }
                         .allowsHitTesting(morphProgress == 0)
                 }
-                .padding(.leading, 16)
-                .padding(.top, 8)
             }
+            .padding(.top, 8)
             .zIndex(1)
         }
         .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { screenSize = $0 })
