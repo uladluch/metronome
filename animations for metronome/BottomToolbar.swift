@@ -4,7 +4,7 @@
 //
 //  Нижний тулбар: по бокам такие же стеклянные кнопки 60×60, что и сверху,
 //  а по центру — нативный SwiftUI Slider (вместо капсулы).
-//  Кнопки-квадраты открывают нативный полноэкранный sheet.
+//  Кнопки-квадраты открывают нативный sheet с grabber'ом (свайпаемый).
 //
 
 import SwiftUI
@@ -42,8 +42,10 @@ struct BottomToolbar: View {
         .frame(height: 60)
         // Конкретная ширина = экран − 32 (по 16pt с боков), центр.
         .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
-        .fullScreenCover(isPresented: $showSheet) {
+        .sheet(isPresented: $showSheet) {
             SheetView()
+                .presentationDetents([.large])
+                .presentationDragIndicator(.visible)   // grabber сверху
         }
     }
 }
