@@ -82,8 +82,7 @@ struct GlassPanel: View {
             axis == .vertical ? length / 2 : length - 32
         }
         // Стекло: .regular (плотное матовое, а не .clear — для панелей более уместно).
-        // cornerRadius 20 для более "пухлого" морфинга из круга (кнопки 60x60).
-        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 20))
+        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 40))
         .glassEffectID(position.glassID, in: namespace)
     }
 }
