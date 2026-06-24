@@ -75,7 +75,6 @@ struct ContentView: View {
                 action: {
                     withAnimation(.easeInOut(duration: 0.35)) {
                         glowOn.toggle()
-                        print("[ContentView] glowOn toggled to: \(glowOn)")
                     }
                 },
                 showDome: false
@@ -91,7 +90,6 @@ struct ContentView: View {
             // Цветной свет под стеклом — видно везде, не обрезается.
             // Выложена перед BottomToolbar, чтобы быть видимой поверх контейнера.
             GlassBackdrop(glowOn: glowOn)
-                .zIndex(-1)  // За всем остальным, но впереди фона.
 
             // Нижний тулбар — прижат к низу.
             BottomToolbar()
