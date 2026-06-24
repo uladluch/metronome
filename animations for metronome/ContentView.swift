@@ -77,8 +77,7 @@ struct ContentView: View {
                         glowOn.toggle()
                         print("[ContentView] GlowOn toggled: \(glowOn)")
                     }
-                },
-                showDome: false  // Без сферы — только на круглых кнопках.
+                }
             ) {
                 Text(glowOn ? "Turn off glow" : "Turn on glow")
                     .font(.headline)
