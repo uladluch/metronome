@@ -82,7 +82,11 @@ struct GlassPanel: View {
             axis == .vertical ? length / 2 : length - 32
         }
         // То же стекло, что у кнопок (interactive), форма — скруглённый прямоугольник.
-        .appGlass(in: RoundedRectangle(cornerRadius: 40), interactive: true)
+        // С tint: левая панель — синий, центр — зелёный, право — оранжевый.
+        .glassEffect(
+            AppGlass.style.interactive().tint(position == .left ? .blue : position == .center ? .green : .orange),
+            in: RoundedRectangle(cornerRadius: 40)
+        )
         .glassEffectID(position.glassID, in: namespace)
     }
 }
