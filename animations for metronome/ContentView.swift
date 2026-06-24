@@ -99,8 +99,8 @@ struct ContentView: View {
         }
     }
 
-    // Лёгкая пружина — едва заметный отскок.
-    private let morphAnimation: Animation = .spring(response: 0.4, dampingFraction: 0.74)
+    // Bounce effect на морфинг — кнопка раздувается как пузырь.
+    private let morphAnimation: Animation = .bouncy(duration: 0.5)
 
     private func open(_ panel: PanelPosition) {
         print("[ContentView] Opening panel: \(panel)")

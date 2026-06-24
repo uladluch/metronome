@@ -87,4 +87,4 @@ struct GlassPanel: View {
             .glassEffectID(position.glassID, in: namespace)
         }
     }
-}
+
