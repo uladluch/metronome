@@ -27,6 +27,15 @@ struct GlassBackdrop: View {
                 // Верхняя кромка картинки начинается под капсулой.
                 // Тулбар: padding.top 8, капсула height 60 → нижняя точка на ~68pt.
                 .offset(y: 75)
+                // Маска: Path видна только ниже капсулы, выше обрезана.
+                .mask(
+                    VStack(spacing: 0) {
+                        Color.clear
+                            .frame(height: 75)  // Обрезаем выше этого уровня
+                        Color.black           // Видно ниже
+                        Spacer()
+                    }
+                )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea()
