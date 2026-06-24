@@ -24,6 +24,10 @@ struct ContentView: View {
             Color.appBackground
                 .ignoresSafeArea()
 
+            // Цветной свет под стеклом — размещена ДО контейнера, чтобы капсула
+            // преломляла её через стекло (Liquid Glass lensing effect).
+            GlassBackdrop(glowOn: glowOn)
+
             // Один контейнер на тулбар + панели — обязательное условие морфинга:
             // стекло может «перетекать» только внутри одного GlassEffectContainer.
             GlassEffectContainer(spacing: 16) {
@@ -86,10 +90,6 @@ struct ContentView: View {
                     .frame(height: 50)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-
-            // Цветной свет под стеклом — видно везде, не обрезается.
-            // Выложена перед BottomToolbar, чтобы быть видимой поверх контейнера.
-            GlassBackdrop(glowOn: glowOn)
 
             // Нижний тулбар — прижат к низу.
             BottomToolbar()
