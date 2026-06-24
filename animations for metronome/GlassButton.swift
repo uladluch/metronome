@@ -84,7 +84,10 @@ struct GlassButton<Label: View>: View {
                 )
         }
         .contentShape(shape)
-        .onTapGesture(perform: action)
+        .onTapGesture {
+            print("[GlassButton] onTapGesture triggered")
+            action()
+        }
         .simultaneousGesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
@@ -94,6 +97,7 @@ struct GlassButton<Label: View>: View {
                 }
                 .onEnded { _ in
                     withAnimation(.easeOut(duration: 0.3)) { isPressed = false }
+                    print("[GlassButton] DragGesture ended (release)")
                 }
         )
         .accessibilityAddTraits(.isButton)
