@@ -33,36 +33,37 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
     }
 
     var body: some View {
-        GlassEffectContainer {
-            // Насколько контент больше кнопки.
-            let widthDiff = contentSize.width - labelSize.width
-            let heightDiff = contentSize.height - labelSize.height
+        // Насколько контент больше кнопки.
+        let widthDiff = contentSize.width - labelSize.width
+        let heightDiff = contentSize.height - labelSize.height
 
-            // Размер тянется за ПОЛНЫМ progress (0→1), а не за contentOpacity.
-            // Иначе рост идёт в конце морфа, а сжатие — в начале → асимметрия.
-            // Линейная привязка к progress делает открытие и закрытие зеркальными.
-            let rWidth = widthDiff * progress
-            let rHeight = heightDiff * progress
+        // Размер тянется за ПОЛНЫМ progress (0→1), а не за contentOpacity.
+        // Иначе рост идёт в конце морфа, а сжатие — в начале → асимметрия.
+        // Линейная привязка к progress делает открытие и закрытие зеркальными.
+        let rWidth = widthDiff * progress
+        let rHeight = heightDiff * progress
 
-            content
+        return ZStack(alignment: alignment) {
+            // Основной стекло-контейнер с контентом.
+            GlassEffectContainer {
+                content
+                    .scaleEffect(contentScale, anchor: scaleAnchor)
+                    .blur(radius: 14 * blurProgress)
+                    .opacity(contentOpacity)
+                    .fixedSize()
+                    .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { contentSize = $0 })
+                    .frame(width: labelSize.width + rWidth, height: labelSize.height + rHeight)
+            }
+            .compositingGroup()
+            .clipShape(.rect(cornerRadius: cornerRadius))
+            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
+
+            // Кнопка-источник (шестерёнка) сверху — видна в начале, угасает по мере открытия.
+            label
                 .compositingGroup()
-                .scaleEffect(contentScale, anchor: scaleAnchor)  // контент «сжат» к размеру кнопки в начале
-                .blur(radius: 14 * blurProgress)                 // лёгкая «жидкость» по центру морфа
-                .opacity(contentOpacity)
-                .fixedSize()                                     // взять натуральный размер контента
-                .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { contentSize = $0 })
-                .frame(width: labelSize.width + rWidth, height: labelSize.height + rHeight)
-                .overlay(alignment: alignment) {
-                    // Кнопка-источник — видна в начале, угасает по мере открытия.
-                    label
-                        .compositingGroup()
-                        .blur(radius: 14 * blurProgress)
-                        .opacity(1 - labelOpacity)
-                        .frame(width: labelSize.width, height: labelSize.height)
-                }
-                .compositingGroup()
-                .clipShape(.rect(cornerRadius: cornerRadius))
-                .glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
+                .blur(radius: 14 * blurProgress)
+                .opacity(1 - labelOpacity)
+                .frame(width: labelSize.width, height: labelSize.height)
         }
     }
 

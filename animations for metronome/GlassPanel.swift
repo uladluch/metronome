@@ -22,7 +22,7 @@ struct PanelContent: View {
                     shape: Circle(),
                     namespace: ns,
                     action: onClose,
-                    showDome: true
+                    showDome: false
                 ) {
                     Image(systemName: "xmark")
                         .font(.system(size: 16, weight: .semibold))
