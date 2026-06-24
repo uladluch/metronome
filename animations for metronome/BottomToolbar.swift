@@ -20,28 +20,32 @@ struct BottomToolbar: View {
     private let icon = "square"
 
     var body: some View {
-        HStack(spacing: 16) {
-            GlassIconButton(
-                systemName: icon,
-                glassID: nil,
-                namespace: ns,
-                action: { showSheet = true }
-            )
+        // Тот же GlassEffectContainer, что и сверху — чтобы стекло на кнопках
+        // вело себя одинаково в обоих тулбарах.
+        GlassEffectContainer(spacing: 16) {
+            HStack(spacing: 16) {
+                GlassIconButton(
+                    systemName: icon,
+                    glassID: nil,
+                    namespace: ns,
+                    action: { showSheet = true }
+                )
 
-            // Нативный слайдер по центру, активный трек — белый.
-            Slider(value: $value)
-                .tint(.white)
+                // Нативный слайдер по центру, активный трек — белый.
+                Slider(value: $value)
+                    .tint(.white)
 
-            GlassIconButton(
-                systemName: icon,
-                glassID: nil,
-                namespace: ns,
-                action: { showSheet = true }
-            )
+                GlassIconButton(
+                    systemName: icon,
+                    glassID: nil,
+                    namespace: ns,
+                    action: { showSheet = true }
+                )
+            }
+            .frame(height: 60)
+            // Конкретная ширина = экран − 32 (по 16pt с боков), центр.
+            .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
         }
-        .frame(height: 60)
-        // Конкретная ширина = экран − 32 (по 16pt с боков), центр.
-        .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
         .sheet(isPresented: $showSheet) {
             SheetView()
                 .presentationDetents([.large])

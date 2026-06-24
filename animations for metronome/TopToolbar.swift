@@ -109,13 +109,29 @@ struct GlassIconButton: View {
                     .offset(y: 4)
             }
             .appGlass(in: .circle, interactive: true)
-            // Свечение по нажатию — поверх нативного, чтобы было заметно.
+            // Лёгкая имитация inner shadow — белый блик по верхней кромке.
+            .overlay {
+                Circle()
+                    .stroke(Color.white.opacity(0.22), lineWidth: 5)
+                    .blur(radius: 7)
+                    .offset(y: 3)
+                    .mask(
+                        Circle().fill(
+                            LinearGradient(
+                                colors: [.white, .clear],
+                                startPoint: .top,
+                                endPoint: .center
+                            )
+                        )
+                    )
+            }
+            // Яркая подсветка по нажатию.
             .overlay {
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [.white.opacity(0.55), .white.opacity(0)],
-                            center: .center, startRadius: 0, endRadius: 36
+                            colors: [.white.opacity(0.85), .white.opacity(0)],
+                            center: .center, startRadius: 0, endRadius: 40
                         )
                     )
                     .opacity(isPressed ? 1 : 0)
