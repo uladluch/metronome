@@ -70,9 +70,12 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
         // Рамка-окно: от кнопки до полного размера, якорь — угол кнопки.
         .frame(width: frameW, height: frameH, alignment: alignment)
         .clipShape(.rect(cornerRadius: r))
-        // То же интерактивное стекло, что у остальных кнопок (AppGlass.style = .clear)
-        // — и на свёрнутой кнопке, и на раскрытой панели.
-        .glassEffect(AppGlass.style.interactive(), in: .rect(cornerRadius: r))
+        // Свёрнутая кнопка — то же стекло, что у остальных кнопок (.clear);
+        // раскрытая панель — плотное .regular. Переключаем по середине морфа.
+        .glassEffect(
+            (progress < 0.5 ? AppGlass.style : .regular).interactive(),
+            in: .rect(cornerRadius: r)
+        )
         // Inner shadow — белый блик по верхней кромке, как у GlassButton.
         .overlay {
             RoundedRectangle(cornerRadius: r)
