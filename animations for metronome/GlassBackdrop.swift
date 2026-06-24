@@ -23,6 +23,7 @@ struct GlassBackdrop: View {
                 .offset(y: 8)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+        .ignoresSafeArea()
         .allowsHitTesting(false)
     }
 }
