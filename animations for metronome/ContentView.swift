@@ -62,9 +62,11 @@ struct ContentView: View {
                             .zIndex(1)
                     }
                 }
-                .frame(maxWidth: .infinity)
-                .padding(.horizontal, 16)
             }
+            // Padding СНАРУЖИ контейнера: внутри GlassEffectContainer ширина
+            // предлагается неограниченной, и padding там не сужает. Снаружи, в
+            // обычном ZStack, ширина конкретная — рамка контейнера сжимается на 16pt.
+            .padding(.horizontal, 16)
         }
     }
 
