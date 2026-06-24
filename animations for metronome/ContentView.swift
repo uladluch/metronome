@@ -36,6 +36,11 @@ struct ContentView: View {
                         onCenter: { open(.center) },
                         onRight: { open(.right) }
                     )
+                    // Конкретная ширина = экран − 32 (по 16pt с боков), центр.
+                    // containerRelativeFrame берёт ширину от экрана, мимо
+                    // «неограниченного» предложения GlassEffectContainer — тот же
+                    // приём, что уже корректно сайзит панели.
+                    .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
                     .padding(.top, 8)
 
                     // Закрытие по тапу мимо окна (нижняя часть экрана).
@@ -63,10 +68,6 @@ struct ContentView: View {
                     }
                 }
             }
-            // Padding СНАРУЖИ контейнера: внутри GlassEffectContainer ширина
-            // предлагается неограниченной, и padding там не сужает. Снаружи, в
-            // обычном ZStack, ширина конкретная — рамка контейнера сжимается на 16pt.
-            .padding(.horizontal, 16)
         }
     }
 
