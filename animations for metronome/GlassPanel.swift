@@ -70,6 +70,7 @@ struct GlassPanel: View {
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 44, height: 44)
+                        .appGlass(in: .circle, interactive: true)
                         .contentShape(Circle())
                 }
                 .buttonStyle(.plain)

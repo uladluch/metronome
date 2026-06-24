@@ -66,8 +66,15 @@ private struct SheetView: View {
                     .font(.largeTitle.bold())
                     .foregroundStyle(.white)
 
-                Button("Close") { dismiss() }
-                    .foregroundStyle(.white)
+                Button(action: { dismiss() }) {
+                    Text("Close")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 28)
+                        .frame(height: 50)
+                        .appGlass(in: .capsule, interactive: true)
+                }
+                .buttonStyle(.plain)
             }
         }
     }
