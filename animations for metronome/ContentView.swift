@@ -24,10 +24,6 @@ struct ContentView: View {
             Color.appBackground
                 .ignoresSafeArea()
 
-            // Цветной свет под стеклом — стеклу есть что преломлять,
-            // отсюда радужное переливание на кромке.
-            GlassBackdrop(glowOn: glowOn)
-
             // Один контейнер на тулбар + панели — обязательное условие морфинга:
             // стекло может «перетекать» только внутри одного GlassEffectContainer.
             GlassEffectContainer(spacing: 16) {
@@ -91,6 +87,11 @@ struct ContentView: View {
                     .frame(height: 50)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+
+            // Цветной свет под стеклом — видно везде, не обрезается.
+            // Выложена перед BottomToolbar, чтобы быть видимой поверх контейнера.
+            GlassBackdrop(glowOn: glowOn)
+                .zIndex(-1)  // За всем остальным, но впереди фона.
 
             // Нижний тулбар — прижат к низу.
             BottomToolbar()
