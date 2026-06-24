@@ -62,6 +62,8 @@ struct ContentView: View {
                             .zIndex(1)
                     }
                 }
+                .frame(maxWidth: .infinity)
+                .padding(.horizontal, 16)
             }
         }
     }
