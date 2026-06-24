@@ -54,4 +54,7 @@ extension Color {
 
     /// Основной фон приложения — полностью чёрный (тёмная тема).
     static let appBackground = Color.black
+
+    /// Акцент контролов (слайдер, тоггл) — #EDEDED.
+    static let controlAccent = Color(red: 0xED / 255, green: 0xED / 255, blue: 0xED / 255)
 }

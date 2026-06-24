@@ -31,9 +31,9 @@ struct BottomToolbar: View {
                     action: { showSheet = true }
                 )
 
-                // Нативный слайдер по центру, активный трек — белый.
+                // Нативный слайдер по центру, активный трек — #EDEDED.
                 Slider(value: $value)
-                    .tint(.white)
+                    .tint(.controlAccent)
 
                 GlassIconButton(
                     systemName: icon,
@@ -59,6 +59,7 @@ struct BottomToolbar: View {
 private struct SheetView: View {
 
     @Environment(\.dismiss) private var dismiss
+    @State private var isOn = true
 
     var body: some View {
         NavigationStack {
@@ -66,6 +67,13 @@ private struct SheetView: View {
                 // Вторичный системный фон.
                 Color(.secondarySystemBackground)
                     .ignoresSafeArea()
+
+                VStack {
+                    Toggle("Toggle", isOn: $isOn)
+                        .tint(.controlAccent)   // не зелёный, а #EDEDED
+                        .padding()
+                    Spacer()
+                }
             }
             .navigationTitle("Sheet")
             .navigationBarTitleDisplayMode(.large)
