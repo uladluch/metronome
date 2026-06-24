@@ -21,8 +21,7 @@ enum AppGlass {
     /// преломляет свет по кромке (lensing по периметру). Радужное переливание
     /// даёт цветной слой под стеклом (см. GlassBackdrop). `.regular` — наоборот,
     /// плотное матовое стекло.
-    /// `.fade()` добавляет затухание по краям — создаёт эффект мягкого свечения/блика.
-    static let style: Glass = .clear.fade()
+    static let style: Glass = .clear
 }
 
 extension View {

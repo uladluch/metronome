@@ -33,10 +33,30 @@ struct GlassButton<Label: View>: View {
         self.label = label()
     }
 
+    private var domeOpacity: Double {
+        isPressed ? 0.24 : 0.12
+    }
+
     var body: some View {
-        ZStack {
-            // Стекло с встроенным затуханием по краям (через .fade()).
-            // Это даёт эффект мягкого светящегося края — вместо ручной сферы.
+        ZStack(alignment: .topLeading) {
+            // Полусфера (блик) в верхнем левом углу. Даёт эффект мягкого светящегося края.
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            .white.opacity(domeOpacity),
+                            .white.opacity(0)
+                        ],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 26
+                    )
+                )
+                .frame(width: 52, height: 52)
+                .offset(x: -6, y: -6)
+                .animation(.easeOut(duration: 0.22), value: isPressed)
+
+            // Стекло поверх полусферы.
             label
                 .appGlass(in: shape, interactive: true)
                 .glassMorphID(glassID, in: namespace)
