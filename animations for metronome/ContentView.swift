@@ -91,8 +91,8 @@ struct ContentView: View {
         }
     }
 
-    // Spring для Liquid Glass morphing (iOS 26 рекомендация).
-    private let morphAnimation: Animation = .spring(response: 0.6, dampingFraction: 0.8)
+    // Spring для Liquid Glass morphing — быстрее и чуть больше bounce.
+    private let morphAnimation: Animation = .spring(response: 0.5, dampingFraction: 0.75)
 
     private func open(_ panel: PanelPosition) {
         print("[ContentView] Opening panel: \(panel)")
