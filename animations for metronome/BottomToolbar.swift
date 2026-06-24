@@ -63,17 +63,11 @@ private struct SheetView: View {
 
     var body: some View {
         NavigationStack {
-            ZStack {
-                // Родной системный фон
-                Color(.secondarySystemBackground)
-                    .ignoresSafeArea()
-
-                VStack {
-                    Toggle("Toggle", isOn: $isOn)
-                        .tint(.controlAccent)
-                        .padding()
-                    Spacer()
-                }
+            VStack {
+                Toggle("Toggle", isOn: $isOn)
+                    .tint(.controlAccent)
+                    .padding()
+                Spacer()
             }
             .navigationTitle("Sheet")
             .navigationBarTitleDisplayMode(.large)
