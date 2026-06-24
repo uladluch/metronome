@@ -36,13 +36,36 @@ struct ContentView: View {
             // Цветной свет под стеклом (lensing).
             GlassBackdrop(glowOn: glowOn)
 
-            // Верхний тулбар (капсула + три точки). Угасает по мере раскрытия панели.
+            // Верхний тулбар + шестерёнка в одном контейнере.
+            // Шестерёнка слева (overlay), капсула в центре, три точки справа.
             GlassEffectContainer(spacing: 16) {
-                TopToolbar(
-                    namespace: glassNS,
-                    onCenter: {},
-                    onRight: {}
-                )
+                ZStack(alignment: .topLeading) {
+                    TopToolbar(
+                        namespace: glassNS,
+                        onCenter: {},
+                        onRight: {}
+                    )
+
+                    // Шестерёнка → панель (overlay слева).
+                    ExpandableGlassMenu(
+                        alignment: .topLeading,
+                        progress: morphProgress,
+                        labelSize: .init(width: 60, height: 60),
+                        cornerRadius: 50
+                    ) {
+                        PanelContent(onClose: close)
+                            .frame(width: panelW, height: panelH, alignment: .topLeading)
+                    } label: {
+                        Image(systemName: "gearshape")
+                            .font(.system(size: 22, weight: .medium))
+                            .foregroundStyle(.white)
+                            .frame(width: 60, height: 60)
+                            .contentShape(Circle())
+                            .onTapGesture { open() }
+                            .allowsHitTesting(morphProgress == 0)
+                    }
+                    .zIndex(1)
+                }
                 .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
                 .padding(.top, 8)
             }
@@ -70,33 +93,6 @@ struct ContentView: View {
             BottomToolbar()
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 8)
-
-            // Шестерёнка → панель. Закреплена в верхнем левом углу через clear-филлер,
-            // чтобы ExpandableGlassMenu сохранял свой размер (а не растягивал стекло
-            // на весь экран). Растёт из угла кнопки 60×60 в панель panelW × panelH.
-            ZStack(alignment: .topLeading) {
-                Color.clear
-                ExpandableGlassMenu(
-                    alignment: .topLeading,
-                    progress: morphProgress,
-                    labelSize: .init(width: 60, height: 60),
-                    cornerRadius: 50
-                ) {
-                    PanelContent(onClose: close)
-                        .frame(width: panelW, height: panelH, alignment: .topLeading)
-                } label: {
-                    Image(systemName: "gearshape")
-                        .font(.system(size: 22, weight: .medium))
-                        .foregroundStyle(.white)
-                        .frame(width: 60, height: 60)
-                        .contentShape(Circle())
-                        .onTapGesture { open() }
-                        .allowsHitTesting(morphProgress == 0)
-                }
-                .padding(.leading, 16)
-                .padding(.top, 8)
-            }
-            .zIndex(1)
         }
         .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { screenSize = $0 })
     }
