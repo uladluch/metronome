@@ -89,7 +89,8 @@ struct ContentView: View {
                     .padding(.horizontal, 24)
                     .frame(height: 50)
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: UnitPoint(x: 0.5, y: 0.65))
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            .offset(y: 80)  // Опустить пониже
 
             // Нижний тулбар — прижат к низу.
             BottomToolbar()
