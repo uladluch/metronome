@@ -100,6 +100,13 @@ private struct GlassIconButton: View {
             .font(.system(size: 22, weight: .medium))
             .foregroundStyle(.white)
             .frame(width: 60, height: 60)
+            // Мягкий белый blur ПОД кнопкой (белый, opacity 8%).
+            .background {
+                Circle()
+                    .fill(Color.white.opacity(0.08))
+                    .blur(radius: 8)
+                    .offset(y: 4)
+            }
             .appGlass(in: .circle, interactive: true)
             // Свечение по нажатию — поверх нативного, чтобы было заметно.
             .overlay {
@@ -140,6 +147,13 @@ private struct GlassCapsuleButton: View {
     var body: some View {
         Color.clear
             .frame(width: 180, height: 60)
+            // Мягкий белый blur ПОД капсулой (белый, opacity 8%).
+            .background {
+                Capsule()
+                    .fill(Color.white.opacity(0.08))
+                    .blur(radius: 8)
+                    .offset(y: 4)
+            }
             .appGlass(in: .capsule, interactive: true)
             .glassMorphID(glassID, in: namespace)
             .contentShape(Capsule())
