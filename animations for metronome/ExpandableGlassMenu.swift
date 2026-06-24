@@ -44,8 +44,8 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
         // заострённый «ромб» (на свёрнутой 60×60 это идеальный круг = 30).
         let r = min(cornerRadius, min(frameW, frameH) / 2)
 
-        // Overshoot → лёгкий масштаб из центра = бонс по всему периметру.
-        let bounceScale = 1 + max(progress - 1, 0)
+        // Overshoot → очень лёгкий масштаб из центра = бонс едва заметен.
+        let bounceScale = 1 + max(progress - 1, 0) * 0.35
 
         return ZStack(alignment: alignment) {
             // Контент в натуральную величину; рамка обрезает его по мере роста.
