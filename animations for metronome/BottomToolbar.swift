@@ -4,6 +4,7 @@
 //
 //  Нижний тулбар: по бокам такие же стеклянные кнопки 60×60, что и сверху,
 //  а по центру — нативный SwiftUI Slider (вместо капсулы).
+//  Кнопки-квадраты открывают нативный полноэкранный sheet.
 //
 
 import SwiftUI
@@ -14,30 +15,58 @@ struct BottomToolbar: View {
     @Namespace private var ns
 
     @State private var value: Double = 0.5
+    @State private var showSheet = false
 
-    private let leftIcon = "minus"
-    private let rightIcon = "plus"
+    private let icon = "square"
 
     var body: some View {
         HStack(spacing: 16) {
             GlassIconButton(
-                systemName: leftIcon,
+                systemName: icon,
                 glassID: nil,
                 namespace: ns,
-                action: {}
+                action: { showSheet = true }
             )
 
-            // Нативный слайдер по центру.
+            // Нативный слайдер по центру, активный трек — белый.
             Slider(value: $value)
+                .tint(.white)
 
             GlassIconButton(
-                systemName: rightIcon,
+                systemName: icon,
                 glassID: nil,
                 namespace: ns,
-                action: {}
+                action: { showSheet = true }
             )
         }
         .frame(height: 60)
-        .padding(.horizontal, 16)
+        // Конкретная ширина = экран − 32 (по 16pt с боков), центр.
+        .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
+        .fullScreenCover(isPresented: $showSheet) {
+            SheetView()
+        }
+    }
+}
+
+// MARK: - Контент полноэкранного sheet
+
+private struct SheetView: View {
+
+    @Environment(\.dismiss) private var dismiss
+
+    var body: some View {
+        ZStack {
+            Color.appBackground
+                .ignoresSafeArea()
+
+            VStack(spacing: 24) {
+                Text("Sheet")
+                    .font(.largeTitle.bold())
+                    .foregroundStyle(.white)
+
+                Button("Close") { dismiss() }
+                    .foregroundStyle(.white)
+            }
+        }
     }
 }
