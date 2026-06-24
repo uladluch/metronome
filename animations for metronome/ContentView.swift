@@ -91,8 +91,8 @@ struct ContentView: View {
         }
     }
 
-    // Spring: медленнее раздувается, больше отскоков (bounce).
-    private let morphAnimation: Animation = .spring(response: 0.8, dampingFraction: 0.6)
+    // Spring: быстрее раздувается, меньше отскоков.
+    private let morphAnimation: Animation = .spring(response: 0.4, dampingFraction: 0.9)
 
     private func open(_ panel: PanelPosition) {
         print("[ContentView] Opening panel: \(panel)")
