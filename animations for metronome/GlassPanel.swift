@@ -47,10 +47,21 @@ struct GlassPanel: View {
 
     let position: PanelPosition
     let namespace: Namespace.ID
+    let morphProgress: CGFloat
     let onClose: () -> Void
 
     var body: some View {
-        let _ = print("[GlassPanel] Rendering \(position) panel")
+        let _ = print("[GlassPanel] Rendering \(position) panel, morphProgress: \(morphProgress)")
+
+        // Stage 2 progress: нормализуем 0.5→1 в 0→1.
+        let stage2Progress = max((morphProgress - 0.5) * 2, 0)
+
+        // Opacity панели: 0 при progress < 0.5, потом растёт к 1.
+        let panelOpacity = stage2Progress
+
+        // cornerRadius: начинаем с овала (0) и переходим к 35 на stage 2.
+        let cornerRadius = stage2Progress * 35
+
         return VStack(spacing: 24) {
             // Только крестик справа (title и icon только для center/right).
             HStack {
@@ -82,9 +93,10 @@ struct GlassPanel: View {
         .containerRelativeFrame([.horizontal, .vertical], alignment: .top) { length, axis in
             axis == .vertical ? length / 2 : length - 32
         }
-        // Стекло: .regular. cornerRadius 35 — баланс между углами и скруглением.
-            .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 35))
-            .glassEffectID(position.glassID, in: namespace)
-        }
+        // Стекло с progress-controlled cornerRadius.
+        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: max(0, cornerRadius)))
+        .glassEffectID(position.glassID, in: namespace)
+        .opacity(panelOpacity)
+        .animation(.spring(response: 0.55, dampingFraction: 0.78), value: morphProgress)
     }
 

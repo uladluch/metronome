@@ -12,8 +12,13 @@ struct ContentView: View {
     /// Общий namespace для морфинга Liquid Glass между кнопками и панелями.
     @Namespace private var glassNS
 
-    /// Какая панель сейчас открыта (nil — закрыты все).
-    @State private var openPanel: PanelPosition?
+    /// Какая панель сейчас открывается (nil — закрыты все).
+    @State private var activePanel: PanelPosition?
+
+    /// Прогресс морфинга: 0 = кнопка, 1 = полная панель.
+    /// Stage 1 (0→0.5): кнопка растягивается в овал (scaleY, cornerRadius).
+    /// Stage 2 (0.5→1): овал раскрывается в полную панель.
+    @State private var morphProgress: CGFloat = 0
 
     /// Подсветка (свечение Path) вкл/выкл. По умолчанию выключена.
     @State private var glowOn = false
@@ -34,7 +39,8 @@ struct ContentView: View {
                 ZStack(alignment: .top) {
                     TopToolbar(
                         namespace: glassNS,
-                        openPanel: openPanel,
+                        activePanel: activePanel,
+                        morphProgress: morphProgress,
                         onLeft: { open(.left) },
                         onCenter: { open(.center) },
                         onRight: { open(.right) }
@@ -46,20 +52,16 @@ struct ContentView: View {
                     .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
                     .padding(.top, 8)
 
-                    // Окна. У каждого тот же glassEffectID, что у его кнопки,
-                    // поэтому стекло кнопки морфит в окно и обратно.
-                    // zIndex(1) — окно гарантированно поверх тулбара и слоя-закрытия.
-                    if openPanel == .left {
-                        GlassPanel(position: .left, namespace: glassNS, onClose: close)
-                            .zIndex(1)
-                    }
-                    if openPanel == .center {
-                        GlassPanel(position: .center, namespace: glassNS, onClose: close)
-                            .zIndex(1)
-                    }
-                    if openPanel == .right {
-                        GlassPanel(position: .right, namespace: glassNS, onClose: close)
-                            .zIndex(1)
+                    // Окна. Отображаются на основе morphProgress.
+                    // Stage 2 (progress > 0.5) — панель становится видима и раскрывается.
+                    if let panel = activePanel {
+                        GlassPanel(
+                            position: panel,
+                            namespace: glassNS,
+                            morphProgress: morphProgress,
+                            onClose: close
+                        )
+                        .zIndex(1)
                     }
                 }
             }
@@ -96,16 +98,20 @@ struct ContentView: View {
 
     private func open(_ panel: PanelPosition) {
         print("[ContentView] Opening panel: \(panel)")
+        activePanel = panel
         withAnimation(morphAnimation) {
-            openPanel = panel
-            print("[ContentView] openPanel set to: \(String(describing: openPanel))")
+            morphProgress = 1
         }
     }
 
     private func close() {
         print("[ContentView] Closing panel")
         withAnimation(morphAnimation) {
-            openPanel = nil
+            morphProgress = 0
+        }
+        // После завершения анимации очистим activePanel
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
+            activePanel = nil
         }
     }
 }
