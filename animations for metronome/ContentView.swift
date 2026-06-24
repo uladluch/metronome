@@ -37,7 +37,6 @@ struct ContentView: View {
                         onRight: { open(.right) }
                     )
                     .padding(.top, 8)
-                    .padding(.horizontal, 16)
 
                     // Закрытие по тапу мимо окна (нижняя часть экрана).
                     if openPanel != nil {
@@ -64,6 +63,7 @@ struct ContentView: View {
                     }
                 }
             }
+            .padding(.horizontal, 16)
         }
     }
 
