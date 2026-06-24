@@ -101,12 +101,25 @@ struct GlassIconButton: View {
             .font(.system(size: 22, weight: .medium))
             .foregroundStyle(.white)
             .frame(width: 60, height: 60)
-            // Мягкий белый blur ПОД кнопкой (белый, opacity 8%).
+            // Под стеклом — светлая «полусфера» (radial-градиент, свет сверху).
+            // Прозрачное стекло показывает её сквозь себя и преломляет по кромке
+            // (переливание). На нажатии она ярче — мягкое свечение ЧЕРЕЗ стекло,
+            // а не плоский оверлей.
             .background {
                 Circle()
-                    .fill(Color.white.opacity(0.08))
-                    .blur(radius: 8)
-                    .offset(y: 4)
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                .white.opacity(isPressed ? 0.55 : 0.20),
+                                .white.opacity(isPressed ? 0.15 : 0.03),
+                                .clear
+                            ],
+                            center: UnitPoint(x: 0.5, y: 0.32),
+                            startRadius: 1,
+                            endRadius: 44
+                        )
+                    )
+                    .animation(.easeOut(duration: 0.22), value: isPressed)
             }
             .appGlass(in: .circle, interactive: true)
             // Лёгкая имитация inner shadow — белый блик по верхней кромке.
@@ -124,17 +137,6 @@ struct GlassIconButton: View {
                             )
                         )
                     )
-            }
-            // Яркая подсветка по нажатию.
-            .overlay {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [.white.opacity(0.85), .white.opacity(0)],
-                            center: .center, startRadius: 0, endRadius: 40
-                        )
-                    )
-                    .opacity(isPressed ? 1 : 0)
             }
             .glassMorphID(glassID, in: namespace)
             .contentShape(Circle())
