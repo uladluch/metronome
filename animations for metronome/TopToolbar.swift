@@ -109,7 +109,13 @@ private struct GlassCapsuleButton: View {
     let action: () -> Void
 
     var body: some View {
-        GlassButton(shape: Capsule(), glassID: glassID, namespace: namespace, action: action) {
+        GlassButton(
+            shape: Capsule(),
+            glassID: glassID,
+            namespace: namespace,
+            action: action,
+            showDome: false  // Без сферы — только на круглых кнопках.
+        ) {
             Text("Hello")
                 .font(.headline)
                 .foregroundStyle(.white)

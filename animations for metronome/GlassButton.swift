@@ -16,6 +16,7 @@ struct GlassButton<Label: View>: View {
     private let namespace: Namespace.ID
     private let action: () -> Void
     private let label: Label
+    private let showDome: Bool
 
     @State private var isPressed = false
 
@@ -24,12 +25,14 @@ struct GlassButton<Label: View>: View {
         glassID: String? = nil,
         namespace: Namespace.ID,
         action: @escaping () -> Void,
+        showDome: Bool = true,
         @ViewBuilder label: () -> Label
     ) {
         self.shape = AnyShape(shape)
         self.glassID = glassID
         self.namespace = namespace
         self.action = action
+        self.showDome = showDome
         self.label = label()
     }
 
@@ -38,24 +41,27 @@ struct GlassButton<Label: View>: View {
             // «Полусфера» ПОД стеклом — фиксированный блик в верхнем левом углу.
             // Жёстко привязан к toplLeading контейнера, потом весь ZStack обрезается
             // по форме. Так сфера одинаково лежит на любой форме.
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            .white.opacity(isPressed ? 0.24 : 0.12),
-                            .white.opacity(0)
-                        ],
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: 26
+            // Показывается только если showDome = true (по умолчанию).
+            if showDome {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                .white.opacity(isPressed ? 0.24 : 0.12),
+                                .white.opacity(0)
+                            ],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 26
+                        )
                     )
-                )
-                .frame(width: 52, height: 52)
-                .offset(x: -6, y: -6)
-                .animation(.easeOut(duration: 0.22), value: isPressed)
-                .onAppear {
-                    print("[GlassButton] \(String(describing: shape)): sphere positioned at topLeading, offset(-6,-6)")
-                }
+                    .frame(width: 52, height: 52)
+                    .offset(x: -6, y: -6)
+                    .animation(.easeOut(duration: 0.22), value: isPressed)
+                    .onAppear {
+                        print("[GlassButton] \(String(describing: shape)): sphere positioned at topLeading, offset(-6,-6)")
+                    }
+            }
 
             // Стекло поверх полусферы.
             label
