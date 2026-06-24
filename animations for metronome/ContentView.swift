@@ -25,8 +25,8 @@ struct ContentView: View {
     /// слева и справа были одинаковые (16pt по бокам).
     @State private var toolbarWidth: CGFloat = 0
 
-    // Открытие — сильный bounce (низкий damping = заметный overshoot окна).
-    private let openAnimation: Animation = .spring(response: 0.55, dampingFraction: 0.55)
+    // Открытие — умеренный bounce (overshoot уходит в центр-scale → бонс по периметру).
+    private let openAnimation: Animation = .spring(response: 0.55, dampingFraction: 0.68)
     // Закрытие — плавное, без отскока.
     private let closeAnimation: Animation = .spring(response: 0.55, dampingFraction: 0.85)
 

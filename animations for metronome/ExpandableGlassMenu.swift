@@ -30,9 +30,12 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
     }
 
     var body: some View {
-        // Рамка растёт линейно с progress — от кнопки до полного контента.
-        let rWidth = (contentSize.width - labelSize.width) * progress
-        let rHeight = (contentSize.height - labelSize.height) * progress
+        // Размер растёт до полного и НЕ переливает (clamp). Overshoot пружины
+        // (progress > 1) уводим ниже в масштаб из ЦЕНТРА — тогда «бонс» идёт по
+        // всему периметру окна, а не только вправо-вниз от угла-якоря.
+        let sizeProgress = min(progress, 1)
+        let rWidth = (contentSize.width - labelSize.width) * sizeProgress
+        let rHeight = (contentSize.height - labelSize.height) * sizeProgress
 
         let frameW = labelSize.width + rWidth
         let frameH = labelSize.height + rHeight
@@ -40,6 +43,9 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
         // ВАЖНО: радиус не больше половины меньшей стороны — иначе .rect рисует
         // заострённый «ромб» (на свёрнутой 60×60 это идеальный круг = 30).
         let r = min(cornerRadius, min(frameW, frameH) / 2)
+
+        // Overshoot → лёгкий масштаб из центра = бонс по всему периметру.
+        let bounceScale = 1 + max(progress - 1, 0)
 
         return ZStack(alignment: alignment) {
             // Контент в натуральную величину; рамка обрезает его по мере роста.
@@ -93,6 +99,8 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
                         )
                 )
         }
+        // Overshoot пружины → масштаб из центра: бонс по всему периметру окна.
+        .scaleEffect(bounceScale, anchor: .center)
     }
 
     // MARK: - Производные от progress (зажаты в [0,1] чтобы spring bounce не ломал)
