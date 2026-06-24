@@ -65,15 +65,12 @@ struct GlassPanel: View {
 
                 Spacer()
 
-                Button(action: onClose) {
+                GlassButton(shape: Circle(), namespace: namespace, action: onClose) {
                     Image(systemName: "xmark")
                         .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.white)
                         .frame(width: 44, height: 44)
-                        .appGlass(in: .circle, interactive: true)
-                        .contentShape(Circle())
                 }
-                .buttonStyle(.plain)
             }
 
             Spacer()

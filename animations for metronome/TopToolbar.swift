@@ -50,7 +50,6 @@ struct TopToolbar: View {
                     namespace: namespace,
                     action: {}
                 )
-                .allowsHitTesting(false)
             } else {
                 placeholder(width: 180)
             }
@@ -81,12 +80,8 @@ struct TopToolbar: View {
 
 // MARK: - Кнопка-иконка 60×60
 
-/// Стеклянная кнопка 60×60 с белой SF-иконкой по центру.
+/// Стеклянная кнопка 60×60 с белой SF-иконкой по центру (обёртка над GlassButton).
 /// Используется и в верхнем, и в нижнем тулбаре.
-///
-/// Без обёртки `Button`: касание получает само `.interactive()`-стекло —
-/// иначе кнопка перехватывала бы тап, и не было бы ни нативного свечения
-/// на нажатии, ни корректного зацепления морфинга через glassEffectID.
 struct GlassIconButton: View {
 
     let systemName: String
@@ -94,71 +89,19 @@ struct GlassIconButton: View {
     let namespace: Namespace.ID
     let action: () -> Void
 
-    @State private var isPressed = false
-
     var body: some View {
-        ZStack {
-            // «Полусфера»/блик ПОД стеклом — в верхнем левом углу.
-            // Отдельный слой ПОЗАДИ стекла (в ZStack), поэтому прозрачное стекло
-            // реально показывает и преломляет его, а не рисует поверх.
-            // Это radial-градиент — мягкий сам по себе, без .blur.
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            .white.opacity(isPressed ? 0.22 : 0.10),
-                            .white.opacity(0)
-                        ],
-                        center: UnitPoint(x: 0.22, y: 0.22),
-                        startRadius: 0,
-                        endRadius: 30
-                    )
-                )
-                .frame(width: 60, height: 60)
-                .animation(.easeOut(duration: 0.22), value: isPressed)
-
-            // Стеклянная кнопка поверх блика.
+        GlassButton(shape: Circle(), glassID: glassID, namespace: namespace, action: action) {
             Image(systemName: systemName)
                 .font(.system(size: 22, weight: .medium))
                 .foregroundStyle(.white)
                 .frame(width: 60, height: 60)
-                .appGlass(in: .circle, interactive: true)
-                .glassMorphID(glassID, in: namespace)
         }
-        // Лёгкая имитация inner shadow — белый блик по верхней кромке.
-        .overlay {
-            Circle()
-                .stroke(Color.white.opacity(0.22), lineWidth: 5)
-                .blur(radius: 7)
-                .offset(y: 3)
-                .mask(
-                    Circle().fill(
-                        LinearGradient(
-                            colors: [.white, .clear],
-                            startPoint: .top,
-                            endPoint: .center
-                        )
-                    )
-                )
-        }
-        .contentShape(Circle())
-        .onTapGesture(perform: action)
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    if !isPressed { withAnimation(.easeOut(duration: 0.12)) { isPressed = true } }
-                }
-                .onEnded { _ in
-                    withAnimation(.easeOut(duration: 0.3)) { isPressed = false }
-                }
-        )
-        .accessibilityAddTraits(.isButton)
     }
 }
 
 // MARK: - Центральная капсула 180×60
 
-/// Стеклянная капсула-кнопка 180×60.
+/// Стеклянная капсула-кнопка 180×60 (обёртка над GlassButton).
 private struct GlassCapsuleButton: View {
 
     let glassID: String?
@@ -166,21 +109,11 @@ private struct GlassCapsuleButton: View {
     let action: () -> Void
 
     var body: some View {
-        Text("Hello")
-            .font(.headline)
-            .foregroundStyle(.white)
-            .frame(width: 180, height: 60)
-            // Мягкий белый blur ПОД капсулой (белый, opacity 8%).
-            .background {
-                Capsule()
-                    .fill(Color.white.opacity(0.08))
-                    .blur(radius: 8)
-                    .offset(y: 4)
-            }
-            .appGlass(in: .capsule, interactive: true)
-            .glassMorphID(glassID, in: namespace)
-            .contentShape(Capsule())
-            .onTapGesture(perform: action)
-            .accessibilityAddTraits(.isButton)
+        GlassButton(shape: Capsule(), glassID: glassID, namespace: namespace, action: action) {
+            Text("Hello")
+                .font(.headline)
+                .foregroundStyle(.white)
+                .frame(width: 180, height: 60)
+        }
     }
 }
