@@ -97,60 +97,62 @@ struct GlassIconButton: View {
     @State private var isPressed = false
 
     var body: some View {
-        Image(systemName: systemName)
-            .font(.system(size: 22, weight: .medium))
-            .foregroundStyle(.white)
-            .frame(width: 60, height: 60)
-            // Под стеклом — светлая «полусфера» (radial-градиент, свет сверху).
-            // Прозрачное стекло показывает её сквозь себя и преломляет по кромке
-            // (переливание). На нажатии она ярче — мягкое свечение ЧЕРЕЗ стекло,
-            // а не плоский оверлей.
-            .background {
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [
-                                .white.opacity(isPressed ? 0.55 : 0.20),
-                                .white.opacity(isPressed ? 0.15 : 0.03),
-                                .clear
-                            ],
-                            center: UnitPoint(x: 0.5, y: 0.32),
-                            startRadius: 1,
-                            endRadius: 44
+        ZStack {
+            // «Полусфера»/блик ПОД стеклом — в верхнем левом углу.
+            // Отдельный слой ПОЗАДИ стекла (в ZStack), поэтому прозрачное стекло
+            // реально показывает и преломляет его, а не рисует поверх.
+            // Это radial-градиент — мягкий сам по себе, без .blur.
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            .white.opacity(isPressed ? 0.6 : 0.3),
+                            .white.opacity(0)
+                        ],
+                        center: UnitPoint(x: 0.3, y: 0.3),
+                        startRadius: 0,
+                        endRadius: 30
+                    )
+                )
+                .frame(width: 60, height: 60)
+                .animation(.easeOut(duration: 0.22), value: isPressed)
+
+            // Стеклянная кнопка поверх блика.
+            Image(systemName: systemName)
+                .font(.system(size: 22, weight: .medium))
+                .foregroundStyle(.white)
+                .frame(width: 60, height: 60)
+                .appGlass(in: .circle, interactive: true)
+                .glassMorphID(glassID, in: namespace)
+        }
+        // Лёгкая имитация inner shadow — белый блик по верхней кромке.
+        .overlay {
+            Circle()
+                .stroke(Color.white.opacity(0.22), lineWidth: 5)
+                .blur(radius: 7)
+                .offset(y: 3)
+                .mask(
+                    Circle().fill(
+                        LinearGradient(
+                            colors: [.white, .clear],
+                            startPoint: .top,
+                            endPoint: .center
                         )
                     )
-                    .animation(.easeOut(duration: 0.22), value: isPressed)
-            }
-            .appGlass(in: .circle, interactive: true)
-            // Лёгкая имитация inner shadow — белый блик по верхней кромке.
-            .overlay {
-                Circle()
-                    .stroke(Color.white.opacity(0.22), lineWidth: 5)
-                    .blur(radius: 7)
-                    .offset(y: 3)
-                    .mask(
-                        Circle().fill(
-                            LinearGradient(
-                                colors: [.white, .clear],
-                                startPoint: .top,
-                                endPoint: .center
-                            )
-                        )
-                    )
-            }
-            .glassMorphID(glassID, in: namespace)
-            .contentShape(Circle())
-            .onTapGesture(perform: action)
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 0)
-                    .onChanged { _ in
-                        if !isPressed { withAnimation(.easeOut(duration: 0.12)) { isPressed = true } }
-                    }
-                    .onEnded { _ in
-                        withAnimation(.easeOut(duration: 0.3)) { isPressed = false }
-                    }
-            )
-            .accessibilityAddTraits(.isButton)
+                )
+        }
+        .contentShape(Circle())
+        .onTapGesture(perform: action)
+        .simultaneousGesture(
+            DragGesture(minimumDistance: 0)
+                .onChanged { _ in
+                    if !isPressed { withAnimation(.easeOut(duration: 0.12)) { isPressed = true } }
+                }
+                .onEnded { _ in
+                    withAnimation(.easeOut(duration: 0.3)) { isPressed = false }
+                }
+        )
+        .accessibilityAddTraits(.isButton)
     }
 }
 
