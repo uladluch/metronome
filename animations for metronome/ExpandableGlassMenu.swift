@@ -34,7 +34,14 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
         let rWidth = (contentSize.width - labelSize.width) * progress
         let rHeight = (contentSize.height - labelSize.height) * progress
 
-        ZStack(alignment: alignment) {
+        let frameW = labelSize.width + rWidth
+        let frameH = labelSize.height + rHeight
+
+        // ВАЖНО: радиус не больше половины меньшей стороны — иначе .rect рисует
+        // заострённый «ромб» (на свёрнутой 60×60 это идеальный круг = 30).
+        let r = min(cornerRadius, min(frameW, frameH) / 2)
+
+        return ZStack(alignment: alignment) {
             // Контент в натуральную величину; рамка обрезает его по мере роста.
             content
                 .fixedSize()
@@ -61,25 +68,19 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
             .opacity(1 - labelOpacity)
         }
         // Рамка-окно: от кнопки до полного размера, якорь — угол кнопки.
-        .frame(width: labelSize.width + rWidth,
-               height: labelSize.height + rHeight,
-               alignment: alignment)
-        .clipShape(.rect(cornerRadius: cornerRadius))
-        // То же стекло, что у остальных кнопок (AppGlass.style = .clear).
-        // interactive только пока кнопка-шестерёнка (progress < 0.5), иначе
-        // «живое» стекло перехватывает тап по крестику в раскрытой панели.
-        .glassEffect(
-            progress < 0.5 ? AppGlass.style.interactive() : AppGlass.style,
-            in: .rect(cornerRadius: cornerRadius)
-        )
+        .frame(width: frameW, height: frameH, alignment: alignment)
+        .clipShape(.rect(cornerRadius: r))
+        // То же интерактивное стекло, что у остальных кнопок (AppGlass.style = .clear)
+        // — и на свёрнутой кнопке, и на раскрытой панели.
+        .glassEffect(AppGlass.style.interactive(), in: .rect(cornerRadius: r))
         // Inner shadow — белый блик по верхней кромке, как у GlassButton.
         .overlay {
-            RoundedRectangle(cornerRadius: cornerRadius)
+            RoundedRectangle(cornerRadius: r)
                 .stroke(Color.white.opacity(0.22), lineWidth: 5)
                 .blur(radius: 7)
                 .offset(y: 3)
                 .mask(
-                    RoundedRectangle(cornerRadius: cornerRadius)
+                    RoundedRectangle(cornerRadius: r)
                         .fill(
                             LinearGradient(
                                 colors: [.white, .clear],
