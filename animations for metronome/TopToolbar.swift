@@ -27,47 +27,47 @@ struct TopToolbar: View {
     private let rightIcon = "ellipsis"
 
     var body: some View {
-        VStack {
-            HStack(spacing: 0) {
-                // Шестерёнка — единственная кнопка с морф-расширением.
-                if openPanel == .left {
-                    placeholder(width: 60)
-                } else {
-                    GlassIconButton(
-                        systemName: leftIcon,
-                        glassID: PanelPosition.left.glassID,
-                        namespace: namespace,
-                        action: onLeft
-                    )
-                    .opacity(openPanel == nil ? 1 : 0)
-                }
-
-                Spacer(minLength: 0)
-
-                // Центр — декоративный, без морфинга и без взаимодействия.
-                GlassCapsuleButton(
-                    glassID: nil,
-                    namespace: namespace,
-                    action: {}
-                )
-                .allowsHitTesting(false)
-                .opacity(openPanel == nil ? 1 : 0)
-
-                Spacer(minLength: 0)
-
-                // Право — декоративное, без морфинга и без взаимодействия.
+        HStack(spacing: 0) {
+            // Шестерёнка — единственная кнопка с морф-расширением.
+            if openPanel == .left {
+                placeholder(width: 60)
+            } else {
                 GlassIconButton(
-                    systemName: rightIcon,
-                    glassID: nil,
+                    systemName: leftIcon,
+                    glassID: PanelPosition.left.glassID,
                     namespace: namespace,
-                    action: {}
+                    action: onLeft
                 )
-                .allowsHitTesting(false)
                 .opacity(openPanel == nil ? 1 : 0)
             }
-            .frame(height: 60)
+
+            Spacer(minLength: 0)
+
+            // Центр — декоративный, без взаимодействия. Свой glassID сохраняем,
+            // чтобы стекло рисовалось (морфа не будет — его панель не открывается).
+            GlassCapsuleButton(
+                glassID: PanelPosition.center.glassID,
+                namespace: namespace,
+                action: {}
+            )
+            .allowsHitTesting(false)
+            .opacity(openPanel == nil ? 1 : 0)
+
+            Spacer(minLength: 0)
+
+            // Право — декоративное, без взаимодействия.
+            GlassIconButton(
+                systemName: rightIcon,
+                glassID: PanelPosition.right.glassID,
+                namespace: namespace,
+                action: {}
+            )
+            .allowsHitTesting(false)
+            .opacity(openPanel == nil ? 1 : 0)
         }
         .frame(maxWidth: .infinity)
+        .frame(height: 60)
+        .padding(.horizontal, 16)
         // Анимация opacity — чтобы кнопки плавно исчезали/появлялись.
         .animation(.easeInOut(duration: 0.2), value: openPanel)
     }
@@ -89,8 +89,7 @@ struct TopToolbar: View {
 private struct GlassIconButton: View {
 
     let systemName: String
-    /// nil — кнопка без морфинга (просто стекло, не «перетекает» в панель).
-    let glassID: String?
+    let glassID: String
     let namespace: Namespace.ID
     let action: () -> Void
 
@@ -112,8 +111,7 @@ private struct GlassIconButton: View {
 /// Стеклянная капсула-кнопка 180×60.
 private struct GlassCapsuleButton: View {
 
-    /// nil — капсула без морфинга.
-    let glassID: String?
+    let glassID: String
     let namespace: Namespace.ID
     let action: () -> Void
 
