@@ -33,5 +33,8 @@ struct GlassBackdrop: View {
         .ignoresSafeArea()
         .allowsHitTesting(false)
         .onAppear { print("[GlassBackdrop] Body rendered, glowOn: \(glowOn)") }
+        .onChange(of: glowOn) { oldVal, newVal in
+            print("[GlassBackdrop] glowOn changed: \(oldVal) -> \(newVal), opacity now: \(newVal ? 1 : 0.5)")
+        }
     }
 }
