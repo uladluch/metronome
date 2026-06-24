@@ -41,6 +41,7 @@ struct TopToolbar: View {
                 action: onRight
             )
         }
+        .frame(maxWidth: .infinity)
         .frame(height: 60)
     }
 

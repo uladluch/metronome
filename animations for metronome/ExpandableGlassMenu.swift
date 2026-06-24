@@ -2,9 +2,10 @@
 //  ExpandableGlassMenu.swift
 //  animations for metronome
 //
-//  Стеклянное меню, которое растёт из кнопки в полноразмерный контент.
-//  Простой вариант: размер интерполируется 0→1, контент угасает/проявляется,
-//  якорь — левый верхний угол кнопки.
+//  Стеклянное меню, которое вырастает из кнопки (label) в полноразмерный контент.
+//  ОДИН стеклянный элемент: рамка растёт от labelSize до измеренного размера
+//  контента по мере progress 0→1, контент проявляется, label угасает. Стекло —
+//  своё (внутренний GlassEffectContainer), якорь роста — alignment (угол кнопки).
 //
 
 import SwiftUI
@@ -18,6 +19,7 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
     @ViewBuilder var content: Content
     @ViewBuilder var label: Label
 
+    /// Измеренный натуральный размер контента.
     @State private var contentSize: CGSize = .zero
 
     var animatableData: CGFloat {
@@ -26,49 +28,55 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
     }
 
     var body: some View {
-        let widthDiff = contentSize.width - labelSize.width
-        let heightDiff = contentSize.height - labelSize.height
+        // Рамка растёт линейно с progress — от кнопки до полного контента.
+        let rWidth = (contentSize.width - labelSize.width) * progress
+        let rHeight = (contentSize.height - labelSize.height) * progress
 
-        let rWidth = widthDiff * progress
-        let rHeight = heightDiff * progress
+        GlassEffectContainer {
+            ZStack(alignment: alignment) {
+                // Контент в натуральную величину; рамка обрезает его по мере роста.
+                content
+                    .fixedSize()
+                    .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { contentSize = $0 })
+                    .opacity(contentOpacity)
 
-        let _ = print("[Menu] progress=\(String(format: "%.2f", progress)) contentOpacity=\(String(format: "%.2f", contentOpacity)) contentSize=\(contentSize) frame=(\(labelSize.width + rWidth)×\(labelSize.height + rHeight))")
-
-        return ZStack(alignment: alignment) {
-            // Контент в полный размер.
-            content
-                .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { contentSize = $0 })
-                .frame(width: contentSize.width, height: contentSize.height)
-                .opacity(contentOpacity)
-                .background(Color.red.opacity(0.1))
-
-            // Кнопка-label сверху (угасает по мере открытия).
-            ZStack(alignment: .topLeading) {
-                // Dome-блик.
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [.white.opacity(0.12), .white.opacity(0)],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: 26
+                // Кнопка-источник (шестерёнка) + dome-блик, угасает по мере открытия.
+                ZStack(alignment: .topLeading) {
+                    Circle()
+                        .fill(
+                            RadialGradient(
+                                colors: [.white.opacity(0.12), .white.opacity(0)],
+                                center: .center,
+                                startRadius: 0,
+                                endRadius: 26
+                            )
                         )
-                    )
-                    .frame(width: 52, height: 52)
-                    .offset(x: -6, y: -6)
+                        .frame(width: 52, height: 52)
+                        .offset(x: -6, y: -6)
 
-                label
+                    label
+                }
+                .frame(width: labelSize.width, height: labelSize.height)
+                .opacity(1 - labelOpacity)
             }
-            .frame(width: labelSize.width, height: labelSize.height)
-            .opacity(1 - labelOpacity)
+            // Рамка-окно: от кнопки до полного размера, якорь — угол кнопки.
+            .frame(width: labelSize.width + rWidth,
+                   height: labelSize.height + rHeight,
+                   alignment: alignment)
+            .clipShape(.rect(cornerRadius: cornerRadius))
+            .contentShape(.rect(cornerRadius: cornerRadius))  // тапы только по видимой форме
+            .glassEffect(.regular.interactive(), in: .rect(cornerRadius: cornerRadius))
         }
-        .frame(width: labelSize.width + rWidth, height: labelSize.height + rHeight, alignment: alignment)
     }
 
+    // MARK: - Производные от progress (зажаты в [0,1] чтобы spring bounce не ломал)
+
+    /// Контент проявляется в последние 65% морфа.
     private var contentOpacity: CGFloat {
         min(max(progress - 0.35, 0) / 0.65, 1)
     }
 
+    /// Кнопка-label угасает в первые 35% морфа.
     private var labelOpacity: CGFloat {
         min(max(progress / 0.35, 0), 1)
     }
