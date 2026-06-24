@@ -21,8 +21,8 @@ struct ContentView: View {
     /// Размер экрана (для размера контента панели).
     @State private var screenSize: CGSize = .zero
 
-    // Пружина для морфа: быстро раздувается, лёгкий отскок.
-    private let morphAnimation: Animation = .spring(response: 0.5, dampingFraction: 0.8)
+    // Bouncy: симметрично по времени (открытие = закрытие наоборот) + лёгкий inflate.
+    private let morphAnimation: Animation = .bouncy(duration: 0.6, extraBounce: 0.1)
 
     var body: some View {
         let panelW = max(screenSize.width - 32, 0)
@@ -37,41 +37,15 @@ struct ContentView: View {
             GlassBackdrop(glowOn: glowOn)
 
             // Верхний тулбар (капсула + три точки). Угасает по мере раскрытия панели.
-            GlassEffectContainer(spacing: 16) {
-                TopToolbar(
-                    namespace: glassNS,
-                    onCenter: {},
-                    onRight: {}
-                )
-                .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
-                .padding(.top, 8)
-            }
-            .opacity(1 - min(morphProgress / 0.25, 1))
-
-            // Шестерёнка → панель. Один стеклянный элемент, который вырастает
-            // из кнопки 60×60 в панель (panelW × panelH), якорь — верхний левый угол.
-            ExpandableGlassMenu(
-                alignment: .topLeading,
-                progress: morphProgress,
-                labelSize: .init(width: 60, height: 60),
-                cornerRadius: 30
-            ) {
-                PanelContent(onClose: close)
-                    .frame(width: panelW, height: panelH, alignment: .topLeading)
-                    .allowsHitTesting(morphProgress > 0.5)   // тапы по контенту только когда открыто
-            } label: {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 22, weight: .medium))
-                    .foregroundStyle(.white)
-                    .frame(width: 60, height: 60)
-                    .contentShape(Circle())
-                    .onTapGesture { open() }
-                    .allowsHitTesting(morphProgress == 0) // тап по шестерёнке только когда закрыто
-            }
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
-            .padding(.leading, 16)
+            TopToolbar(
+                namespace: glassNS,
+                onCenter: {},
+                onRight: {}
+            )
+            .padding(.horizontal, 16)
             .padding(.top, 8)
-            .zIndex(1)
+            .frame(maxWidth: .infinity, alignment: .top)
+            .opacity(1 - min(morphProgress / 0.25, 1))
 
             // Кнопка по центру: включает/выключает подсветку (свечение Path).
             GlassButton(
@@ -95,6 +69,34 @@ struct ContentView: View {
             BottomToolbar()
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 8)
+
+            // Шестерёнка → панель. Закреплена в верхнем левом углу через clear-филлер,
+            // чтобы ExpandableGlassMenu сохранял свой размер (а не растягивал стекло
+            // на весь экран). Растёт из угла кнопки 60×60 в панель panelW × panelH.
+            ZStack(alignment: .topLeading) {
+                Color.clear
+                ExpandableGlassMenu(
+                    alignment: .topLeading,
+                    progress: morphProgress,
+                    labelSize: .init(width: 60, height: 60),
+                    cornerRadius: 50
+                ) {
+                    PanelContent(onClose: close)
+                        .frame(width: panelW, height: panelH, alignment: .topLeading)
+                        .allowsHitTesting(morphProgress > 0.5)
+                } label: {
+                    Image(systemName: "gearshape")
+                        .font(.system(size: 22, weight: .medium))
+                        .foregroundStyle(.white)
+                        .frame(width: 60, height: 60)
+                        .contentShape(Circle())
+                        .onTapGesture { open() }
+                        .allowsHitTesting(morphProgress == 0)
+                }
+                .padding(.leading, 16)
+                .padding(.top, 8)
+            }
+            .zIndex(1)
         }
         .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { screenSize = $0 })
     }

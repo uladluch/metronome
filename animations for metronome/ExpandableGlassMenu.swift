@@ -38,9 +38,11 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
             let widthDiff = contentSize.width - labelSize.width
             let heightDiff = contentSize.height - labelSize.height
 
-            // Текущая «добавка» размера — растёт вместе с проявлением контента.
-            let rWidth = widthDiff * contentOpacity
-            let rHeight = heightDiff * contentOpacity
+            // Размер тянется за ПОЛНЫМ progress (0→1), а не за contentOpacity.
+            // Иначе рост идёт в конце морфа, а сжатие — в начале → асимметрия.
+            // Линейная привязка к progress делает открытие и закрытие зеркальными.
+            let rWidth = widthDiff * progress
+            let rHeight = heightDiff * progress
 
             content
                 .compositingGroup()
