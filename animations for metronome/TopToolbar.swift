@@ -30,8 +30,7 @@ struct TopToolbar: View {
         HStack(spacing: 0) {
             // Шестерёнка — единственная кнопка с морф-расширением.
             // Пока её панель открыта, на её месте прозрачный placeholder
-            // (стекло уже «перетекло» в панель). При открытии других панелей
-            // она прячется по opacity, оставаясь на месте.
+            // (стекло уже «перетекло» в панель).
             if openPanel == .left {
                 placeholder(width: 60)
             } else {
@@ -46,26 +45,31 @@ struct TopToolbar: View {
 
             Spacer(minLength: 0)
 
-            // Центр — без морфинга (glassID = nil). Прячется по месту.
+            // Центр — декоративный, без морфинга и без взаимодействия.
             GlassCapsuleButton(
                 glassID: nil,
                 namespace: namespace,
-                action: onCenter
+                action: {}
             )
+            .allowsHitTesting(false)
             .opacity(openPanel == nil ? 1 : 0)
 
             Spacer(minLength: 0)
 
-            // Право — без морфинга. Прячется по месту.
+            // Право — декоративное, без морфинга и без взаимодействия.
             GlassIconButton(
                 systemName: rightIcon,
                 glassID: nil,
                 namespace: namespace,
-                action: onRight
+                action: {}
             )
+            .allowsHitTesting(false)
             .opacity(openPanel == nil ? 1 : 0)
         }
         .frame(height: 60)
+        .padding(.horizontal, 16)
+        // Анимация opacity — чтобы кнопки плавно исчезали/появлялись.
+        .animation(.easeInOut(duration: 0.2), value: openPanel)
     }
 
     /// Прозрачная «дырка» размером с кнопку — держит раскладку, пока

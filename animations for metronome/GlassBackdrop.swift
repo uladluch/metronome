@@ -18,9 +18,8 @@ struct GlassBackdrop: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 440)
+                .opacity(0.5)
                 // Верхняя кромка картинки совпадает с верхней кромкой капсулы.
-                // Тулбар отступает 8pt от верха safe area, картинка прижата к
-                // верху safe area → сдвигаем вниз ровно на этот отступ.
                 .offset(y: 8)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)

@@ -36,7 +36,6 @@ struct ContentView: View {
                         onCenter: { open(.center) },
                         onRight: { open(.right) }
                     )
-                    .padding(.horizontal, 16)
                     .padding(.top, 8)
 
                     // Закрытие по тапу мимо окна (нижняя часть экрана).
