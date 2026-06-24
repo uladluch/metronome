@@ -51,14 +51,17 @@ struct GlassPanel: View {
 
     var body: some View {
         VStack(spacing: 24) {
-            HStack(spacing: 12) {
-                Image(systemName: position.icon)
-                    .font(.system(size: 26, weight: .semibold))
-                    .foregroundStyle(.white)
+            // Только крестик справа (title и icon только для center/right).
+            HStack {
+                if position != .left {
+                    Image(systemName: position.icon)
+                        .font(.system(size: 26, weight: .semibold))
+                        .foregroundStyle(.white)
 
-                Text(position.title)
-                    .font(.title2.bold())
-                    .foregroundStyle(.white)
+                    Text(position.title)
+                        .font(.title2.bold())
+                        .foregroundStyle(.white)
+                }
 
                 Spacer()
 
