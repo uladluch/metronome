@@ -75,9 +75,9 @@ struct ContentView: View {
                 action: {
                     withAnimation(.easeInOut(duration: 0.35)) {
                         glowOn.toggle()
-                        print("[ContentView] GlowOn toggled: \(glowOn)")
                     }
-                }
+                },
+                showDome: false
             ) {
                 Text(glowOn ? "Turn off glow" : "Turn on glow")
                     .font(.headline)

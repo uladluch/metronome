@@ -16,6 +16,7 @@ struct GlassButton<Label: View>: View {
     private let namespace: Namespace.ID
     private let action: () -> Void
     private let label: Label
+    private let showDome: Bool
 
     @State private var isPressed = false
 
@@ -24,12 +25,14 @@ struct GlassButton<Label: View>: View {
         glassID: String? = nil,
         namespace: Namespace.ID,
         action: @escaping () -> Void,
+        showDome: Bool = true,
         @ViewBuilder label: () -> Label
     ) {
         self.shape = AnyShape(shape)
         self.glassID = glassID
         self.namespace = namespace
         self.action = action
+        self.showDome = showDome
         self.label = label()
     }
 
@@ -39,22 +42,24 @@ struct GlassButton<Label: View>: View {
 
     var body: some View {
         ZStack(alignment: .topLeading) {
-            // Полусфера (блик) в верхнем левом углу. Даёт эффект мягкого светящегося края.
-            Circle()
-                .fill(
-                    RadialGradient(
-                        colors: [
-                            .white.opacity(domeOpacity),
-                            .white.opacity(0)
-                        ],
-                        center: .center,
-                        startRadius: 0,
-                        endRadius: 26
+            // Полусфера (блик) в верхнем левом углу. Только на круглых кнопках (showDome = true).
+            if showDome {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [
+                                .white.opacity(domeOpacity),
+                                .white.opacity(0)
+                            ],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: 26
+                        )
                     )
-                )
-                .frame(width: 52, height: 52)
-                .offset(x: -6, y: -6)
-                .animation(.easeOut(duration: 0.22), value: isPressed)
+                    .frame(width: 52, height: 52)
+                    .offset(x: -6, y: -6)
+                    .animation(.easeOut(duration: 0.22), value: isPressed)
+            }
 
             // Стекло поверх полусферы.
             label
@@ -85,12 +90,10 @@ struct GlassButton<Label: View>: View {
                 .onChanged { _ in
                     if !isPressed {
                         withAnimation(.easeOut(duration: 0.12)) { isPressed = true }
-                        print("[GlassButton] Press: isPressed=true")
                     }
                 }
                 .onEnded { _ in
                     withAnimation(.easeOut(duration: 0.3)) { isPressed = false }
-                    print("[GlassButton] Release: isPressed=false")
                 }
         )
         .accessibilityAddTraits(.isButton)
