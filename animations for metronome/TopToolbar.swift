@@ -101,24 +101,6 @@ private struct GlassIconButton: View {
             .foregroundStyle(.white)
             .frame(width: 60, height: 60)
             .appGlass(in: .circle, interactive: true)
-            // Inner shadow (Figma): белый, мягкий, ТОЛЬКО сверху.
-            // Маска — вертикальный градиент: вверху видно, к центру сходит на нет,
-            // снизу тени нет.
-            .overlay {
-                Circle()
-                    .stroke(Color.white.opacity(0.4), lineWidth: 8)
-                    .blur(radius: 12)
-                    .offset(y: 4)
-                    .mask(
-                        Circle().fill(
-                            LinearGradient(
-                                colors: [.white, .clear],
-                                startPoint: .top,
-                                endPoint: .center
-                            )
-                        )
-                    )
-            }
             // Свечение по нажатию — поверх нативного, чтобы было заметно.
             .overlay {
                 Circle()
