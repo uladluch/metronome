@@ -27,9 +27,11 @@ struct GlassBackdrop: View {
                 // Верхняя кромка картинки начинается под капсулой.
                 // Тулбар: padding.top 8, капсула height 60 → нижняя точка на ~68pt.
                 .offset(y: 75)
+                .onAppear { print("[GlassBackdrop] Path rendered, opacity: \(glowOn ? 1 : 0.5)") }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea()
         .allowsHitTesting(false)
+        .onAppear { print("[GlassBackdrop] Body rendered, glowOn: \(glowOn)") }
     }
 }
