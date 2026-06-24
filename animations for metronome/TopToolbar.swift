@@ -65,7 +65,8 @@ struct TopToolbar: View {
             .allowsHitTesting(false)
             .opacity(openPanel == nil ? 1 : 0)
         }
-        .frame(height: 60)
+        .frame(maxWidth: .infinity, maxHeight: 60, alignment: .center)
+        .padding(.horizontal, 16)
         // Анимация opacity — чтобы кнопки плавно исчезали/появлялись.
         .animation(.easeInOut(duration: 0.2), value: openPanel)
     }
