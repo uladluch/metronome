@@ -82,11 +82,12 @@ struct TopToolbar: View {
 // MARK: - Кнопка-иконка 60×60
 
 /// Стеклянная кнопка 60×60 с белой SF-иконкой по центру.
+/// Используется и в верхнем, и в нижнем тулбаре.
 ///
 /// Без обёртки `Button`: касание получает само `.interactive()`-стекло —
 /// иначе кнопка перехватывала бы тап, и не было бы ни нативного свечения
 /// на нажатии, ни корректного зацепления морфинга через glassEffectID.
-private struct GlassIconButton: View {
+struct GlassIconButton: View {
 
     let systemName: String
     let glassID: String?

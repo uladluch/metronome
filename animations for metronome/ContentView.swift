@@ -68,6 +68,11 @@ struct ContentView: View {
                     }
                 }
             }
+
+            // Нижний тулбар — прижат к низу.
+            BottomToolbar()
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, 8)
         }
     }
 
