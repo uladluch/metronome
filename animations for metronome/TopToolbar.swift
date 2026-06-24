@@ -5,11 +5,11 @@
 //  Верхний тулбар: левая и правая стеклянные кнопки 60×60
 //  и центральная стеклянная капсула 180×60.
 //
-//  Каждый стеклянный элемент несёт glassEffectID — это «якорь» для морфинга
-//  в соответствующую панель. Когда открыта любая панель, все кнопки скрываются:
-//  активная «перетекает» в панель с тем же id, а остальные не должны проступать
-//  сквозь стекло панели (внутри GlassEffectContainer стекло рисуется единым
-//  проходом, и zIndex не перекрывает одно стекло другим).
+//  Морф-расширение в панель есть только у шестерёнки (левая кнопка) — у неё
+//  glassEffectID, и её стекло «перетекает» в левую панель. Когда открыта любая
+//  панель, остальные кнопки просто прячутся ПО МЕСТУ (opacity), не двигаясь:
+//  слоты в HStack фиксированы (у шестерёнки — прозрачный placeholder, пока она
+//  морфит), поэтому раскладка не «разъезжается».
 //
 
 import SwiftUI
@@ -28,38 +28,50 @@ struct TopToolbar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // Кнопки видны, только пока все панели закрыты. Как только панель
-            // открыта — все три кнопки скрываются: активная морфит в панель,
-            // остальные не должны проступать сквозь стекло панели
-            // (внутри GlassEffectContainer стекло рисуется единым проходом,
-            //  и zIndex не перекрывает одно стекло другим).
-            if openPanel == nil {
+            // Шестерёнка — единственная кнопка с морф-расширением.
+            // Пока её панель открыта, на её месте прозрачный placeholder
+            // (стекло уже «перетекло» в панель). При открытии других панелей
+            // она прячется по opacity, оставаясь на месте.
+            if openPanel == .left {
+                placeholder(width: 60)
+            } else {
                 GlassIconButton(
                     systemName: leftIcon,
                     glassID: PanelPosition.left.glassID,
                     namespace: namespace,
                     action: onLeft
                 )
-
-                Spacer(minLength: 0)
-
-                GlassCapsuleButton(
-                    glassID: PanelPosition.center.glassID,
-                    namespace: namespace,
-                    action: onCenter
-                )
-
-                Spacer(minLength: 0)
-
-                GlassIconButton(
-                    systemName: rightIcon,
-                    glassID: PanelPosition.right.glassID,
-                    namespace: namespace,
-                    action: onRight
-                )
+                .opacity(openPanel == nil ? 1 : 0)
             }
+
+            Spacer(minLength: 0)
+
+            // Центр — без морфинга (glassID = nil). Прячется по месту.
+            GlassCapsuleButton(
+                glassID: nil,
+                namespace: namespace,
+                action: onCenter
+            )
+            .opacity(openPanel == nil ? 1 : 0)
+
+            Spacer(minLength: 0)
+
+            // Право — без морфинга. Прячется по месту.
+            GlassIconButton(
+                systemName: rightIcon,
+                glassID: nil,
+                namespace: namespace,
+                action: onRight
+            )
+            .opacity(openPanel == nil ? 1 : 0)
         }
         .frame(height: 60)
+    }
+
+    /// Прозрачная «дырка» размером с кнопку — держит раскладку, пока
+    /// шестерёнка морфит в панель.
+    private func placeholder(width: CGFloat) -> some View {
+        Color.clear.frame(width: width, height: 60)
     }
 }
 
@@ -73,7 +85,8 @@ struct TopToolbar: View {
 private struct GlassIconButton: View {
 
     let systemName: String
-    let glassID: String
+    /// nil — кнопка без морфинга (просто стекло, не «перетекает» в панель).
+    let glassID: String?
     let namespace: Namespace.ID
     let action: () -> Void
 
@@ -95,7 +108,8 @@ private struct GlassIconButton: View {
 /// Стеклянная капсула-кнопка 180×60.
 private struct GlassCapsuleButton: View {
 
-    let glassID: String
+    /// nil — капсула без морфинга.
+    let glassID: String?
     let namespace: Namespace.ID
     let action: () -> Void
 
