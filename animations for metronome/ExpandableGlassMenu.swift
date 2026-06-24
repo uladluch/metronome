@@ -54,10 +54,10 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
                     let _ = print("[Menu] contentSize measured: \($0)")
                 })
                 .frame(width: labelSize.width + rWidth, height: labelSize.height + rHeight, alignment: .topLeading)
+                .background(Color.red.opacity(0.1))  // DEBUG: красный фон
+                .opacity(contentOpacity)
                 .scaleEffect(contentScale, anchor: scaleAnchor)
                 .blur(radius: 14 * blurProgress)
-                .opacity(contentOpacity)
-                .background(Color.red.opacity(0.1))  // DEBUG: красный фон чтобы видеть размер
 
             // Кнопка-источник (шестерёнка) сверху — видна в начале, угасает по мере открытия.
             // Dome-эффект (белый блик в верхнем левом углу) — как на других стеклянных кнопках.
