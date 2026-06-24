@@ -34,41 +34,38 @@ struct GlassButton<Label: View>: View {
     }
 
     var body: some View {
-        ZStack {
-            // «Полусфера» ПОД стеклом — фиксированный блик, жёстко привязанный к
-            // верхнему левому углу и обрезанный по форме. Так он одинаково лежит
-            // на любой форме (круг/капсула/прямоугольник) и не «уезжает».
-            shape
-                .fill(.clear)
-                .overlay(alignment: .topLeading) {
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [
-                                    .white.opacity(isPressed ? 0.24 : 0.12),
-                                    .white.opacity(0)
-                                ],
-                                center: .center,
-                                startRadius: 0,
-                                endRadius: 26
-                            )
-                        )
-                        .frame(width: 52, height: 52)
-                        .offset(x: -6, y: -6)
-                        .animation(.easeOut(duration: 0.22), value: isPressed)
-                        .onAppear {
-                            print("[GlassButton] \(String(describing: shape)): sphere positioned at topLeading, offset(-6,-6)")
-                        }
-                }
-                .clipShape(shape)
+        ZStack(alignment: .topLeading) {
+            // «Полусфера» ПОД стеклом — фиксированный блик в верхнем левом углу.
+            // Жёстко привязан к toplLeading контейнера, потом весь ZStack обрезается
+            // по форме. Так сфера одинаково лежит на любой форме.
+            Circle()
+                .fill(
+                    RadialGradient(
+                        colors: [
+                            .white.opacity(isPressed ? 0.24 : 0.12),
+                            .white.opacity(0)
+                        ],
+                        center: .center,
+                        startRadius: 0,
+                        endRadius: 26
+                    )
+                )
+                .frame(width: 52, height: 52)
+                .offset(x: -6, y: -6)
+                .animation(.easeOut(duration: 0.22), value: isPressed)
                 .onAppear {
-                    print("[GlassButton] ClipShape: \(String(describing: shape))")
+                    print("[GlassButton] \(String(describing: shape)): sphere positioned at topLeading, offset(-6,-6)")
                 }
 
             // Стекло поверх полусферы.
             label
                 .appGlass(in: shape, interactive: true)
                 .glassMorphID(glassID, in: namespace)
+        }
+        // Весь ZStack обрезается по форме кнопки.
+        .clipShape(shape)
+        .onAppear {
+            print("[GlassButton] ClipShape: \(String(describing: shape))")
         }
         // Лёгкая имитация inner shadow — белый блик по верхней кромке.
         .overlay {
