@@ -64,20 +64,13 @@ private struct SheetView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Фон со стеклом — вместо плоского secondarySystemBackground.
+                // Родной системный фон
                 Color(.secondarySystemBackground)
                     .ignoresSafeArea()
-                    .overlay {
-                        // Glass layer поверх фона
-                        Rectangle()
-                            .fill(.clear)
-                            .glassEffect(.regular.interactive())
-                            .ignoresSafeArea()
-                    }
 
                 VStack {
                     Toggle("Toggle", isOn: $isOn)
-                        .tint(.controlAccent)   // не зелёный, а #EDEDED
+                        .tint(.controlAccent)
                         .padding()
                     Spacer()
                 }
