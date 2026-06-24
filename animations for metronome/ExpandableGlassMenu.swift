@@ -43,8 +43,6 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
         let rWidth = widthDiff * progress
         let rHeight = heightDiff * progress
 
-        let _ = print("[ExpandableGlassMenu] progress: \(progress), contentOpacity: \(contentOpacity), contentScale: \(contentScale), contentSize: \(contentSize)")
-
         return ZStack(alignment: alignment) {
             // Контент (стекло даёт внешний GlassEffectContainer).
             content
@@ -87,13 +85,15 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
     // MARK: - Производные от progress
 
     /// Контент проявляется в последние 65% морфа.
+    /// Зажимаем в [0, 1] чтобы spring bounce не портил opacity.
     private var contentOpacity: CGFloat {
-        max(progress - 0.35, 0) / 0.65
+        min(max(progress - 0.35, 0) / 0.65, 1)
     }
 
     /// Кнопка-label угасает в первые 35% морфа.
+    /// Зажимаем в [0, 1] чтобы spring bounce не портил opacity.
     private var labelOpacity: CGFloat {
-        min(progress / 0.35, 1)
+        min(max(progress / 0.35, 0), 1)
     }
 
     /// Blur максимален на середине (0.5), на концах = 0.
