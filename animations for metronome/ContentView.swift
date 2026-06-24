@@ -21,8 +21,8 @@ struct ContentView: View {
     /// Размер экрана (для размера контента панели).
     @State private var screenSize: CGSize = .zero
 
-    // Bouncy: симметрично по времени (открытие = закрытие наоборот) + лёгкий inflate.
-    private let morphAnimation: Animation = .bouncy(duration: 0.6, extraBounce: 0.1)
+    // Spring морфинга: правильный выбор для liquid glass morphing.
+    private let morphAnimation: Animation = .spring(response: 0.6, dampingFraction: 0.8)
 
     var body: some View {
         let panelW = max(screenSize.width - 32, 0)
