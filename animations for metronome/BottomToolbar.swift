@@ -48,7 +48,8 @@ struct BottomToolbar: View {
         }
         .sheet(isPresented: $showSheet) {
             SheetView()
-                .presentationDetents([.medium, .large])  // half-screen + large (не фулскрин)
+                .presentationDetents([.medium, .large])
+                .presentationDefaultDetent(.large)       // по умолчанию открывается на .large
                 .presentationDragIndicator(.visible)     // grabber сверху
         }
     }
