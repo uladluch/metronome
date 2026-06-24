@@ -43,15 +43,17 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
         let rWidth = widthDiff * progress
         let rHeight = heightDiff * progress
 
+        let _ = print("[ExpandableGlassMenu] progress: \(progress), contentOpacity: \(contentOpacity), contentScale: \(contentScale), contentSize: \(contentSize)")
+
         return ZStack(alignment: alignment) {
             // Контент (стекло даёт внешний GlassEffectContainer).
             content
+                .fixedSize()
+                .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { contentSize = $0 })
+                .frame(width: labelSize.width + rWidth, height: labelSize.height + rHeight, alignment: .topLeading)
                 .scaleEffect(contentScale, anchor: scaleAnchor)
                 .blur(radius: 14 * blurProgress)
                 .opacity(contentOpacity)
-                .fixedSize()
-                .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { contentSize = $0 })
-                .frame(width: labelSize.width + rWidth, height: labelSize.height + rHeight)
 
             // Кнопка-источник (шестерёнка) сверху — видна в начале, угасает по мере открытия.
             // Dome-эффект (белый блик в верхнем левом углу) — как на других стеклянных кнопках.
