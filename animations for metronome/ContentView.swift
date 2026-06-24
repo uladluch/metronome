@@ -91,8 +91,8 @@ struct ContentView: View {
         }
     }
 
-    // Bouncy анимация для Liquid Glass морфинга — дольше, чтобы окно плавнее влетало в кнопку.
-    private let morphAnimation: Animation = .bouncy(duration: 1.0, extraBounce: 0.02)
+    // EaseInOut для плавного морфинга shapes — форма меняется медленнее.
+    private let morphAnimation: Animation = .easeInOut(duration: 1.0)
 
     private func open(_ panel: PanelPosition) {
         print("[ContentView] Opening panel: \(panel)")
