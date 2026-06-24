@@ -103,12 +103,15 @@ struct ContentView: View {
     private let morphAnimation: Animation = .spring(response: 0.4, dampingFraction: 0.74)
 
     private func open(_ panel: PanelPosition) {
+        print("[ContentView] Opening panel: \(panel)")
         withAnimation(morphAnimation) {
             openPanel = panel
+            print("[ContentView] openPanel set to: \(String(describing: openPanel))")
         }
     }
 
     private func close() {
+        print("[ContentView] Closing panel")
         withAnimation(morphAnimation) {
             openPanel = nil
         }

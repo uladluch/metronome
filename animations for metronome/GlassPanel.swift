@@ -50,7 +50,8 @@ struct GlassPanel: View {
     let onClose: () -> Void
 
     var body: some View {
-        VStack(spacing: 24) {
+        let _ = print("[GlassPanel] Rendering \(position) panel")
+        return VStack(spacing: 24) {
             // Только крестик справа (title и icon только для center/right).
             HStack {
                 if position != .left {
@@ -82,7 +83,8 @@ struct GlassPanel: View {
             axis == .vertical ? length / 2 : length - 32
         }
         // Стекло: .regular (плотное матовое, а не .clear — для панелей более уместно).
-        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 40))
-        .glassEffectID(position.glassID, in: namespace)
+            .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 40))
+            .glassEffectID(position.glassID, in: namespace)
+        }
     }
 }
