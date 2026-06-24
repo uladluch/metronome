@@ -57,24 +57,21 @@ private struct SheetView: View {
     @Environment(\.dismiss) private var dismiss
 
     var body: some View {
-        ZStack {
-            Color.appBackground
-                .ignoresSafeArea()
-
-            VStack(spacing: 24) {
-                Text("Sheet")
-                    .font(.largeTitle.bold())
-                    .foregroundStyle(.white)
-
-                Button(action: { dismiss() }) {
-                    Text("Close")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                        .padding(.horizontal, 28)
-                        .frame(height: 50)
-                        .appGlass(in: .capsule, interactive: true)
+        NavigationStack {
+            ZStack {
+                // Вторичный системный фон.
+                Color(.secondarySystemBackground)
+                    .ignoresSafeArea()
+            }
+            .navigationTitle("Sheet")
+            .navigationBarTitleDisplayMode(.large)
+            .toolbar {
+                // Крестик в тулбаре — в iOS 26 кнопка тулбара уже Liquid Glass.
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: { dismiss() }) {
+                        Image(systemName: "xmark")
+                    }
                 }
-                .buttonStyle(.plain)
             }
         }
     }
