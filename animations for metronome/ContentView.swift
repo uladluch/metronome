@@ -9,71 +9,76 @@ import SwiftUI
 
 struct ContentView: View {
 
-    /// Общий namespace для морфинга Liquid Glass между кнопками и панелями.
+    /// Namespace для GlassButton-обёрток (капсула/кнопки) — морфинга у них нет.
     @Namespace private var glassNS
 
-    /// Какая панель сейчас открывается (nil — закрыты все).
-    @State private var activePanel: PanelPosition?
-
-    /// Прогресс морфинга: 0 = кнопка, 1 = полная панель.
-    /// Stage 1 (0→0.5): кнопка растягивается в овал (scaleY, cornerRadius).
-    /// Stage 2 (0.5→1): овал раскрывается в полную панель.
+    /// Прогресс раскрытия шестерёнки в панель: 0 = кнопка, 1 = панель.
     @State private var morphProgress: CGFloat = 0
 
     /// Подсветка (свечение Path) вкл/выкл. По умолчанию выключена.
     @State private var glowOn = false
 
+    /// Размер экрана (для размера контента панели).
+    @State private var screenSize: CGSize = .zero
+
+    // Пружина для морфа: быстро раздувается, лёгкий отскок.
+    private let morphAnimation: Animation = .spring(response: 0.5, dampingFraction: 0.8)
+
     var body: some View {
+        let panelW = max(screenSize.width - 32, 0)
+        let panelH = max(screenSize.height * 0.5, 0)
+
         ZStack(alignment: .top) {
             // Тёмная тема: основной фон полностью чёрный.
             Color.appBackground
                 .ignoresSafeArea()
 
-            // Цветной свет под стеклом — размещена ДО контейнера, чтобы капсула
-            // преломляла её через стекло (Liquid Glass lensing effect).
+            // Цветной свет под стеклом (lensing).
             GlassBackdrop(glowOn: glowOn)
 
-            // Один контейнер на тулбар + панели — обязательное условие морфинга:
-            // стекло может «перетекать» только внутри одного GlassEffectContainer.
+            // Верхний тулбар (капсула + три точки). Угасает по мере раскрытия панели.
             GlassEffectContainer(spacing: 16) {
-                ZStack(alignment: .top) {
-                    TopToolbar(
-                        namespace: glassNS,
-                        activePanel: activePanel,
-                        morphProgress: morphProgress,
-                        onLeft: { open(.left) },
-                        onCenter: { open(.center) },
-                        onRight: { open(.right) }
-                    )
-                    // Конкретная ширина = экран − 32 (по 16pt с боков), центр.
-                    // containerRelativeFrame берёт ширину от экрана, мимо
-                    // «неограниченного» предложения GlassEffectContainer — тот же
-                    // приём, что уже корректно сайзит панели.
-                    .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
-                    .padding(.top, 8)
-
-                    // Окна. Отображаются на основе morphProgress.
-                    // Stage 2 (progress > 0.5) — панель становится видима и раскрывается.
-                    if let panel = activePanel {
-                        GlassPanel(
-                            position: panel,
-                            namespace: glassNS,
-                            morphProgress: morphProgress,
-                            onClose: close
-                        )
-                        .zIndex(1)
-                    }
-                }
+                TopToolbar(
+                    namespace: glassNS,
+                    onCenter: {},
+                    onRight: {}
+                )
+                .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
+                .padding(.top, 8)
             }
+            .opacity(1 - min(morphProgress / 0.25, 1))
+
+            // Шестерёнка → панель. Один стеклянный элемент, который вырастает
+            // из кнопки 60×60 в панель (panelW × panelH), якорь — верхний левый угол.
+            ExpandableGlassMenu(
+                alignment: .topLeading,
+                progress: morphProgress,
+                labelSize: .init(width: 60, height: 60),
+                cornerRadius: 30
+            ) {
+                PanelContent(onClose: close)
+                    .frame(width: panelW, height: panelH, alignment: .topLeading)
+                    .allowsHitTesting(morphProgress > 0.5)   // тапы по контенту только когда открыто
+            } label: {
+                Image(systemName: "gearshape")
+                    .font(.system(size: 22, weight: .medium))
+                    .foregroundStyle(.white)
+                    .frame(width: 60, height: 60)
+                    .contentShape(Circle())
+                    .onTapGesture { open() }
+                    .allowsHitTesting(morphProgress == 0) // тап по шестерёнке только когда закрыто
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+            .padding(.leading, 16)
+            .padding(.top, 8)
+            .zIndex(1)
 
             // Кнопка по центру: включает/выключает подсветку (свечение Path).
             GlassButton(
                 shape: Capsule(),
                 namespace: glassNS,
                 action: {
-                    withAnimation(.easeInOut(duration: 0.35)) {
-                        glowOn.toggle()
-                    }
+                    withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
                 },
                 showDome: false
             ) {
@@ -84,35 +89,22 @@ struct ContentView: View {
                     .frame(height: 50)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            .offset(y: 80)  // Опустить пониже
+            .offset(y: 80)
 
             // Нижний тулбар — прижат к низу.
             BottomToolbar()
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 8)
         }
+        .onGeometryChange(for: CGSize.self, of: { $0.size }, action: { screenSize = $0 })
     }
 
-    // Spring с лёгким bounce для морфинга.
-    private let morphAnimation: Animation = .spring(response: 0.55, dampingFraction: 0.78)
-
-    private func open(_ panel: PanelPosition) {
-        print("[ContentView] Opening panel: \(panel)")
-        activePanel = panel
-        withAnimation(morphAnimation) {
-            morphProgress = 1
-        }
+    private func open() {
+        withAnimation(morphAnimation) { morphProgress = 1 }
     }
 
     private func close() {
-        print("[ContentView] Closing panel")
-        withAnimation(morphAnimation) {
-            morphProgress = 0
-        }
-        // После завершения анимации очистим activePanel
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.6) {
-            activePanel = nil
-        }
+        withAnimation(morphAnimation) { morphProgress = 0 }
     }
 }
 

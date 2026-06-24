@@ -2,101 +2,52 @@
 //  GlassPanel.swift
 //  animations for metronome
 //
-//  Полноэкранное окно из Liquid Glass, в которое морфит кнопка тулбара.
-//  Окно несёт тот же glassEffectID, что и его кнопка, и живёт в том же
-//  GlassEffectContainer — поэтому стекло «вытягивается» из кнопки на весь
-//  контейнер и обратно. Origin морфинга определяется кадром кнопки-источника:
-//  слева тянется слева, справа — справа, центр — из центра.
+//  Внутренний контент панели, который раскрывается из шестерёнки через
+//  ExpandableGlassMenu. Стекло/форму/морф даёт сам ExpandableGlassMenu —
+//  здесь только содержимое (заголовок, строки, крестик).
 //
 
 import SwiftUI
 
-enum PanelPosition {
-    case left
-    case right
-    case center
+struct PanelContent: View {
 
-    /// Якорь морфинга — общий для кнопки и её окна.
-    var glassID: String {
-        switch self {
-        case .left:   return "panel.left"
-        case .right:  return "panel.right"
-        case .center: return "panel.center"
-        }
-    }
+    var onClose: () -> Void
 
-    var title: String {
-        switch self {
-        case .left:   return "Left Panel"
-        case .right:  return "Right Panel"
-        case .center: return "Center Panel"
-        }
-    }
-
-    /// Иконка-tile панели — совпадает с иконкой её кнопки в тулбаре.
-    var icon: String {
-        switch self {
-        case .left:   return "gearshape"
-        case .right:  return "ellipsis"
-        case .center: return "metronome"
-        }
-    }
-}
-
-struct GlassPanel: View {
-
-    let position: PanelPosition
-    let namespace: Namespace.ID
-    let morphProgress: CGFloat
-    let onClose: () -> Void
+    private let rows = ["Tempo", "Sound", "Vibration"]
 
     var body: some View {
-        let _ = print("[GlassPanel] Rendering \(position) panel, morphProgress: \(morphProgress)")
-
-        // Stage 2 progress: нормализуем 0.5→1 в 0→1.
-        let stage2Progress = max((morphProgress - 0.5) * 2, 0)
-
-        // Opacity панели: 0 при progress < 0.5, потом растёт к 1.
-        let panelOpacity = stage2Progress
-
-        // cornerRadius: начинаем с овала (0) и переходим к 35 на stage 2.
-        let cornerRadius = stage2Progress * 35
-
-        return VStack(spacing: 24) {
-            // Только крестик справа (title и icon только для center/right).
+        VStack(alignment: .leading, spacing: 18) {
             HStack {
-                if position != .left {
-                    Image(systemName: position.icon)
-                        .font(.system(size: 26, weight: .semibold))
-                        .foregroundStyle(.white)
-
-                    Text(position.title)
-                        .font(.title2.bold())
-                        .foregroundStyle(.white)
-                }
+                Text("Settings")
+                    .font(.title.bold())
+                    .foregroundStyle(.white)
 
                 Spacer()
 
-                GlassButton(shape: Circle(), namespace: namespace, action: onClose) {
+                Button(action: onClose) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 18, weight: .semibold))
+                        .font(.system(size: 15, weight: .bold))
                         .foregroundStyle(.white)
-                        .frame(width: 44, height: 44)
+                        .frame(width: 36, height: 36)
+                        .background(Circle().fill(Color.white.opacity(0.18)))
                 }
+                .buttonStyle(.plain)
+            }
+
+            ForEach(rows, id: \.self) { item in
+                HStack {
+                    Text(item)
+                        .foregroundStyle(.white)
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                        .font(.system(size: 14, weight: .semibold))
+                        .foregroundStyle(.white.opacity(0.5))
+                }
+                .padding(.vertical, 10)
             }
 
             Spacer()
         }
-        .padding(24)
-        // Ширина = контейнер минус 16pt по каждому боку, высота — половина экрана,
-        // прижато к верху и отцентрировано по горизонтали.
-        .containerRelativeFrame([.horizontal, .vertical], alignment: .top) { length, axis in
-            axis == .vertical ? length / 2 : length - 32
-        }
-        // Стекло с progress-controlled cornerRadius.
-        .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: max(0, cornerRadius)))
-        .glassEffectID(position.glassID, in: namespace)
-        .opacity(panelOpacity)
-        .animation(.spring(response: 0.55, dampingFraction: 0.78), value: morphProgress)
+        .padding(28)
     }
-
+}
