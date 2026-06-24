@@ -82,8 +82,8 @@ struct GlassPanel: View {
         .containerRelativeFrame([.horizontal, .vertical], alignment: .top) { length, axis in
             axis == .vertical ? length / 2 : length - 32
         }
-        // Стекло: .regular. cornerRadius 45 — достаточно скруглено для плавного морфинга.
-            .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 45))
+        // Стекло: .regular. cornerRadius 35 — баланс между углами и скруглением.
+            .glassEffect(.regular.interactive(), in: RoundedRectangle(cornerRadius: 35))
             .glassEffectID(position.glassID, in: namespace)
         }
     }

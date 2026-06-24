@@ -91,8 +91,8 @@ struct ContentView: View {
         }
     }
 
-    // Bouncy анимация для морфинга.
-    private let morphAnimation: Animation = .bouncy(duration: 0.75, extraBounce: 0.02)
+    // Spring с лёгким bounce для морфинга.
+    private let morphAnimation: Animation = .spring(response: 0.55, dampingFraction: 0.78)
 
     private func open(_ panel: PanelPosition) {
         print("[ContentView] Opening panel: \(panel)")
