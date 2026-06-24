@@ -106,7 +106,7 @@ struct GlassIconButton: View {
                 .fill(
                     RadialGradient(
                         colors: [
-                            .white.opacity(isPressed ? 0.3 : 0.15),
+                            .white.opacity(isPressed ? 0.22 : 0.10),
                             .white.opacity(0)
                         ],
                         center: UnitPoint(x: 0.22, y: 0.22),
