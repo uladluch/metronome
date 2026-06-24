@@ -91,8 +91,8 @@ struct ContentView: View {
         }
     }
 
-    // Spring для Liquid Glass morphing — быстрее и чуть больше bounce.
-    private let morphAnimation: Animation = .spring(response: 0.5, dampingFraction: 0.75)
+    // Bouncy анимация для Liquid Glass морфинга.
+    private let morphAnimation: Animation = .bouncy(duration: 0.75, extraBounce: 0.02)
 
     private func open(_ panel: PanelPosition) {
         print("[ContentView] Opening panel: \(panel)")
