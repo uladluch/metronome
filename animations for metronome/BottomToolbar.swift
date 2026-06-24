@@ -46,10 +46,9 @@ struct BottomToolbar: View {
             // Конкретная ширина = экран − 32 (по 16pt с боков), центр.
             .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
         }
-        .sheet(isPresented: $showSheet) {
+        // Полноэкранное окно (edge-to-edge). Закрытие — крестик в тулбаре SheetView.
+        .fullScreenCover(isPresented: $showSheet) {
             SheetView()
-                .presentationDetents([.medium, .large])  // Half-screen + full-screen
-                .presentationDragIndicator(.visible)    // grabber сверху
         }
     }
 }
