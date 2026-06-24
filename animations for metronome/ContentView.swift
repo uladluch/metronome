@@ -26,7 +26,7 @@ struct ContentView: View {
 
     var body: some View {
         let panelW = max(screenSize.width - 32, 0)
-        let panelH = max(screenSize.height * 0.5, 0)
+        let panelH = max(screenSize.height * 0.45, 0)
 
         ZStack(alignment: .top) {
             // Тёмная тема: основной фон полностью чёрный.
@@ -83,7 +83,6 @@ struct ContentView: View {
                 ) {
                     PanelContent(onClose: close)
                         .frame(width: panelW, height: panelH, alignment: .topLeading)
-                        .allowsHitTesting(morphProgress > 0.5)
                 } label: {
                     Image(systemName: "gearshape")
                         .font(.system(size: 22, weight: .medium))

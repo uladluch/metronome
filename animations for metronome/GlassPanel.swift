@@ -4,27 +4,31 @@
 //
 //  Внутренний контент панели, который раскрывается из шестерёнки через
 //  ExpandableGlassMenu. Стекло/форму/морф даёт сам ExpandableGlassMenu —
-//  здесь только крестик закрытия в верхнем правом углу.
+//  здесь только крестик закрытия (LG кнопка) в верхнем правом углу.
 //
 
 import SwiftUI
 
 struct PanelContent: View {
 
+    @Namespace private var ns
     var onClose: () -> Void
 
     var body: some View {
         VStack {
             HStack {
                 Spacer()
-                Button(action: onClose) {
+                GlassButton(
+                    shape: Circle(),
+                    namespace: ns,
+                    action: onClose,
+                    showDome: true
+                ) {
                     Image(systemName: "xmark")
-                        .font(.system(size: 16, weight: .bold))
+                        .font(.system(size: 16, weight: .semibold))
                         .foregroundStyle(.white)
-                        .frame(width: 40, height: 40)
-                        .background(Circle().fill(Color.white.opacity(0.18)))
+                        .frame(width: 44, height: 44)
                 }
-                .buttonStyle(.plain)
             }
             Spacer()
         }
