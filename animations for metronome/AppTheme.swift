@@ -34,6 +34,18 @@ extension View {
     func appGlass(in shape: some Shape = .capsule, interactive: Bool = false) -> some View {
         glassEffect(interactive ? AppGlass.style.interactive() : AppGlass.style, in: shape)
     }
+
+    /// Навешивает glassEffectID только если id задан.
+    /// nil — стекло рисуется, но без морфинга (и без «уезжания» при удалении).
+    /// Важно: это НЕ то же, что `glassEffectID(nil)` — тот гасит стекло.
+    @ViewBuilder
+    func glassMorphID(_ id: String?, in namespace: Namespace.ID) -> some View {
+        if let id {
+            glassEffectID(id, in: namespace)
+        } else {
+            self
+        }
+    }
 }
 
 // MARK: - Цвета

@@ -71,8 +71,8 @@ struct ContentView: View {
         }
     }
 
-    // Чистая кривая без пружины — нулевой «отскок», баунс незаметен.
-    private let morphAnimation: Animation = .easeInOut(duration: 0.35)
+    // Лёгкая пружина — едва заметный отскок.
+    private let morphAnimation: Animation = .spring(response: 0.4, dampingFraction: 0.74)
 
     private func open(_ panel: PanelPosition) {
         withAnimation(morphAnimation) {

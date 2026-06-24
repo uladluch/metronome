@@ -46,7 +46,7 @@ struct TopToolbar: View {
 
             if openPanel == nil {
                 GlassCapsuleButton(
-                    glassID: PanelPosition.center.glassID,
+                    glassID: nil,                 // без морфинга → не уезжает, просто пропадает
                     namespace: namespace,
                     action: {}
                 )
@@ -60,7 +60,7 @@ struct TopToolbar: View {
             if openPanel == nil {
                 GlassIconButton(
                     systemName: rightIcon,
-                    glassID: PanelPosition.right.glassID,
+                    glassID: nil,                 // без морфинга → не уезжает, просто пропадает
                     namespace: namespace,
                     action: {}
                 )
@@ -89,9 +89,11 @@ struct TopToolbar: View {
 private struct GlassIconButton: View {
 
     let systemName: String
-    let glassID: String
+    let glassID: String?
     let namespace: Namespace.ID
     let action: () -> Void
+
+    @State private var isPressed = false
 
     var body: some View {
         Image(systemName: systemName)
@@ -99,14 +101,38 @@ private struct GlassIconButton: View {
             .foregroundStyle(.white)
             .frame(width: 60, height: 60)
             .appGlass(in: .circle, interactive: true)
-            // Лёгкий inner shadow (как в Figma): #FFF, 15%, y +4, blur 10.
+            // Inner shadow (Figma): белый сверху, мягкий. Ручной (stroke+blur+mask)
+            // рисуется надёжнее, чем .clear.shadow(.inner) на прозрачной заливке.
             .overlay {
                 Circle()
-                    .fill(.clear.shadow(.inner(color: .white.opacity(0.15), radius: 10, x: 0, y: 4)))
+                    .stroke(Color.white.opacity(0.35), lineWidth: 8)
+                    .blur(radius: 12)
+                    .offset(y: 4)
+                    .mask(Circle())
             }
-            .glassEffectID(glassID, in: namespace)
+            // Свечение по нажатию — поверх нативного, чтобы было заметно.
+            .overlay {
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [.white.opacity(0.55), .white.opacity(0)],
+                            center: .center, startRadius: 0, endRadius: 36
+                        )
+                    )
+                    .opacity(isPressed ? 1 : 0)
+            }
+            .glassMorphID(glassID, in: namespace)
             .contentShape(Circle())
             .onTapGesture(perform: action)
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { _ in
+                        if !isPressed { withAnimation(.easeOut(duration: 0.12)) { isPressed = true } }
+                    }
+                    .onEnded { _ in
+                        withAnimation(.easeOut(duration: 0.3)) { isPressed = false }
+                    }
+            )
             .accessibilityAddTraits(.isButton)
     }
 }
@@ -116,7 +142,7 @@ private struct GlassIconButton: View {
 /// Стеклянная капсула-кнопка 180×60.
 private struct GlassCapsuleButton: View {
 
-    let glassID: String
+    let glassID: String?
     let namespace: Namespace.ID
     let action: () -> Void
 
@@ -124,7 +150,7 @@ private struct GlassCapsuleButton: View {
         Color.clear
             .frame(width: 180, height: 60)
             .appGlass(in: .capsule, interactive: true)
-            .glassEffectID(glassID, in: namespace)
+            .glassMorphID(glassID, in: namespace)
             .contentShape(Capsule())
             .onTapGesture(perform: action)
             .accessibilityAddTraits(.isButton)
