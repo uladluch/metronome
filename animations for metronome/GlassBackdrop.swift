@@ -21,11 +21,12 @@ struct GlassBackdrop: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 440)
-                .opacity(glowOn ? 0.5 : 0)
+                // Glow всегда видно: выключено (0.15 — тусклое), включено (0.5 — яркое).
+                .opacity(glowOn ? 0.5 : 0.15)
                 .animation(.easeInOut(duration: 0.35), value: glowOn)
-                .onAppear { print("[GlassBackdrop] Path opacity: \(glowOn ? 0.5 : 0)") }
+                .onAppear { print("[GlassBackdrop] Path opacity: \(glowOn ? 0.5 : 0.15)") }
                 .onChange(of: glowOn) { oldVal, newVal in
-                    print("[GlassBackdrop] GlowOn changed: \(oldVal) -> \(newVal), opacity now: \(newVal ? 0.5 : 0)")
+                    print("[GlassBackdrop] GlowOn changed: \(oldVal) -> \(newVal), opacity now: \(newVal ? 0.5 : 0.15)")
                 }
                 // Верхняя кромка картинки начинается под капсулой.
                 // Тулбар: padding.top 8, капсула height 60 → нижняя точка на ~68pt.
