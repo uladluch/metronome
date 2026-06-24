@@ -65,7 +65,30 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
                height: labelSize.height + rHeight,
                alignment: alignment)
         .clipShape(.rect(cornerRadius: cornerRadius))
-        .glassEffect(.regular, in: .rect(cornerRadius: cornerRadius))
+        // То же стекло, что у остальных кнопок (AppGlass.style = .clear).
+        // interactive только пока кнопка-шестерёнка (progress < 0.5), иначе
+        // «живое» стекло перехватывает тап по крестику в раскрытой панели.
+        .glassEffect(
+            progress < 0.5 ? AppGlass.style.interactive() : AppGlass.style,
+            in: .rect(cornerRadius: cornerRadius)
+        )
+        // Inner shadow — белый блик по верхней кромке, как у GlassButton.
+        .overlay {
+            RoundedRectangle(cornerRadius: cornerRadius)
+                .stroke(Color.white.opacity(0.22), lineWidth: 5)
+                .blur(radius: 7)
+                .offset(y: 3)
+                .mask(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .fill(
+                            LinearGradient(
+                                colors: [.white, .clear],
+                                startPoint: .top,
+                                endPoint: .center
+                            )
+                        )
+                )
+        }
     }
 
     // MARK: - Производные от progress (зажаты в [0,1] чтобы spring bounce не ломал)
