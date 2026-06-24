@@ -99,6 +99,11 @@ private struct GlassIconButton: View {
             .foregroundStyle(.white)
             .frame(width: 60, height: 60)
             .appGlass(in: .circle, interactive: true)
+            // Лёгкий inner shadow (как в Figma): #FFF, 15%, y +4, blur 10.
+            .overlay {
+                Circle()
+                    .fill(.clear.shadow(.inner(color: .white.opacity(0.15), radius: 10, x: 0, y: 4)))
+            }
             .glassEffectID(glassID, in: namespace)
             .contentShape(Circle())
             .onTapGesture(perform: action)
