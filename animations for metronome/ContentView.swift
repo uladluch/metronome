@@ -25,8 +25,10 @@ struct ContentView: View {
     /// слева и справа были одинаковые (16pt по бокам).
     @State private var toolbarWidth: CGFloat = 0
 
-    // Spring морфинга: правильный выбор для liquid glass morphing.
-    private let morphAnimation: Animation = .spring(response: 0.6, dampingFraction: 0.8)
+    // Открытие — сильный bounce (низкий damping = заметный overshoot окна).
+    private let openAnimation: Animation = .spring(response: 0.55, dampingFraction: 0.55)
+    // Закрытие — плавное, без отскока.
+    private let closeAnimation: Animation = .spring(response: 0.55, dampingFraction: 0.85)
 
     var body: some View {
         let panelW = max(toolbarWidth, 0)
@@ -107,11 +109,11 @@ struct ContentView: View {
     }
 
     private func open() {
-        withAnimation(morphAnimation) { morphProgress = 1 }
+        withAnimation(openAnimation) { morphProgress = 1 }
     }
 
     private func close() {
-        withAnimation(morphAnimation) { morphProgress = 0 }
+        withAnimation(closeAnimation) { morphProgress = 0 }
     }
 }
 
