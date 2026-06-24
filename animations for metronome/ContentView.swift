@@ -91,8 +91,8 @@ struct ContentView: View {
         }
     }
 
-    // EaseInOut для плавного морфинга shapes — форма меняется медленнее.
-    private let morphAnimation: Animation = .easeInOut(duration: 1.0)
+    // Bouncy анимация для морфинга.
+    private let morphAnimation: Animation = .bouncy(duration: 0.75, extraBounce: 0.02)
 
     private func open(_ panel: PanelPosition) {
         print("[ContentView] Opening panel: \(panel)")
