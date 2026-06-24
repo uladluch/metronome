@@ -48,8 +48,8 @@ struct BottomToolbar: View {
         }
         .sheet(isPresented: $showSheet) {
             SheetView()
-                .presentationDetents([.large])
-                .presentationDragIndicator(.visible)   // grabber сверху
+                .presentationDetents([.medium, .large])  // Half-screen + full-screen
+                .presentationDragIndicator(.visible)    // grabber сверху
         }
     }
 }
@@ -64,9 +64,16 @@ private struct SheetView: View {
     var body: some View {
         NavigationStack {
             ZStack {
-                // Вторичный системный фон.
+                // Фон со стеклом — вместо плоского secondarySystemBackground.
                 Color(.secondarySystemBackground)
                     .ignoresSafeArea()
+                    .overlay {
+                        // Glass layer поверх фона
+                        Rectangle()
+                            .fill(.clear)
+                            .glassEffect(.regular.interactive())
+                            .ignoresSafeArea()
+                    }
 
                 VStack {
                     Toggle("Toggle", isOn: $isOn)
