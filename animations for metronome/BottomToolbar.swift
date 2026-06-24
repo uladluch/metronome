@@ -48,8 +48,7 @@ struct BottomToolbar: View {
         }
         .sheet(isPresented: $showSheet) {
             SheetView()
-                .presentationDetents([.medium, .large])
-                .presentationDefaultDetent(.large)       // по умолчанию открывается на .large
+                .presentationDetents([.large])           // только .large (не medium)
                 .presentationDragIndicator(.visible)     // grabber сверху
         }
     }
