@@ -2,9 +2,10 @@
 //  BPMSheet.swift
 //  animations for metronome
 //
-//  Шит ввода BPM (правая кнопка нижнего тулбара). Пока — на весь экран (.large),
-//  системный тулбар: крестик слева, чек (белый) справа, тайтл «BPM». Крупное
-//  редактируемое число, автофокус → клавиатура.
+//  Шит ввода BPM (правая кнопка нижнего тулбара). На весь экран (.large),
+//  системный тулбар: крестик слева, чек (белый) справа, тайтл «BPM».
+//  Крупное редактируемое число (дефолт 90), автофокус + хаптик на клавиатуру.
+//  Значение > 360 не вводится: shake + error-хаптик.
 //
 
 import SwiftUI
@@ -13,8 +14,12 @@ struct BPMSheet: View {
 
     @Environment(\.dismiss) private var dismiss
 
-    @State private var bpmText: String = "96"
+    @State private var bpmText: String = "90"
+    @State private var lastValid: String = "90"
+    @State private var shakes: CGFloat = 0
     @FocusState private var focused: Bool
+
+    private let maxBPM = 360
 
     var body: some View {
         NavigationStack {
@@ -28,6 +33,16 @@ struct BPMSheet: View {
                     .focused($focused)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 40)
+                    .modifier(Shake(animatableData: shakes))
+                    .onChange(of: bpmText) { _, newValue in
+                        // Больше 360 — не даём ввести: возвращаем прошлое + ошибка.
+                        if let v = Int(newValue), v > maxBPM {
+                            bpmText = lastValid
+                            triggerError()
+                        } else {
+                            lastValid = newValue
+                        }
+                    }
 
                 Spacer()
             }
@@ -58,10 +73,32 @@ struct BPMSheet: View {
             }
         }
         .presentationDetents([.large])
-        // Дать шиту открыться, затем фокус → клавиатура.
+        // Дать шиту открыться, затем фокус → клавиатура + хаптик на её появление.
         .task {
             try? await Task.sleep(for: .milliseconds(350))
             focused = true
+            UIImpactFeedbackGenerator(style: .soft).impactOccurred()
         }
+    }
+
+    /// Ошибка ввода: «рычащий» error-хаптик + shake поля.
+    private func triggerError() {
+        UINotificationFeedbackGenerator().notificationOccurred(.error)
+        withAnimation(.linear(duration: 0.4)) { shakes += 1 }
+    }
+}
+
+// MARK: - Shake-эффект
+
+private struct Shake: GeometryEffect {
+    var amount: CGFloat = 10
+    var shakesPerUnit: CGFloat = 3
+    var animatableData: CGFloat
+
+    func effectValue(size: CGSize) -> ProjectionTransform {
+        ProjectionTransform(
+            CGAffineTransform(translationX: amount * sin(animatableData * .pi * shakesPerUnit),
+                              y: 0)
+        )
     }
 }
