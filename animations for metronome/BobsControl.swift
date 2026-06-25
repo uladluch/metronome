@@ -50,7 +50,7 @@ struct BobsControl: View {
             ForEach(heightVariants.indices, id: \.self) { i in
                 let height = bobSizeCycles[i][bobSizeModes[i]]
                 bob(height: height, isActive: glowOn && i == activeIndex, isPressed: bobPressed[i])
-                    .scaleEffect(bobBounceScales[i] * (bobPressed[i] ? 0.92 : 1.0))
+                    .scaleEffect(bobBounceScales[i] * (bobPressed[i] ? 1.1 : 1.0))
                     .contentShape(Capsule())
                     .onTapGesture {
                         tapBob(at: i)
@@ -150,7 +150,7 @@ struct BobsControl: View {
                 )
         }
         // Свечение вокруг боба, пульсирует с ударом.
-        .shadow(color: .white.opacity(0.1 + 0.45 * glow), radius: 6 + 14 * glow)
-        .shadow(color: .white.opacity(0.35 * glow), radius: 28 * glow)
+        .shadow(color: .white.opacity(0.1 + 0.45 * glow + (isPressed ? 0.15 : 0)), radius: 6 + 14 * glow)
+        .shadow(color: .white.opacity(0.35 * glow + (isPressed ? 0.2 : 0)), radius: 28 * glow + (isPressed ? 12 : 0))
     }
 }
