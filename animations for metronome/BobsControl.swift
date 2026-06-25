@@ -29,16 +29,20 @@ struct BobsControl: View {
     }
 
     private func bob(height: CGFloat, isActive: Bool) -> some View {
-        // Подложка (белая) чуть меньше стекла — padding 4pt по периметру, чтобы
-        // по краям появлялось искажение от clear-стекла.
-        Capsule()
-            .fill(.white.opacity(isActive ? 1.0 : 0.5))   // активный — без прозрачности
-            .padding(4)
-            .frame(width: bobWidth, height: height)
-            .glassEffect(.clear, in: Capsule())           // стекло clear на полном размере
-            // Свечение вокруг боба (в два раза слабее).
-            .shadow(color: .white.opacity(isActive ? 0.45 : 0.1), radius: isActive ? 16 : 6)
-            .shadow(color: .white.opacity(isActive ? 0.28 : 0), radius: isActive ? 32 : 0)
-            .animation(.easeInOut(duration: 0.25), value: isActive)
+        ZStack {
+            // Белая подложка ПОД стеклом, на 4pt меньше → стекло искажает края.
+            Capsule()
+                .fill(.white.opacity(isActive ? 1.0 : 0.5))   // активный — без прозрачности
+                .padding(4)
+
+            // Стекло clear СВЕРХУ — преломляет подложку позади.
+            Color.clear
+                .glassEffect(.clear, in: Capsule())
+        }
+        .frame(width: bobWidth, height: height)
+        // Свечение вокруг боба (в два раза слабее).
+        .shadow(color: .white.opacity(isActive ? 0.45 : 0.1), radius: isActive ? 16 : 6)
+        .shadow(color: .white.opacity(isActive ? 0.28 : 0), radius: isActive ? 32 : 0)
+        .animation(.easeInOut(duration: 0.25), value: isActive)
     }
 }
