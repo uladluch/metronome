@@ -161,10 +161,11 @@ struct ContentView: View {
             .shadow(color: .black.opacity(0.25), radius: 20, y: 8)  // глубина
             .padding(.top, 8)                       // отступ от верха
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)  // центр X, верх
-            // Плавный fade + лёгкий slide/scale — управляется состоянием.
+            // Эффектный влёт сверху: большой offset (из-за верхнего края) + scale +
+            // fade. Всё через состояние → надёжно работает в обе стороны.
             .opacity(showNotification ? 1 : 0)
-            .scaleEffect(showNotification ? 1 : 0.94, anchor: .top)
-            .offset(y: showNotification ? 0 : -12)
+            .scaleEffect(showNotification ? 1 : 0.9, anchor: .top)
+            .offset(y: showNotification ? 0 : -120)
             .allowsHitTesting(showNotification)     // скрытая не перехватывает тапы
         }
         // Клавиатура из BPM-шита не должна двигать контент под ним (иначе кнопки
