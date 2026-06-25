@@ -41,33 +41,20 @@ struct ContentView: View {
             // Обе — нативный Liquid Glass (.glass и .glassProminent) → одинаковый
             // размер и родное поведение на нажатие.
             VStack(spacing: 12) {
-                // Тёмная стеклянная кнопка (native .glass) со свечением-сферой снизу.
-                Button(action: {
-                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                    withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
-                }) {
+                // Тёмная стеклянная кнопка (кастомный GlassButton — плотнее, «чернее»).
+                GlassButton(
+                    shape: Capsule(),
+                    namespace: glassNS,
+                    action: {
+                        withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
+                    },
+                    showDome: false
+                ) {
                     Text(glowOn ? "Turn off glow" : "Turn on glow")
                         .font(.headline)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
-                }
-                .buttonStyle(.glass)
-                .background {
-                    // Мягкая сфера-свечение под кнопкой (преломляется стеклом).
-                    Circle()
-                        .fill(
-                            RadialGradient(
-                                colors: [.white.opacity(0.5), .white.opacity(0)],
-                                center: .center,
-                                startRadius: 0,
-                                endRadius: 70
-                            )
-                        )
-                        .frame(width: 160, height: 160)
-                        .blur(radius: 24)
-                        .offset(y: 34)
-                        .allowsHitTesting(false)
                 }
 
                 // Белая prominent-кнопка (тот же функционал), чёрный шрифт.
