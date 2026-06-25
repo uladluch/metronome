@@ -24,9 +24,6 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
     /// Измеренный натуральный размер контента.
     @State private var contentSize: CGSize = .zero
 
-    /// Отслеживание нажатия для единообразного press-эффекта.
-    @State private var isPressed = false
-
     var animatableData: CGFloat {
         get { progress }
         set { progress = newValue }
@@ -58,14 +55,11 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
                 .opacity(contentOpacity)
 
             // Кнопка-источник (шестерёнка) + dome-блик, угасает по мере открытия.
-            // Dome меняет opacity на нажатие (как в GlassButton) — для единообразного press-эффекта.
-            let domeOpacity: Double = isPressed ? 0.24 : 0.12
-
             ZStack(alignment: .topLeading) {
                 Circle()
                     .fill(
                         RadialGradient(
-                            colors: [.white.opacity(domeOpacity), .white.opacity(0)],
+                            colors: [.white.opacity(0.12), .white.opacity(0)],
                             center: .center,
                             startRadius: 0,
                             endRadius: 26
@@ -73,7 +67,6 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
                     )
                     .frame(width: 52, height: 52)
                     .offset(x: -6, y: -6)
-                    .animation(.easeOut(duration: 0.22), value: isPressed)
 
                 label
             }
@@ -108,18 +101,6 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
         }
         // Overshoot пружины → масштаб из центра: бонс по всему периметру окна.
         .scaleEffect(bounceScale, anchor: .center)
-        // Press-эффект: DragGesture управляет dome-блик (как в GlassButton).
-        .simultaneousGesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { _ in
-                    if !isPressed {
-                        withAnimation(.easeOut(duration: 0.12)) { isPressed = true }
-                    }
-                }
-                .onEnded { _ in
-                    withAnimation(.easeOut(duration: 0.3)) { isPressed = false }
-                }
-        )
     }
 
     // MARK: - Производные от progress (зажаты в [0,1] чтобы spring bounce не ломал)
