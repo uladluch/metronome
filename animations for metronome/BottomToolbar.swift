@@ -90,6 +90,7 @@ private struct SheetView: View {
     @State private var sliderValue: Double = 0.5
     @State private var selectedSegment = 0
     @State private var showPopover = false
+    @State private var containerWidth: CGFloat = 0
 
     var body: some View {
         NavigationStack {
@@ -144,8 +145,11 @@ private struct SheetView: View {
                         }
                         .popover(isPresented: $showPopover) {
                             Text("Hello")
-                                .font(.headline)
-                                .padding()
+                                .font(.title.bold())
+                                .foregroundStyle(.white)
+                                .frame(width: containerWidth > 0 ? containerWidth : 360,
+                                       height: 280)
+                                .multilineTextAlignment(.center)
                                 // На iPhone (compact) форсируем именно popover, а не sheet.
                                 .presentationCompactAdaptation(.popover)
                         }
@@ -179,5 +183,7 @@ private struct SheetView: View {
                 }
             }
         }
+        // Ширина контейнера для popover на всю ширину.
+        .onGeometryChange(for: CGFloat.self, of: { $0.size.width }, action: { containerWidth = $0 })
     }
 }
