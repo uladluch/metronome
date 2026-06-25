@@ -10,18 +10,6 @@ import SwiftUI
 @main
 struct animations_for_metronomeApp: App {
 
-    init() {
-        // Глобально: прозрачный navigation bar (без материала-блюра), чтобы
-        // стекло под NavigationStack было видно и фон не светлел.
-        let appearance = UINavigationBarAppearance()
-        appearance.configureWithTransparentBackground()
-        appearance.backgroundColor = .clear
-        appearance.shadowColor = .clear
-        UINavigationBar.appearance().standardAppearance = appearance
-        UINavigationBar.appearance().scrollEdgeAppearance = appearance
-        UINavigationBar.appearance().compactAppearance = appearance
-    }
-
     var body: some Scene {
         WindowGroup {
             ContentView()
