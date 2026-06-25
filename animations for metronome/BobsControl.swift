@@ -150,7 +150,7 @@ struct BobsControl: View {
                 )
         }
         // Свечение вокруг боба, пульсирует с ударом.
-        .shadow(color: .white.opacity(0.1 + 0.45 * glow + (isPressed ? 0.15 : 0)), radius: 6 + 14 * glow)
-        .shadow(color: .white.opacity(0.35 * glow + (isPressed ? 0.2 : 0)), radius: 28 * glow + (isPressed ? 12 : 0))
+        .shadow(color: .white.opacity(0.1 + 0.45 * glow + (isPressed ? 0.06 : 0)), radius: 6 + 14 * glow)
+        .shadow(color: .white.opacity(0.35 * glow + (isPressed ? 0.08 : 0)), radius: 28 * glow + (isPressed ? 6 : 0))
     }
 }
