@@ -24,14 +24,7 @@ struct PanelContent: View {
 
                 HStack {
                     Spacer()
-                    Button(action: {
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        onClose()
-                    }) {
-                        Image(systemName: "xmark")
-                    }
-                    .buttonStyle(.glass)           // нативная iOS 26 glass-кнопка
-                    .buttonBorderShape(.circle)    // круглая, как системная в sheet (не капсула)
+                    CloseButton(action: onClose)  // та же кнопка, что в sheet
                 }
             }
             .padding(.horizontal, 16)

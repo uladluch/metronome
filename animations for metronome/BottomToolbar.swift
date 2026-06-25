@@ -111,11 +111,8 @@ private struct SheetView: View {
             .navigationTitle("Sheet")
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                // Крестик в тулбаре — в iOS 26 кнопка тулбара уже Liquid Glass.
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: { dismiss() }) {
-                        Image(systemName: "xmark")
-                    }
+                    CloseButton { dismiss() }  // та же кнопка, что в оверлее
                 }
             }
         }
