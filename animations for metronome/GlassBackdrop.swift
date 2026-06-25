@@ -12,8 +12,9 @@ import SwiftUI
 
 struct GlassBackdrop: View {
 
-    /// Подсветка вкл/выкл — управляет видимостью свечения Path.
-    var glowOn: Bool
+    /// Яркость свечения (0.5 — приглушено, 1 — ярко). Анимацию задаёт вызывающий
+    /// (мигание идёт через withAnimation в ContentView).
+    var level: Double
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -21,9 +22,7 @@ struct GlassBackdrop: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 440)
-                // Glow всегда видно: выключено (0.5 — приглушено), включено (1 — полностью).
-                .opacity(glowOn ? 1 : 0.5)
-                .animation(.easeInOut(duration: 0.35), value: glowOn)
+                .opacity(level)
                 // Верхняя кромка картинки начинается под капсулой.
                 // Тулбар: padding.top 8, капсула height 60 → нижняя точка на ~68pt.
                 .offset(y: 75)

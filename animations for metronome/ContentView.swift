@@ -14,6 +14,8 @@ struct ContentView: View {
 
     /// Подсветка (свечение Path) вкл/выкл.
     @State private var glowOn = false
+    /// Яркость свечения: 0.5 — приглушено (выкл), 1 — ярко (вкл). Мигает при glowOn.
+    @State private var glowLevel: Double = 0.5
 
     /// Значение «линейки» (tick-слайдер) под кнопками.
     @State private var tempo: Double = 120
@@ -28,8 +30,8 @@ struct ContentView: View {
             Color.appBackground
                 .ignoresSafeArea()
 
-            // Цветной свет под стеклом (lensing).
-            GlassBackdrop(glowOn: glowOn)
+            // Цветной свет под стеклом (lensing). Яркость = glowLevel (мигает).
+            GlassBackdrop(level: glowLevel)
 
             // Верхний тулбар: шестерёнка + капсула + три точки.
             // Пока кнопки ничего не открывают (sheet вернём позже).
@@ -52,9 +54,7 @@ struct ContentView: View {
                     GlassButton(
                         shape: Capsule(),
                         namespace: glassNS,
-                        action: {
-                            withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
-                        },
+                        action: { toggleGlow() },
                         showDome: false,
                         // .clear прозрачное → нативный интерактив масштабирует только
                         // текст. pressScale тянет всю кнопку целиком, под уровень белой.
@@ -72,7 +72,7 @@ struct ContentView: View {
                     // .regular.tint(.white) — белая заливка + интерактив.
                     Button(action: {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
+                        toggleGlow()
                     }) {
                         Text(glowOn ? "Turn off glow" : "Turn on glow")
                             .font(.headline)
@@ -80,6 +80,7 @@ struct ContentView: View {
                             .frame(maxWidth: .infinity)
                             .frame(height: 50)
                             .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
+                            .contentShape(Capsule())  // тапается вся кнопка, не только текст
                     }
                     .buttonStyle(.plain)
                 }
@@ -125,6 +126,20 @@ struct ContentView: View {
     }
 
     // MARK: - Шаг рулера и видимость кнопок +/-
+
+    /// Вкл/выкл подсветку. Включённая — МИГАЕТ с темпом 90 bpm
+    /// (загорание как «вкл», затухание как «выкл», бесконечный autoreverse).
+    private func toggleGlow() {
+        glowOn.toggle()
+        if glowOn {
+            let beat = 60.0 / 90.0  // длительность одного удара (90 bpm)
+            withAnimation(.easeInOut(duration: beat / 2).repeatForever(autoreverses: true)) {
+                glowLevel = 1.0
+            }
+        } else {
+            withAnimation(.easeInOut(duration: 0.35)) { glowLevel = 0.5 }
+        }
+    }
 
     /// Шаг на ±1 (clamp 40...240) + держим кнопки видимыми.
     private func step(_ delta: Double) {
