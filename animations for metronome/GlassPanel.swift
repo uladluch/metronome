@@ -33,6 +33,10 @@ struct PanelContent: View {
                 }
             }
             .toolbarBackground(.hidden, for: .navigationBar)
+            // КЛЮЧЕВОЕ: убирает серый фон контейнера NavigationStack (не только bar),
+            // чтобы стекло под ним было видно (iOS 26 Liquid Glass).
+            .containerBackground(.clear, for: .navigation)
+            .scrollContentBackground(.hidden)
         }
     }
 }
