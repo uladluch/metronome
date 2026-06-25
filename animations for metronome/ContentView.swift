@@ -81,9 +81,9 @@ struct ContentView: View {
                 }
                 .frame(width: 240)
 
-                // «Линейка» (tick-слайдер) под кнопками — ниже и на всю ширину.
+                // «Линейка» (tick-слайдер) под кнопками — та же ширина, что у кнопок (240).
                 TickSlider(value: $tempo)
-                    .frame(height: 44)
+                    .frame(width: 240, height: 44)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .offset(y: -60)  // чуть выше середины
