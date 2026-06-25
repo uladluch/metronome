@@ -24,14 +24,6 @@ struct ContentView: View {
     private let bpm: Double = 90
     private var beatInterval: Double { 60.0 / bpm }
 
-    /// Отслеживание прессинга на кнопки для переливающегося эффекта стекла.
-    @State private var darkButtonPressed = false
-    @State private var whiteButtonPressed = false
-    /// Позиция пальца на белой кнопке для эффекта spotlight (нормализованная 0...1).
-    @State private var whiteButtonTouchLocation: CGPoint = .init(x: 0.5, y: 0.5)
-    /// Размер белой кнопки для пересчета координат.
-    @State private var whiteButtonSize: CGSize = .zero
-
     /// Значение «линейки» (tick-слайдер) под кнопками.
     @State private var tempo: Double = 120
 
@@ -114,20 +106,10 @@ struct ContentView: View {
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
                         }
-                        .brightness(darkButtonPressed ? 0.15 : 0)
-                        .simultaneousGesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { _ in
-                                    if !darkButtonPressed {
-                                        withAnimation(.easeOut(duration: 0.08)) { darkButtonPressed = true }
-                                    }
-                                }
-                                .onEnded { _ in
-                                    withAnimation(.easeOut(duration: 0.15)) { darkButtonPressed = false }
-                                }
-                        )
 
-                        // Белая кнопка (тот же функционал), чёрный шрифт.
+                        // Белая кнопка — НАТИВНЫЙ Liquid Glass стиль (.glassProminent).
+                        // Даёт встроенный интерактивный отклик: свет следует за пальцем
+                        // из коробки, без ручных overlay / gesture / spotlight.
                         Button(action: {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             toggleGlow()
@@ -137,43 +119,9 @@ struct ContentView: View {
                                 .foregroundStyle(.black)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
-                                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
-                                .contentShape(Capsule())
                         }
-                        .buttonStyle(.plain)
-                        // Тонкий общий эффект при прессинге.
-                        .brightness(whiteButtonPressed ? 0.04 : 0)
-                        // Spotlight эффект под пальцем — только при прессинге.
-                        .overlay(alignment: .topLeading) {
-                            if whiteButtonPressed {
-                                GeometryReader { g in
-                                    RadialGradient(
-                                        colors: [.yellow.opacity(0.5), .yellow.opacity(0.15), .clear],
-                                        center: .init(x: whiteButtonTouchLocation.x, y: whiteButtonTouchLocation.y),
-                                        startRadius: 0,
-                                        endRadius: 70
-                                    )
-                                    .clipShape(Capsule())
-                                    .onAppear { whiteButtonSize = g.size }
-                                }
-                            }
-                        }
-                        .simultaneousGesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { value in
-                                    if !whiteButtonPressed {
-                                        withAnimation(.easeOut(duration: 0.08)) { whiteButtonPressed = true }
-                                    }
-                                    // Рассчитываем локальные координаты внутри кнопки
-                                    // Предполагаем что кнопка находится в нижней части экрана
-                                    let localX = value.location.x
-                                    let localY = value.location.y - (UIScreen.main.bounds.height - 180)
-                                    whiteButtonTouchLocation = CGPoint(x: max(0, min(240, localX)), y: max(0, min(50, localY)))
-                                }
-                                .onEnded { _ in
-                                    withAnimation(.easeOut(duration: 0.15)) { whiteButtonPressed = false }
-                                }
-                        )
+                        .buttonStyle(.glassProminent)
+                        .tint(.white)
                     }
                     .frame(width: 240)
                 }
