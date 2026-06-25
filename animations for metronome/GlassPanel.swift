@@ -26,17 +26,11 @@ struct PanelContent: View {
                         onClose()
                     }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 15, weight: .semibold))
                     }
-                    .foregroundStyle(.white.opacity(0.6))
-                    .tint(.white.opacity(0.6))
                 }
             }
-            .toolbarBackground(.clear, for: .navigationBar)
-            .scrollContentBackground(.hidden)
-            .background(Color.clear)
-            .ignoresSafeArea(edges: .all)
+            // .hidden (НЕ .clear/.visible) убирает материал навбара → glass виден.
+            .toolbarBackground(.hidden, for: .navigationBar)
         }
-        .background(Color.clear)
     }
 }
