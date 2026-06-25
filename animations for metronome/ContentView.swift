@@ -51,7 +51,7 @@ struct ContentView: View {
                     showDome: false,
                     // .clear прозрачное → нативный интерактив масштабирует только
                     // текст. pressScale тянет всю кнопку целиком, под уровень белой.
-                    pressScale: 1.06
+                    pressScale: 1.08
                 ) {
                     Text(glowOn ? "Turn off glow" : "Turn on glow")
                         .font(.headline)
