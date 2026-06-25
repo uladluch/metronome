@@ -49,8 +49,7 @@ struct ContentView: View {
                         withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
                     },
                     showDome: false,
-                    pressScale: 1.1,          // сильнее увеличение на нажатие
-                    glassStyle: .regular      // заметнее интерактив «под пальцем»
+                    pressScale: 1.1           // сильнее увеличение на нажатие
                 ) {
                     Text(glowOn ? "Turn off glow" : "Turn on glow")
                         .font(.headline)
@@ -75,7 +74,7 @@ struct ContentView: View {
             }
             .frame(width: 240)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            .offset(y: 80)
+            .offset(y: -60)  // чуть выше середины
 
             // Нижний тулбар — прижат к низу.
             BottomToolbar()
