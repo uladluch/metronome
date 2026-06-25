@@ -144,8 +144,9 @@ struct ContentView: View {
         // Клавиатура из BPM-шита не должна двигать контент под ним (иначе кнопки
         // и рулер прыгают при разворачивании/сворачивании шита).
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        // Overlay нотификации (левый край, под safe area, с отступами по сторонам).
-        .overlay(alignment: .topLeading) {
+        // Overlay нотификации: прилетает сверху по ЦЕНТРУ, с отступами по сторонам.
+        // alignment: .top + maxWidth: .infinity + симметричный padding = центр.
+        .overlay(alignment: .top) {
             if showNotification {
                 HStack(spacing: 12) {
                     Image(systemName: "bell.fill")
@@ -156,11 +157,12 @@ struct ContentView: View {
                         .foregroundStyle(.white)
                     Spacer()
                 }
+                .padding(.horizontal, 24)          // внутренний отступ контента
                 .frame(height: 60)
-                .padding(.horizontal, 24)
-                .containerRelativeFrame(.horizontal) { width, _ in width - 32 }
+                .frame(maxWidth: .infinity)         // тянем на всю ширину контейнера
                 .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
-                .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
+                .padding(.horizontal, 16)           // отступы от краёв экрана (симметрично)
+                .padding(.top, 16)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
