@@ -18,11 +18,6 @@ struct BottomToolbar: View {
     @State private var showSheet = false
     @State private var showBPM = false
 
-    // BPM-шит инлайнится здесь (НЕ отдельной struct-вью) — иначе sheet «улетает»
-    // вверх при появлении клавиатуры.
-    @State private var bpmText = "96"
-    @FocusState private var bpmFocused: Bool
-
     /// Иконки громкости видны только во время взаимодействия со слайдером.
     @State private var showVolumeIcons = false
 
@@ -84,56 +79,9 @@ struct BottomToolbar: View {
                 .presentationDetents([.large])           // только .large (не medium)
                 .presentationDragIndicator(.visible)     // grabber сверху
         }
-        // Второй шит — ввод BPM (правая кнопка). Контент ИНЛАЙН (см. выше).
+        // Второй шит — ввод BPM (правая кнопка). Пока на весь экран.
         .sheet(isPresented: $showBPM) {
-            NavigationStack {
-                VStack(spacing: 0) {
-                    // Крупное редактируемое значение по центру.
-                    TextField("", text: $bpmText)
-                        .font(.system(size: 64, weight: .bold))
-                        .foregroundStyle(.white)
-                        .multilineTextAlignment(.center)
-                        .keyboardType(.numberPad)
-                        .focused($bpmFocused)
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 32)
-
-                    Spacer()
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .ignoresSafeArea(.keyboard, edges: .bottom)
-                .navigationTitle("BPM")
-                .navigationBarTitleDisplayMode(.inline)
-                .toolbar {
-                    ToolbarItem(placement: .topBarLeading) {
-                        Button(action: {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            showBPM = false
-                        }) {
-                            Image(systemName: "xmark")
-                        }
-                    }
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button(action: {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            showBPM = false
-                        }) {
-                            Image(systemName: "checkmark")
-                                .foregroundStyle(.black)
-                        }
-                        .buttonStyle(.glassProminent)
-                        .tint(.white)
-                    }
-                }
-            }
-            .ignoresSafeArea(.keyboard, edges: .bottom)
-            .presentationDetents([.fraction(2.0 / 3.0)])
-            .presentationDragIndicator(.visible)
-            .presentationBackground(Color(.systemBackground))
-            .task {
-                try? await Task.sleep(for: .milliseconds(350))
-                bpmFocused = true
-            }
+            BPMSheet()
         }
     }
 }
