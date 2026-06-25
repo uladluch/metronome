@@ -20,10 +20,13 @@ struct TickSlider: View {
     private let tickSpacing: CGFloat = 11
 
     @State private var dragStart: Double?
-    /// Идёт ли взаимодействие — центральный индикатор слегка растёт.
-    @State private var active = false
     /// Непрерывная визуальная позиция (для плавного скролла). value = округление.
     @State private var displayValue: Double = 0
+    /// Масштаб центральной черточки (растёт со скоростью инерции).
+    @State private var indicatorScale: CGFloat = 1.0
+    /// Инерция (momentum) после резкого броска.
+    @State private var momentumTimer: Timer?
+    @State private var momentumVelocity: Double = 0
 
     var body: some View {
         GeometryReader { geo in
@@ -70,22 +73,22 @@ struct TickSlider: View {
                     }
                 }
 
-                // Яркий центральный индикатор — медленно чуть растёт при свайпе.
-                // Низ чуть ниже тиков (прикрывает их), растёт вверх.
+                // Яркий центральный индикатор. Растёт со скоростью прокрутки
+                // (drag/инерция), уменьшается по замедлению. Низ чуть ниже тиков.
                 Capsule()
                     .fill(.white)
                     .frame(width: 6, height: indicatorH)
-                    .shadow(color: .white.opacity(0.7), radius: active ? 12 : 7)
-                    .scaleEffect(active ? 1.22 : 1.0, anchor: .bottom)
+                    .shadow(color: .white.opacity(0.7), radius: 7 + (indicatorScale - 1) * 28)
+                    .scaleEffect(indicatorScale, anchor: .bottom)
                     .offset(y: indicatorOffset)
-                    .animation(.easeInOut(duration: 0.6), value: active)
             }
             .frame(width: w, height: h)
             .contentShape(Rectangle())
             .onAppear { displayValue = value }
-            // Внешние изменения (кнопки +/-) — снаппи доезжаем (успеваем при ускорении).
+            // Внешние изменения (кнопки +/-) — снаппи доезжаем. Не вмешиваемся во
+            // время драга и инерции.
             .onChange(of: value) { _, newValue in
-                if dragStart == nil {
+                if dragStart == nil && momentumTimer == nil {
                     withAnimation(.spring(response: 0.2, dampingFraction: 0.85)) {
                         displayValue = newValue
                     }
@@ -94,27 +97,75 @@ struct TickSlider: View {
             .gesture(
                 DragGesture()
                     .onChanged { g in
+                        stopMomentum()
                         if dragStart == nil {
                             dragStart = displayValue
                             onInteractingChange(true)
+                            withAnimation(.easeOut(duration: 0.15)) { indicatorScale = 1.2 }
                         }
-                        active = true
                         let start = dragStart ?? displayValue
                         let raw = start - Double(g.translation.width / tickSpacing)
                         displayValue = min(max(raw, range.lowerBound), range.upperBound)
                         value = displayValue.rounded()
                     }
-                    .onEnded { _ in
+                    .onEnded { g in
                         dragStart = nil
-                        active = false
                         onInteractingChange(false)
-                        // Снап: меняем value → onChange плавно доводит displayValue до черточки.
-                        value = min(max(displayValue.rounded(), range.lowerBound), range.upperBound)
+                        // Импульс по скорости броска (ticks/sec). Драг вправо уменьшает значение.
+                        let v = max(-250, min(250, -Double(g.velocity.width) / Double(tickSpacing)))
+                        if abs(v) > 3 {
+                            startMomentum(v)
+                        } else {
+                            snapAndRest()
+                        }
                     }
             )
             // Чёткий хаптик на каждом пройденном тике.
             .sensoryFeedback(.impact(flexibility: .rigid, intensity: 0.8),
                              trigger: Int(displayValue))
         }
+    }
+
+    // MARK: - Инерция (momentum)
+
+    private func startMomentum(_ v0: Double) {
+        momentumVelocity = v0
+        momentumTimer?.invalidate()
+        momentumTimer = Timer.scheduledTimer(withTimeInterval: 1.0 / 60.0, repeats: true) { _ in
+            tickMomentum()
+        }
+    }
+
+    private func tickMomentum() {
+        let dt = 1.0 / 60.0
+        var v = momentumVelocity
+        var next = displayValue + v * dt
+        if next <= range.lowerBound { next = range.lowerBound; v = 0 }
+        else if next >= range.upperBound { next = range.upperBound; v = 0 }
+        displayValue = next
+        value = displayValue.rounded()
+
+        v *= 0.95  // трение
+        momentumVelocity = v
+
+        // Центральная черточка растёт со скоростью.
+        let speed = min(abs(v) / 80.0, 1.0)
+        indicatorScale = 1.0 + speed * 0.5
+
+        if abs(v) < 1.5 {
+            stopMomentum()
+            snapAndRest()
+        }
+    }
+
+    private func stopMomentum() {
+        momentumTimer?.invalidate()
+        momentumTimer = nil
+    }
+
+    /// Доезд до ближайшей черточки + плавное уменьшение черточки.
+    private func snapAndRest() {
+        value = min(max(displayValue.rounded(), range.lowerBound), range.upperBound)
+        withAnimation(.easeOut(duration: 0.45)) { indicatorScale = 1.0 }
     }
 }
