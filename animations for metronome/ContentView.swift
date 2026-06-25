@@ -133,16 +133,12 @@ struct ContentView: View {
                                 .foregroundStyle(.black)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
-                                .glassEffect(
-                                    whiteButtonPressed
-                                        ? Glass(tint: .yellow.opacity(0.4))
-                                        : .regular.tint(.white),
-                                    in: Capsule()
-                                )
+                                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
                                 .contentShape(Capsule())  // тапается вся кнопка
                         }
                         .buttonStyle(.plain)
-                        .brightness(whiteButtonPressed ? 0.1 : 0)
+                        .brightness(whiteButtonPressed ? 0.2 : 0)
+                        .saturation(whiteButtonPressed ? 1.5 : 1)
                         .simultaneousGesture(
                             DragGesture(minimumDistance: 0)
                                 .onChanged { _ in
