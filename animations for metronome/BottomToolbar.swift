@@ -143,7 +143,7 @@ private struct SheetView: View {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             showPopover = true
                         }
-                        .popover(isPresented: $showPopover, arrowEdge: .bottom) {
+                        .popover(isPresented: $showPopover, arrowEdge: .top) {
                             Text("Hello")
                                 .font(.title.bold())
                                 .foregroundStyle(.white)
