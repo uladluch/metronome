@@ -59,13 +59,13 @@ struct BobsControl: View {
                         DragGesture(minimumDistance: 0)
                             .onChanged { _ in
                                 if !bobPressed[i] {
-                                    withAnimation(.easeOut(duration: 0.12)) {
+                                    withAnimation(.easeOut(duration: 0.06)) {
                                         bobPressed[i] = true
                                     }
                                 }
                             }
                             .onEnded { _ in
-                                withAnimation(.easeOut(duration: 0.3)) {
+                                withAnimation(.easeOut(duration: 0.12)) {
                                     bobPressed[i] = false
                                 }
                             }
@@ -92,9 +92,9 @@ struct BobsControl: View {
     }
 
     private func bob(height: CGFloat, isActive: Bool, isPressed: Bool) -> some View {
-        // Подложка: 30% серая по умолчанию. Активная вспыхивает к белому на пике удара и
+        // Подложка: 10% серая по умолчанию. Активная вспыхивает к белому на пике удара и
         // плавно гаснет к серому вместе с pulse → к следующему удару уже серая.
-        let fillOpacity = isActive ? (0.3 + 0.7 * pulse) : 0.3
+        let fillOpacity = isActive ? (0.1 + 0.9 * pulse) : 0.1
         // Свечение — только у активного, его сила = pulse (синхронно с картинкой).
         let glow = isActive ? pulse : 0
         // Dome (полусфера) светлеет при нажатии.
