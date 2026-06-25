@@ -46,77 +46,77 @@ struct ContentView: View {
                 .padding(.top, 8)
             }
 
-            // Кнопки + «линейка» по центру.
-            VStack(spacing: 24) {
-                // Две кнопки: обе включают/выключают подсветку (Path).
-                VStack(spacing: 12) {
-                    // Тёмная стеклянная кнопка (кастомный GlassButton — плотнее, «чернее»).
-                    GlassButton(
-                        shape: Capsule(),
-                        namespace: glassNS,
-                        action: { toggleGlow() },
-                        showDome: false,
-                        // .clear прозрачное → нативный интерактив масштабирует только
-                        // текст. pressScale тянет всю кнопку целиком, под уровень белой.
-                        pressScale: 1.08
-                    ) {
-                        Text(glowOn ? "Turn off glow" : "Turn on glow")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
+            // Бобы (сверху) + рулер + кнопки. Всё опущено ниже.
+            VStack(spacing: 36) {
+                // Новый контрол — светящиеся бобы.
+                BobsControl()
+
+                VStack(spacing: 24) {
+                    // Рулер с широкими тап-зонами слева/справа (теперь СВЕРХУ).
+                    HStack(spacing: 0) {
+                        StepZone(
+                            systemName: "minus",
+                            namespace: glassNS,
+                            alignment: .trailing,
+                            visible: controlsVisible,
+                            onShow: showControls,
+                            onStep: { step(-1) },
+                            onHide: scheduleHide
+                        )
+
+                        TickSlider(value: $tempo, onInteractingChange: { interacting in
+                            if interacting { showControls() } else { scheduleHide() }
+                        })
+                        .frame(width: 230, height: 100)  // выше — зона свайпа больше
+
+                        StepZone(
+                            systemName: "plus",
+                            namespace: glassNS,
+                            alignment: .leading,
+                            visible: controlsVisible,
+                            onShow: showControls,
+                            onStep: { step(1) },
+                            onHide: scheduleHide
+                        )
                     }
 
-                    // Белая кнопка (тот же функционал), чёрный шрифт.
-                    // Стекло прямо на лейбле 50pt (как у чёрной) → ровно 50pt, не сдавлено.
-                    // .regular.tint(.white) — белая заливка + интерактив.
-                    Button(action: {
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        toggleGlow()
-                    }) {
-                        Text(glowOn ? "Turn off glow" : "Turn on glow")
-                            .font(.headline)
-                            .foregroundStyle(.black)
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
-                            .contentShape(Capsule())  // тапается вся кнопка, не только текст
+                    // Две кнопки glow (теперь СНИЗУ).
+                    VStack(spacing: 12) {
+                        // Тёмная стеклянная кнопка (кастомный GlassButton — плотнее, «чернее»).
+                        GlassButton(
+                            shape: Capsule(),
+                            namespace: glassNS,
+                            action: { toggleGlow() },
+                            showDome: false,
+                            pressScale: 1.08
+                        ) {
+                            Text(glowOn ? "Turn off glow" : "Turn on glow")
+                                .font(.headline)
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                        }
+
+                        // Белая кнопка (тот же функционал), чёрный шрифт.
+                        Button(action: {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            toggleGlow()
+                        }) {
+                            Text(glowOn ? "Turn off glow" : "Turn on glow")
+                                .font(.headline)
+                                .foregroundStyle(.black)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
+                                .contentShape(Capsule())  // тапается вся кнопка
+                        }
+                        .buttonStyle(.plain)
                     }
-                    .buttonStyle(.plain)
-                }
-                .frame(width: 240)
-
-                // Рулер с широкими тап-зонами слева/справа. Кнопки 44×44 проявляются
-                // под пальцем (opacity), один жест на зоне — тап с первого раза.
-                HStack(spacing: 0) {
-                    StepZone(
-                        systemName: "minus",
-                        namespace: glassNS,
-                        alignment: .trailing,
-                        visible: controlsVisible,
-                        onShow: showControls,
-                        onStep: { step(-1) },
-                        onHide: scheduleHide
-                    )
-
-                    TickSlider(value: $tempo, onInteractingChange: { interacting in
-                        if interacting { showControls() } else { scheduleHide() }
-                    })
-                    .frame(width: 230, height: 100)  // выше — зона свайпа больше
-
-                    StepZone(
-                        systemName: "plus",
-                        namespace: glassNS,
-                        alignment: .leading,
-                        visible: controlsVisible,
-                        onShow: showControls,
-                        onStep: { step(1) },
-                        onHide: scheduleHide
-                    )
+                    .frame(width: 240)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            .offset(y: -60)  // чуть выше середины
+            .offset(y: 30)  // опущено ниже
 
             // Нижний тулбар — прижат к низу.
             BottomToolbar()
