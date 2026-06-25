@@ -28,22 +28,24 @@ struct TickSlider: View {
     var body: some View {
         GeometryReader { geo in
             let w = geo.size.width
-            let h = geo.size.height
+            let h = geo.size.height          // высота TOUCH-зоны (скролл)
             let cx = w / 2
 
-            // Общая нижняя линия для тиков и центральной черточки.
-            let baseline = h - 4
-            let indicatorH = h * 0.8
-            // Смещение капсулы вниз, чтобы её низ совпал с baseline.
-            let indicatorOffset = baseline - indicatorH / 2 - h / 2
+            // Визуал (тики + индикатор) фиксированной высоты, по центру touch-зоны.
+            let contentH: CGFloat = 40
+            let midY = h / 2
+            let baseline = midY + contentH / 2        // нижняя линия тиков
+            let indicatorH = contentH * 0.8
+            // Низ индикатора чуть НИЖЕ тиков (+4), чтобы прикрыть тики под собой.
+            let indicatorOffset = contentH / 2 - indicatorH / 2 + 4
 
             ZStack {
                 // Тики: ярко у центра (будто индикатор светит), жёсткий спад к краям.
                 // Скроллятся ПЛАВНО по displayValue. Каждый 5-й — мажорный (выше/толще),
                 // чтобы было видно движение и направление.
                 Canvas { ctx, size in
-                    let minorH = size.height * 0.38
-                    let majorH = size.height * 0.55
+                    let minorH = contentH * 0.38
+                    let majorH = contentH * 0.55
                     let half = Int(cx / tickSpacing) + 2
                     let base = displayValue.rounded()
                     let maxDist = cx * 0.85  // за этим — полностью погасли (жёстко)
@@ -68,8 +70,8 @@ struct TickSlider: View {
                     }
                 }
 
-                // Яркий центральный индикатор — медленно чуть растёт при свайпе
-                // (вверх от нижней линии), низ совпадает с тиками.
+                // Яркий центральный индикатор — медленно чуть растёт при свайпе.
+                // Низ чуть ниже тиков (прикрывает их), растёт вверх.
                 Capsule()
                     .fill(.white)
                     .frame(width: 6, height: indicatorH)

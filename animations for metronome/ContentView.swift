@@ -45,7 +45,7 @@ struct ContentView: View {
             }
 
             // Кнопки + «линейка» по центру.
-            VStack(spacing: 28) {
+            VStack(spacing: 16) {
                 // Две кнопки: обе включают/выключают подсветку (Path).
                 VStack(spacing: 12) {
                     // Тёмная стеклянная кнопка (кастомный GlassButton — плотнее, «чернее»).
@@ -87,7 +87,7 @@ struct ContentView: View {
 
                 // Рулер с кнопками шага слева/справа (тот же GlassIconButton, 40×40).
                 // Кнопки скрыты по умолчанию, появляются при взаимодействии с рулером.
-                HStack(spacing: 8) {
+                HStack(spacing: -14) {
                     GlassIconButton(
                         systemName: "minus",
                         glassID: nil,
@@ -98,11 +98,13 @@ struct ContentView: View {
                         action: { step(-1) }
                     )
                     .opacity(controlsVisible ? 1 : 0)
+                    .allowsHitTesting(controlsVisible)  // скрытые — не тапаются
+                    .zIndex(1)
 
                     TickSlider(value: $tempo, onInteractingChange: { interacting in
                         if interacting { showControls() } else { scheduleHide() }
                     })
-                    .frame(width: 250, height: 44)
+                    .frame(width: 250, height: 72)  // выше — скролл-зона больше
 
                     GlassIconButton(
                         systemName: "plus",
@@ -114,6 +116,8 @@ struct ContentView: View {
                         action: { step(1) }
                     )
                     .opacity(controlsVisible ? 1 : 0)
+                    .allowsHitTesting(controlsVisible)  // скрытые — не тапаются
+                    .zIndex(1)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
