@@ -14,8 +14,15 @@ struct ContentView: View {
 
     /// Подсветка (свечение Path) вкл/выкл.
     @State private var glowOn = false
-    /// Яркость свечения: 0.5 — приглушено (выкл), 1 — ярко (вкл). Мигает при glowOn.
+    /// Яркость свечения: 0.5 — приглушено (выкл), 1 — ярко (вкл). Вспыхивает на удар.
     @State private var glowLevel: Double = 0.5
+    /// Счётчик ударов. activeIndex боба = beatIndex % 4.
+    @State private var beatIndex = 0
+    /// Таймер метронома (бьётся, пока glowOn). Единый источник синхронизации.
+    @State private var beatTimer: Timer?
+    /// Темп визуального метронома.
+    private let bpm: Double = 90
+    private var beatInterval: Double { 60.0 / bpm }
 
     /// Значение «линейки» (tick-слайдер) под кнопками.
     @State private var tempo: Double = 120
@@ -46,8 +53,9 @@ struct ContentView: View {
                     .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
                 }
 
-                // Новый контрол — светящиеся бобы.
-                BobsControl()
+                // Новый контрол — светящиеся бобы. activeIndex и glowLevel — из того
+                // же источника, что и вспышка картинки → синхрон гарантирован.
+                BobsControl(activeIndex: beatIndex % 4, glowOn: glowOn, glowLevel: glowLevel)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
             .padding(.top, 8)
@@ -131,17 +139,40 @@ struct ContentView: View {
 
     // MARK: - Шаг рулера и видимость кнопок +/-
 
-    /// Вкл/выкл подсветку. Включённая — МИГАЕТ с темпом 90 bpm
-    /// (загорание как «вкл», затухание как «выкл», бесконечный autoreverse).
+    /// Вкл/выкл подсветку. Включённая — БЬЁТСЯ метрономом (90 bpm): на каждый удар
+    /// картинка вспыхивает И загорается следующий боб. Оба изменения — в одном
+    /// callback таймера, читают одно glowLevel → синхрон физически гарантирован.
     private func toggleGlow() {
         glowOn.toggle()
         if glowOn {
-            let beat = 60.0 / 90.0  // длительность одного удара (90 bpm)
-            withAnimation(.easeInOut(duration: beat / 2).repeatForever(autoreverses: true)) {
-                glowLevel = 1.0
-            }
+            beatIndex = 0
+            startBeat()
         } else {
+            beatTimer?.invalidate()
+            beatTimer = nil
             withAnimation(.easeInOut(duration: 0.35)) { glowLevel = 0.5 }
+        }
+    }
+
+    /// Запустить метроном: сразу первый удар, затем по таймеру.
+    /// Режим .common — таймер не замирает во время свайпа по рулеру.
+    private func startBeat() {
+        beatTimer?.invalidate()
+        flashBeat()  // первый удар сразу (боб 0)
+        let timer = Timer(timeInterval: beatInterval, repeats: true) { _ in
+            beatIndex += 1
+            flashBeat()
+        }
+        RunLoop.main.add(timer, forMode: .common)
+        beatTimer = timer
+    }
+
+    /// Один удар метронома: резкая вспышка (snap до 1.0) → плавное затухание.
+    /// Боб переключается через beatIndex в том же callback → синхронно с вспышкой.
+    private func flashBeat() {
+        glowLevel = 1.0  // мгновенно — резкая «атака» удара
+        withAnimation(.easeOut(duration: beatInterval * 0.85)) {
+            glowLevel = 0.5  // плавное затухание к следующему удару
         }
     }
 
