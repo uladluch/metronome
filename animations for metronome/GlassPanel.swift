@@ -35,10 +35,8 @@ struct PanelContent: View {
                         }
                 }
             }
-            // Серый фон КОНТЕЙНЕРА убираем (окно прозрачное)...
-            .containerBackground(.clear, for: .navigation)
-            .scrollContentBackground(.hidden)
-            // ...но стекло самого TOOLBAR-bar возвращаем явно.
+            // Фон окна задаёт сам NavigationStack (override-прозрачность убрана),
+            // стекло toolbar-bar — явно видимое.
             .toolbarBackground(.visible, for: .navigationBar)
         }
     }
