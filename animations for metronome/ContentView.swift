@@ -27,6 +27,10 @@ struct ContentView: View {
     /// Отслеживание прессинга на кнопки для переливающегося эффекта стекла.
     @State private var darkButtonPressed = false
     @State private var whiteButtonPressed = false
+    /// Позиция пальца на белой кнопке для эффекта spotlight (нормализованная 0...1).
+    @State private var whiteButtonTouchLocation: CGPoint = .init(x: 0.5, y: 0.5)
+    /// Размер белой кнопки для пересчета координат.
+    @State private var whiteButtonSize: CGSize = .zero
 
     /// Значение «линейки» (tick-слайдер) под кнопками.
     @State private var tempo: Double = 120
@@ -134,17 +138,35 @@ struct ContentView: View {
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
                                 .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
-                                .contentShape(Capsule())  // тапается вся кнопка
+                                .contentShape(Capsule())
                         }
                         .buttonStyle(.plain)
-                        .brightness(whiteButtonPressed ? 0.2 : 0)
-                        .saturation(whiteButtonPressed ? 1.5 : 1)
+                        // Spotlight эффект под пальцем — только при прессинге.
+                        .overlay(alignment: .topLeading) {
+                            if whiteButtonPressed {
+                                GeometryReader { g in
+                                    RadialGradient(
+                                        colors: [.yellow.opacity(0.5), .yellow.opacity(0.15), .clear],
+                                        center: .init(x: whiteButtonTouchLocation.x, y: whiteButtonTouchLocation.y),
+                                        startRadius: 0,
+                                        endRadius: 70
+                                    )
+                                    .clipShape(Capsule())
+                                    .onAppear { whiteButtonSize = g.size }
+                                }
+                            }
+                        }
                         .simultaneousGesture(
                             DragGesture(minimumDistance: 0)
-                                .onChanged { _ in
+                                .onChanged { value in
                                     if !whiteButtonPressed {
                                         withAnimation(.easeOut(duration: 0.08)) { whiteButtonPressed = true }
                                     }
+                                    // Рассчитываем локальные координаты внутри кнопки
+                                    // Предполагаем что кнопка находится в нижней части экрана
+                                    let localX = value.location.x
+                                    let localY = value.location.y - (UIScreen.main.bounds.height - 180)
+                                    whiteButtonTouchLocation = CGPoint(x: max(0, min(240, localX)), y: max(0, min(50, localY)))
                                 }
                                 .onEnded { _ in
                                     withAnimation(.easeOut(duration: 0.15)) { whiteButtonPressed = false }
