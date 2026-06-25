@@ -45,7 +45,7 @@ struct ContentView: View {
             }
 
             // Кнопки + «линейка» по центру.
-            VStack(spacing: 16) {
+            VStack(spacing: 24) {
                 // Две кнопки: обе включают/выключают подсветку (Path).
                 VStack(spacing: 12) {
                     // Тёмная стеклянная кнопка (кастомный GlassButton — плотнее, «чернее»).
@@ -103,7 +103,7 @@ struct ContentView: View {
                     TickSlider(value: $tempo, onInteractingChange: { interacting in
                         if interacting { showControls() } else { scheduleHide() }
                     })
-                    .frame(width: 250, height: 72)  // выше — скролл-зона больше
+                    .frame(width: 250, height: 100)  // выше — зона свайпа больше
 
                     GlassIconButton(
                         systemName: "plus",
