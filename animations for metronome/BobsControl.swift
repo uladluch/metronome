@@ -14,12 +14,15 @@ import SwiftUI
 
 struct BobsControl: View {
 
-    /// Три варианта высот: маленький, средний, большой.
-    private let heightVariants: [CGFloat] = [60, 90, 60, 30]  // исходные размеры 4 бобов
-    private let sizeRotations: [[CGFloat]] = [
-        [60, 90, 60, 30],      // вариант 0: исходный
-        [90, 60, 30, 60],      // вариант 1: сдвинуто
-        [30, 60, 90, 60]       // вариант 2: сдвинуто ещё
+    /// Исходные размеры 4 бобов.
+    private let heightVariants: [CGFloat] = [60, 90, 60, 30]
+    /// Для каждого боба его цикл размеров: каждый боб циклирует через 30→60→90→30.
+    /// Начинает со своего исходного размера в варианте 0.
+    private let bobSizeCycles: [[CGFloat]] = [
+        [60, 30, 90],     // боб 0: средний → маленький → большой
+        [90, 60, 30],     // боб 1: большой → средний → маленький
+        [60, 30, 90],     // боб 2: средний → маленький → большой
+        [30, 60, 90]      // боб 3: маленький → средний → большой
     ]
     private let bobWidth: CGFloat = 40
 
@@ -45,7 +48,7 @@ struct BobsControl: View {
     var body: some View {
         HStack(alignment: .center, spacing: 6) {
             ForEach(heightVariants.indices, id: \.self) { i in
-                let height = sizeRotations[bobSizeModes[i]][i]
+                let height = bobSizeCycles[i][bobSizeModes[i]]
                 bob(height: height, isActive: glowOn && i == activeIndex, isPressed: bobPressed[i])
                     .scaleEffect(bobBounceScales[i] * (bobPressed[i] ? 0.92 : 1.0))
                     .contentShape(Capsule())
