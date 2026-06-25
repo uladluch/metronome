@@ -22,25 +22,16 @@ struct PanelContent: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        onClose()
-                    }) {
-                        Image(systemName: "xmark")
-                    }
-                    // Просто крестик в glass-стиле. Без .buttonBorderShape — он давал
-                    // вторую форму поверх стекла («кнопка в кнопке»).
-                    .buttonStyle(.glass)
-                }
-            }
-            // КЛЮЧЕВОЕ: убирает серый фон контейнера NavigationStack, чтобы стекло
-            // под ним было видно. НЕ используем .toolbarBackground(.hidden) — он
-            // снимает Liquid Glass и с самой тулбар-кнопки (в sheet его нет, поэтому
-            // там у кнопки есть кромка-стекло).
+            // Убирает серый фон контейнера NavigationStack → стекло под ним видно.
             .containerBackground(.clear, for: .navigation)
             .scrollContentBackground(.hidden)
+        }
+        // Крестик — НЕ в ToolbarItem (там iOS даёт второе стекло → «кнопка в кнопке»),
+        // а отдельным overlay со своим контролируемым стеклом 40×40.
+        .overlay(alignment: .topTrailing) {
+            CloseButton(action: onClose)
+                .padding(.trailing, 10)
+                .padding(.top, 2)
         }
     }
 }
