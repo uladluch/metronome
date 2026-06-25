@@ -114,10 +114,7 @@ struct ContentView: View {
                                 .frame(height: 50)
                         }
 
-                        // Белая кнопка — НАТИВНЫЙ .glassProminent с ПОЛУПРОЗРАЧНЫМ белым
-                        // tint: чем прозрачнее заливка, тем ярче просвечивает фирменное
-                        // specular-«переливание» Liquid Glass — оно проходит ПОВЕРХ
-                        // контента. Сплошной белый его глушил.
+                        // Белая кнопка (тот же функционал), чёрный шрифт.
                         Button(action: {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             toggleGlow()
@@ -127,9 +124,10 @@ struct ContentView: View {
                                 .foregroundStyle(.black)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
+                                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
+                                .contentShape(Capsule())
                         }
-                        .buttonStyle(.glassProminent)
-                        .tint(.white.opacity(0.6))
+                        .buttonStyle(.plain)
                     }
                     .frame(width: 240)
                 }
