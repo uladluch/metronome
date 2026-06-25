@@ -38,6 +38,7 @@ struct ContentView: View {
             }
 
             // Две кнопки по центру: обе включают/выключают подсветку (Path).
+            // Одинаковая ширина — обе растянуты на ширину VStack.
             VStack(spacing: 12) {
                 // Стеклянная кнопка.
                 GlassButton(
@@ -51,7 +52,7 @@ struct ContentView: View {
                     Text(glowOn ? "Turn off glow" : "Turn on glow")
                         .font(.headline)
                         .foregroundStyle(.white)
-                        .padding(.horizontal, 24)
+                        .frame(maxWidth: .infinity)
                         .frame(height: 50)
                 }
 
@@ -63,12 +64,13 @@ struct ContentView: View {
                     Text(glowOn ? "Turn off glow" : "Turn on glow")
                         .font(.headline)
                         .foregroundStyle(.black)
-                        .padding(.horizontal, 24)
+                        .frame(maxWidth: .infinity)
                         .frame(height: 50)
                 }
                 .buttonStyle(.glassProminent)
                 .tint(.white)
             }
+            .frame(width: 240)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .offset(y: 80)
 
