@@ -33,25 +33,27 @@ struct ContentView: View {
             // Цветной свет под стеклом (lensing). Яркость = glowLevel (мигает).
             GlassBackdrop(level: glowLevel)
 
-            // Верхний тулбар: шестерёнка + капсула + три точки.
-            // Пока кнопки ничего не открывают (sheet вернём позже).
-            GlassEffectContainer(spacing: 16) {
-                TopToolbar(
-                    namespace: glassNS,
-                    onLeft: {},
-                    onCenter: {},
-                    onRight: {}
-                )
-                .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
-                .padding(.top, 8)
-            }
+            // Верхний тулбар + бобы наверху. Между капсулой и бобами — 40pt.
+            VStack(spacing: 40) {
+                // Тулбар: шестерёнка + капсула + три точки.
+                GlassEffectContainer(spacing: 16) {
+                    TopToolbar(
+                        namespace: glassNS,
+                        onLeft: {},
+                        onCenter: {},
+                        onRight: {}
+                    )
+                    .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
+                }
 
-            // Бобы (сверху) + рулер + кнопки. Всё опущено ниже.
-            VStack(spacing: 36) {
                 // Новый контрол — светящиеся бобы.
                 BobsControl()
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+            .padding(.top, 8)
 
-                VStack(spacing: 24) {
+            // Рулер + кнопки (ниже).
+            VStack(spacing: 24) {
                     // Рулер с широкими тап-зонами слева/справа (теперь СВЕРХУ).
                     HStack(spacing: 0) {
                         StepZone(
@@ -114,9 +116,8 @@ struct ContentView: View {
                     }
                     .frame(width: 240)
                 }
-            }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
-            .offset(y: 30)  // опущено ниже
+            .offset(y: 40)  // опущено ниже
 
             // Нижний тулбар — прижат к низу.
             BottomToolbar()
