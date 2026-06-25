@@ -31,6 +31,8 @@ struct BPMSheet: View {
 
                 Spacer()
             }
+            // Клавиатура не двигает/не растит контент шита.
+            .ignoresSafeArea(.keyboard, edges: .bottom)
             .navigationTitle("BPM")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -56,6 +58,8 @@ struct BPMSheet: View {
         }
         .presentationDetents([.fraction(2.0 / 3.0)])
         .presentationDragIndicator(.visible)
+        // Сплошной фон как у large-шита (не Liquid Glass middle-стиль).
+        .presentationBackground(Color(.systemBackground))
         // Дать шиту выехать, затем фокус → клавиатура.
         .task {
             try? await Task.sleep(for: .milliseconds(350))
