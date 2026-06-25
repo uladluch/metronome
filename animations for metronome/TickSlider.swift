@@ -18,6 +18,8 @@ struct TickSlider: View {
 
     /// Расстояние между тиками в точках.
     private let tickSpacing: CGFloat = 11
+    /// Чувствительность драга/инерции (<1 — медленнее, мягче реакция).
+    private let dragSensitivity: Double = 0.8
 
     @State private var dragStart: Double?
     /// Непрерывная визуальная позиция (для плавного скролла). value = округление.
@@ -104,7 +106,8 @@ struct TickSlider: View {
                             withAnimation(.easeOut(duration: 0.25)) { indicatorScale = 1.15 }
                         }
                         let start = dragStart ?? displayValue
-                        let raw = start - Double(g.translation.width / tickSpacing)
+                        // dragSensitivity < 1 — рулер реагирует медленнее (не дёргано).
+                        let raw = start - Double(g.translation.width / tickSpacing) * dragSensitivity
                         displayValue = min(max(raw, range.lowerBound), range.upperBound)
                         value = displayValue.rounded()
                     }
@@ -112,7 +115,7 @@ struct TickSlider: View {
                         dragStart = nil
                         onInteractingChange(false)
                         // Импульс по скорости броска (ticks/sec). Драг вправо уменьшает значение.
-                        let v = max(-250, min(250, -Double(g.velocity.width) / Double(tickSpacing)))
+                        let v = max(-250, min(250, -Double(g.velocity.width) / Double(tickSpacing) * dragSensitivity))
                         if abs(v) > 3 {
                             startMomentum(v)
                         } else {
