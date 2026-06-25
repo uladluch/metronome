@@ -33,8 +33,9 @@ struct PanelContent: View {
                 }
             }
             .toolbarBackground(.clear, for: .navigationBar)
-            .toolbarBackground(.visible, for: .navigationBar)
+            .scrollContentBackground(.hidden)
             .background(Color.clear)
+            .ignoresSafeArea(edges: .all)
         }
         .background(Color.clear)
     }
