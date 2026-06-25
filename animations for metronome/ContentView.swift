@@ -149,16 +149,16 @@ struct ContentView: View {
             if showNotification {
                 HStack(spacing: 12) {
                     Image(systemName: "bell.fill")
-                        .font(.system(size: 16, weight: .semibold))
+                        .font(.system(size: 18, weight: .semibold))
                         .foregroundStyle(.white)
                     Text("Hello I'm notification")
-                        .font(.body)
+                        .font(.headline)
                         .foregroundStyle(.white)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(height: 60)
                 .padding(.horizontal, 16)
-                .padding(.vertical, 12)
-                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
                 .padding(16)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
