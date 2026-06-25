@@ -93,7 +93,7 @@ private struct SheetView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Microanimations") {
+                Section {
                     // Toggle row
                     HStack {
                         Text("Toggle")
@@ -132,6 +132,18 @@ private struct SheetView: View {
                         }
                         .frame(maxWidth: 180)
                     }
+                }
+
+                // Большой длинный блок — просто чтобы шит скроллился. Подсказка
+                // пользователю: проскролль и посмотри, как затемняется топ-тулбар.
+                Section {
+                    Text("Scroll up — watch the top toolbar dim as the content scrolls under it.")
+                        .font(.title3)
+                        .foregroundStyle(.white)
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: .infinity, alignment: .center)
+                        .frame(height: 900, alignment: .top)
+                        .padding(.top, 40)
                 }
             }
             .navigationTitle("Sheet")
