@@ -43,7 +43,7 @@ struct BobsControl: View {
     }
 
     var body: some View {
-        HStack(spacing: 6) {
+        HStack(alignment: .center, spacing: 6) {
             ForEach(heightVariants.indices, id: \.self) { i in
                 let height = sizeRotations[bobSizeModes[i]][i]
                 bob(height: height, isActive: glowOn && i == activeIndex, isPressed: bobPressed[i])
@@ -69,6 +69,7 @@ struct BobsControl: View {
                     )
             }
         }
+        .frame(height: 90)  // высота максимального боба — контейнер фиксирован
     }
 
     private func tapBob(at index: Int) {
