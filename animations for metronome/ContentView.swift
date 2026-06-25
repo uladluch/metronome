@@ -155,12 +155,11 @@ struct ContentView: View {
                     Spacer(minLength: 0)
                 }
                 .padding(.horizontal, 24)              // внутренний отступ контента
-                .frame(height: 60)
-                .frame(maxWidth: .infinity)            // на всю доступную ширину
+                .frame(width: 360, height: 60)         // фиксированная ширина
                 .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
                 .shadow(color: .black.opacity(0.25), radius: 20, y: 8)  // глубина
-                .padding(.horizontal, 16)              // отступы от краёв экрана
-                .frame(maxHeight: .infinity, alignment: .top)
+                .padding(.top, 8)                       // отступ от верха
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)  // центр X, верх
                 // Apple-style: въезд = slide вниз + лёгкий scale из верхней точки +
                 // fade. Выезд = быстрый slide вверх + fade.
                 .transition(.asymmetric(
