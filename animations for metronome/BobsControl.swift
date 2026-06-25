@@ -110,7 +110,7 @@ struct BobsControl: View {
 
             // Стекло с интерактивностью (реагирует на нажатие — liquid glass look).
             Color.clear
-                .glassEffect(.regular.interactive(), in: Capsule())
+                .glassEffect(.clear.interactive(), in: Capsule())
                 .frame(width: bobWidth, height: height)
         }
         .frame(width: bobWidth, height: height)
