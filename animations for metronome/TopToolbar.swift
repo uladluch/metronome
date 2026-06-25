@@ -2,9 +2,8 @@
 //  TopToolbar.swift
 //  animations for metronome
 //
-//  Верхний тулбар: слева — шестерёнка (открывает нативный sheet настроек
-//  с zoom-переходом, .matchedTransitionSource), по центру — капсула,
-//  справа — три точки.
+//  Верхний тулбар: слева — шестерёнка, по центру — капсула, справа — три точки.
+//  Кнопки пока без действий (sheet вернём позже).
 //
 
 import SwiftUI
@@ -12,8 +11,6 @@ import SwiftUI
 struct TopToolbar: View {
 
     let namespace: Namespace.ID
-    /// Namespace для zoom-перехода sheet'а из шестерёнки.
-    let sheetNamespace: Namespace.ID
 
     let onLeft: () -> Void
     let onCenter: () -> Void
@@ -24,14 +21,13 @@ struct TopToolbar: View {
 
     var body: some View {
         HStack(spacing: 0) {
-            // Шестерёнка — источник zoom-перехода: sheet «вырастает» из неё.
+            // Шестерёнка (пока без действия).
             GlassIconButton(
                 systemName: leftIcon,
                 glassID: nil,
                 namespace: namespace,
                 action: onLeft
             )
-            .matchedTransitionSource(id: "gear", in: sheetNamespace)
 
             Spacer(minLength: 0)
 

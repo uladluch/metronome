@@ -12,14 +12,8 @@ struct ContentView: View {
     /// Namespace для GlassButton-обёрток.
     @Namespace private var glassNS
 
-    /// Namespace для zoom-перехода sheet'а из шестерёнки.
-    @Namespace private var sheetNS
-
     /// Подсветка (свечение Path) вкл/выкл.
     @State private var glowOn = false
-
-    /// Открыт ли sheet настроек (открывается из шестерёнки).
-    @State private var showSettings = false
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -30,12 +24,12 @@ struct ContentView: View {
             // Цветной свет под стеклом (lensing).
             GlassBackdrop(glowOn: glowOn)
 
-            // Верхний тулбар: шестерёнка (открывает sheet) + капсула + три точки.
+            // Верхний тулбар: шестерёнка + капсула + три точки.
+            // Пока кнопки ничего не открывают (sheet вернём позже).
             GlassEffectContainer(spacing: 16) {
                 TopToolbar(
                     namespace: glassNS,
-                    sheetNamespace: sheetNS,
-                    onLeft: { showSettings = true },
+                    onLeft: {},
                     onCenter: {},
                     onRight: {}
                 )
@@ -65,11 +59,6 @@ struct ContentView: View {
             BottomToolbar()
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 8)
-        }
-        // Нативный sheet, который «вырастает» (zoom) из шестерёнки.
-        .sheet(isPresented: $showSettings) {
-            SettingsSheet()
-                .navigationTransition(.zoom(sourceID: "gear", in: sheetNS))
         }
     }
 }
