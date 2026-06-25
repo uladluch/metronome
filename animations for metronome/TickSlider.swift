@@ -78,7 +78,7 @@ struct TickSlider: View {
                 Capsule()
                     .fill(.white)
                     .frame(width: 6, height: indicatorH)
-                    .shadow(color: .white.opacity(0.7), radius: 7 + (indicatorScale - 1) * 28)
+                    .shadow(color: .white.opacity(0.85), radius: 12 + (indicatorScale - 1) * 34)
                     .scaleEffect(indicatorScale, anchor: .bottom)
                     .offset(y: indicatorOffset)
             }
@@ -101,7 +101,7 @@ struct TickSlider: View {
                         if dragStart == nil {
                             dragStart = displayValue
                             onInteractingChange(true)
-                            withAnimation(.easeOut(duration: 0.15)) { indicatorScale = 1.2 }
+                            withAnimation(.easeOut(duration: 0.25)) { indicatorScale = 1.15 }
                         }
                         let start = dragStart ?? displayValue
                         let raw = start - Double(g.translation.width / tickSpacing)
@@ -148,9 +148,11 @@ struct TickSlider: View {
         v *= 0.95  // трение
         momentumVelocity = v
 
-        // Центральная черточка растёт со скоростью.
+        // Центральная черточка растёт со скоростью — но плавно (лерп к цели),
+        // чтобы не подскакивала.
         let speed = min(abs(v) / 80.0, 1.0)
-        indicatorScale = 1.0 + speed * 0.5
+        let targetScale = 1.0 + CGFloat(speed) * 0.4
+        indicatorScale += (targetScale - indicatorScale) * 0.2
 
         if abs(v) < 1.5 {
             stopMomentum()
