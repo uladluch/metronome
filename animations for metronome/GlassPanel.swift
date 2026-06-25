@@ -3,7 +3,8 @@
 //  animations for metronome
 //
 //  Внутренний контент панели, который раскрывается из шестерёнки через
-//  ExpandableGlassMenu. Включает NavigationStack с toolbar и inline title.
+//  ExpandableGlassMenu. Toolbar с inline маленьким тайтлом и крестиком,
+//  glass effect сохраняется (прозрачный фон).
 //
 
 import SwiftUI
@@ -16,10 +17,10 @@ struct PanelContent: View {
     var body: some View {
         NavigationStack {
             VStack(spacing: 0) {
-                // Toolbar с крестиком (аналог sheet'а).
+                // Toolbar с крестиком.
                 HStack {
                     Text("Settings")
-                        .font(.title.bold())
+                        .font(.headline)
                         .foregroundStyle(.white)
 
                     Spacer()
@@ -38,20 +39,10 @@ struct PanelContent: View {
                 }
                 .padding(20)
 
-                Divider()
-                    .background(Color.white.opacity(0.1))
-
-                // Контент
-                VStack {
-                    Text("Settings Panel")
-                        .foregroundStyle(.white)
-                        .font(.headline)
-
-                    Spacer()
-                }
-                .padding(20)
+                Spacer()
             }
             .navigationBarTitleDisplayMode(.inline)
+            .background(Color.clear)  // Glass effect: прозрачный фон вместо серого
         }
     }
 }
