@@ -123,6 +123,9 @@ struct ContentView: View {
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 8)
         }
+        // Клавиатура из BPM-шита не должна двигать контент под ним (иначе кнопки
+        // и рулер прыгают при разворачивании/сворачивании шита).
+        .ignoresSafeArea(.keyboard, edges: .bottom)
     }
 
     // MARK: - Шаг рулера и видимость кнопок +/-

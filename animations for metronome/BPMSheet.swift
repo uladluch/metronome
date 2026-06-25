@@ -81,10 +81,10 @@ struct BPMSheet: View {
         }
     }
 
-    /// Ошибка ввода: «рычащий» error-хаптик + shake поля.
+    /// Ошибка ввода: «рычащий» error-хаптик + быстрый shake поля.
     private func triggerError() {
         UINotificationFeedbackGenerator().notificationOccurred(.error)
-        withAnimation(.linear(duration: 0.4)) { shakes += 1 }
+        withAnimation(.linear(duration: 0.25)) { shakes += 1 }
     }
 }
 
@@ -92,7 +92,7 @@ struct BPMSheet: View {
 
 private struct Shake: GeometryEffect {
     var amount: CGFloat = 10
-    var shakesPerUnit: CGFloat = 3
+    var shakesPerUnit: CGFloat = 4
     var animatableData: CGFloat
 
     func effectValue(size: CGSize) -> ProjectionTransform {
