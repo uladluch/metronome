@@ -158,9 +158,18 @@ struct ContentView: View {
                 .frame(height: 60)
                 .frame(maxWidth: .infinity)            // на всю доступную ширину
                 .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+                .shadow(color: .black.opacity(0.25), radius: 20, y: 8)  // глубина
                 .padding(.horizontal, 16)              // отступы от краёв экрана
                 .frame(maxHeight: .infinity, alignment: .top)
-                .transition(.move(edge: .top).combined(with: .opacity))
+                // Apple-style: въезд = slide вниз + лёгкий scale из верхней точки +
+                // fade. Выезд = быстрый slide вверх + fade.
+                .transition(.asymmetric(
+                    insertion: .move(edge: .top)
+                        .combined(with: .opacity)
+                        .combined(with: .scale(scale: 0.9, anchor: .top)),
+                    removal: .move(edge: .top)
+                        .combined(with: .opacity)
+                ))
             }
         }
         // Клавиатура из BPM-шита не должна двигать контент под ним (иначе кнопки
@@ -215,15 +224,16 @@ struct ContentView: View {
     }
 
     /// Показать нотификацию и скрыть через 2.5s.
+    /// Apple-style: въезд — пружина с лёгким bounce; выезд — быстро и чисто.
     private func showNotificationAction() {
         notificationHideTask?.cancel()
-        withAnimation(.easeOut(duration: 0.2)) {
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.72)) {
             showNotification = true
         }
         notificationHideTask = Task { @MainActor in
             try? await Task.sleep(for: .milliseconds(2500))
             guard !Task.isCancelled else { return }
-            withAnimation(.easeOut(duration: 0.2)) {
+            withAnimation(.spring(response: 0.32, dampingFraction: 0.9)) {
                 showNotification = false
             }
         }
