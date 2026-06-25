@@ -17,6 +17,9 @@ struct BottomToolbar: View {
     @State private var value: Double = 0.5
     @State private var showSheet = false
 
+    /// Иконки громкости видны только во время взаимодействия со слайдером.
+    @State private var showVolumeIcons = false
+
     private let icon = "square"
 
     var body: some View {
@@ -31,9 +34,29 @@ struct BottomToolbar: View {
                     action: { showSheet = true }
                 )
 
-                // Нативный слайдер по центру, активный трек — #EDEDED.
-                Slider(value: $value)
+                // Слайдер с иконками громкости по бокам. Иконки всегда занимают
+                // место (через opacity) → слайдер уже и не «прыгает».
+                HStack(spacing: 8) {
+                    Image(systemName: "speaker.wave.1.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.white.opacity(0.6))
+                        .opacity(showVolumeIcons ? 1 : 0)
+
+                    Slider(value: $value, onEditingChanged: { editing in
+                        if editing {
+                            withAnimation(.easeOut(duration: 0.15)) { showVolumeIcons = true }
+                        } else {
+                            // Затухают за 300ms после взаимодействия.
+                            withAnimation(.easeInOut(duration: 0.3)) { showVolumeIcons = false }
+                        }
+                    })
                     .tint(.controlAccent)
+
+                    Image(systemName: "speaker.wave.3.fill")
+                        .font(.system(size: 13))
+                        .foregroundStyle(.white.opacity(0.6))
+                        .opacity(showVolumeIcons ? 1 : 0)
+                }
 
                 GlassIconButton(
                     systemName: icon,
