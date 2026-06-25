@@ -15,10 +15,11 @@ import SwiftUI
 struct BobsControl: View {
 
     /// Три варианта высот: маленький, средний, большой.
-    private let heightVariants: [[CGFloat]] = [
-        [60, 90, 60, 30],      // вариант 0: средний, большой, средний, маленький
-        [30, 60, 90, 60],      // вариант 1: маленький, средний, большой, средний (ротация)
-        [90, 60, 30, 60]       // вариант 2: большой, средний, маленький, средний (ротация)
+    private let heightVariants: [CGFloat] = [60, 90, 60, 30]  // исходные размеры 4 бобов
+    private let sizeRotations: [[CGFloat]] = [
+        [60, 90, 60, 30],      // вариант 0: исходный
+        [90, 60, 30, 60],      // вариант 1: сдвинуто
+        [30, 60, 90, 60]       // вариант 2: сдвинуто ещё
     ]
     private let bobWidth: CGFloat = 40
 
@@ -29,12 +30,10 @@ struct BobsControl: View {
     /// Яркость вспышки: 0.5 — затухло, 1.0 — пик удара. Тот же источник, что и картинка.
     var glowLevel: Double = 0.5
 
-    /// Текущий вариант размеров (0, 1, 2) — циклируется при тапе.
-    @State private var sizeMode: Int = 0
-    /// Масштаб для bounce анимации (при тапе).
-    @State private var bounceScale: CGFloat = 1.0
-
-    private var heights: [CGFloat] { heightVariants[sizeMode] }
+    /// Для каждого боба (индекс 0-3): его текущий вариант размера (0, 1, 2).
+    @State private var bobSizeModes: [Int] = [0, 0, 0, 0]
+    /// Для каждого боба: масштаб для bounce анимации.
+    @State private var bobBounceScales: [CGFloat] = [1, 1, 1, 1]
 
     /// Нормализованная сила удара: 0 (затухло) … 1 (пик). Из glowLevel 0.5…1.0.
     private var pulse: Double {
@@ -43,36 +42,37 @@ struct BobsControl: View {
 
     var body: some View {
         HStack(spacing: 6) {
-            ForEach(heights.indices, id: \.self) { i in
-                bob(height: heights[i], isActive: glowOn && i == activeIndex)
-                    .scaleEffect(bounceScale)
+            ForEach(heightVariants.indices, id: \.self) { i in
+                let height = sizeRotations[bobSizeModes[i]][i]
+                bob(height: height, isActive: glowOn && i == activeIndex)
+                    .scaleEffect(bobBounceScales[i])
                     .onTapGesture {
-                        tapBob()
+                        tapBob(at: i)
                     }
             }
         }
     }
 
-    private func tapBob() {
+    private func tapBob(at index: Int) {
         // Haptic feedback
         UIImpactFeedbackGenerator(style: .light).impactOccurred()
 
-        // Смещение размеров вперёд на один вариант (ротация 0 → 1 → 2 → 0)
-        sizeMode = (sizeMode + 1) % 3
+        // Смещение размера только этого боба (0 → 1 → 2 → 0)
+        bobSizeModes[index] = (bobSizeModes[index] + 1) % 3
 
-        // Bounce анимация: вниз до 0.95, обратно до 1.0
+        // Bounce анимация для этого боба
         withAnimation(.interpolatingSpring(stiffness: 150, damping: 8)) {
-            bounceScale = 0.95
+            bobBounceScales[index] = 0.95
         }
         withAnimation(.interpolatingSpring(stiffness: 150, damping: 8).delay(0.05)) {
-            bounceScale = 1.0
+            bobBounceScales[index] = 1.0
         }
     }
 
     private func bob(height: CGFloat, isActive: Bool) -> some View {
-        // Подложка: 36% серая по умолчанию. Активная вспыхивает к белому на пике удара и
+        // Подложка: 40% серая по умолчанию. Активная вспыхивает к белому на пике удара и
         // плавно гаснет к серому вместе с pulse → к следующему удару уже серая.
-        let fillOpacity = isActive ? (0.36 + 0.64 * pulse) : 0.36
+        let fillOpacity = isActive ? (0.4 + 0.6 * pulse) : 0.4
         // Свечение — только у активного, его сила = pulse (синхронно с картинкой).
         let glow = isActive ? pulse : 0
 
