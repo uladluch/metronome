@@ -59,6 +59,8 @@ struct ContentView: View {
                 }
 
                 // Белая prominent-кнопка (тот же функционал), чёрный шрифт.
+                // Высоту зажимаем на 50pt всей кнопке (иначе паддинги .glassProminent
+                // делают её выше чёрной).
                 Button(action: {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
@@ -67,10 +69,10 @@ struct ContentView: View {
                         .font(.headline)
                         .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
-                        .frame(height: 50)
                 }
                 .buttonStyle(.glassProminent)
                 .tint(.white)
+                .frame(height: 50)
             }
             .frame(width: 240)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
