@@ -114,10 +114,10 @@ struct ContentView: View {
                                 .frame(height: 50)
                         }
 
-                        // Белая кнопка — нативный интерактив Liquid Glass через
-                        // .glassEffect(.regular.tint(.white).interactive()): свет следует
-                        // за пальцем из коробки. .plain + glass ВНУТРИ label держит
-                        // размер (height 50), не раздувая кнопку как .glassProminent.
+                        // Белая кнопка — НАТИВНЫЙ .glassProminent + tint(.white).
+                        // Фирменное specular-«переливание» Liquid Glass на нажатие даёт
+                        // именно нативный button style; ручной .glassEffect на .plain
+                        // его не показывает (а сплошная белая заливка глушит блик).
                         Button(action: {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             toggleGlow()
@@ -127,10 +127,9 @@ struct ContentView: View {
                                 .foregroundStyle(.black)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
-                                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
-                                .contentShape(Capsule())
                         }
-                        .buttonStyle(.plain)
+                        .buttonStyle(.glassProminent)
+                        .tint(.white)
                     }
                     .frame(width: 240)
                 }
