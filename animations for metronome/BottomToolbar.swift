@@ -39,7 +39,7 @@ struct BottomToolbar: View {
                 HStack(spacing: 8) {
                     Image(systemName: "speaker.wave.1.fill")
                         .font(.system(size: 13))
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(.white)
                         .opacity(showVolumeIcons ? 1 : 0)
 
                     Slider(value: $value, onEditingChanged: { editing in
@@ -51,10 +51,13 @@ struct BottomToolbar: View {
                         }
                     })
                     .tint(.controlAccent)
+                    // Очень нежный хаптик на каждые 5% слайдера.
+                    .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.4),
+                                     trigger: Int(value * 20))
 
                     Image(systemName: "speaker.wave.3.fill")
                         .font(.system(size: 13))
-                        .foregroundStyle(.white.opacity(0.6))
+                        .foregroundStyle(.white)
                         .opacity(showVolumeIcons ? 1 : 0)
                 }
 
