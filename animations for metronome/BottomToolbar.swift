@@ -59,15 +59,31 @@ struct BottomToolbar: View {
 private struct SheetView: View {
 
     @Environment(\.dismiss) private var dismiss
-    @State private var isOn = true
+
+    @State private var toggleOn = true
+    @State private var sliderValue: Double = 0.5
+    @State private var selectedSegment = 0
 
     var body: some View {
         NavigationStack {
-            VStack {
-                Toggle("Toggle", isOn: $isOn)
-                    .tint(.controlAccent)
-                    .padding()
-                Spacer()
+            Form {
+                Section("Микроанимации") {
+                    // Toggle
+                    Toggle("Микроанимация", isOn: $toggleOn)
+                        .tint(.controlAccent)
+
+                    // Slider
+                    Slider(value: $sliderValue, in: 0...1)
+                        .tint(.controlAccent)
+
+                    // Segmented Control
+                    Picker("Тип", selection: $selectedSegment) {
+                        Text("Быстро").tag(0)
+                        Text("Нормально").tag(1)
+                        Text("Медленно").tag(2)
+                    }
+                    .pickerStyle(.segmented)
+                }
             }
             .navigationTitle("Sheet")
             .navigationBarTitleDisplayMode(.large)
