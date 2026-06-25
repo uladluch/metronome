@@ -2,11 +2,15 @@
 //  CloseButton.swift
 //  animations for metronome
 //
-//  Единая кнопка закрытия (крестик) для всех оверлеев и sheet'ов.
-//  44×44, полностью Liquid Glass (.clear). Один источник правды.
+//  Единая НАТИВНАЯ кнопка закрытия (крестик) для всех оверлеев и sheet'ов.
+//  44×44, системный Liquid Glass стиль (.buttonStyle(.glass)) — тот же, что
+//  тулбар применяет автоматически, но вызванный standalone.
 //
-//  ВАЖНО: НЕ класть в ToolbarItem — там iOS 26 сама оборачивает в стекло,
-//  получится «кнопка в кнопке». Ставить вручную (overlay / HStack).
+//  ВАЖНО:
+//  - НЕ класть в ToolbarItem — там iOS сама оборачивает в стекло → «кнопка в кнопке».
+//    Ставить через .overlay / HStack.
+//  - .clipShape(Circle()) обязателен — без него .buttonStyle(.glass) даёт
+//    rendering artifacts (кнопку «расплющивает»).
 //
 
 import SwiftUI
@@ -22,10 +26,10 @@ struct CloseButton: View {
         }) {
             Image(systemName: "xmark")
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(.white)
                 .frame(width: 44, height: 44)
-                .appGlass(in: Circle(), interactive: true)  // clear glass, 44×44
         }
-        .buttonStyle(.plain)
+        .buttonStyle(.glass)         // системный Liquid Glass стиль (нативный)
+        .buttonBorderShape(.circle)  // круглая форма
+        .clipShape(Circle())         // фикс rendering artifacts (иначе плющит)
     }
 }

@@ -110,12 +110,17 @@ private struct SheetView: View {
             }
             .navigationTitle("Sheet")
             .navigationBarTitleDisplayMode(.large)
-        }
-        // Кнопка ВНЕ тулбара — иначе iOS оборачивает её в своё стекло (двойное).
-        .overlay(alignment: .topTrailing) {
-            CloseButton { dismiss() }  // та же кнопка, что в оверлее
-                .padding(.trailing, 12)
-                .padding(.top, 4)
+            .toolbar {
+                // Нативная кнопка тулбара — iOS 26 сама оборачивает в Liquid Glass.
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                    }
+                }
+            }
         }
     }
 }
