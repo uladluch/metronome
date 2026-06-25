@@ -146,15 +146,11 @@ private struct SheetView: View {
                         .padding(.top, 40)
                 }
             }
-            // Заголовок — СВОЙ элемент в тулбаре (не navigationTitle, который
-            // навбар сворачивает в маленький по центру при скролле). Так он
-            // зафиксирован большим слева и при скролле не меняется.
+            .navigationTitle("Sheet")
+            // Штатный режим: большой заголовок зафиксирован в тулбаре, не уходит
+            // в маленький inline при скролле.
+            .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Text("Sheet")
-                        .font(.largeTitle.bold())
-                        .foregroundStyle(.white)
-                }
                 // Нативная кнопка тулбара — iOS 26 сама оборачивает в Liquid Glass.
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
