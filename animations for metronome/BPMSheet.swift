@@ -31,8 +31,6 @@ struct BPMSheet: View {
 
                 Spacer()
             }
-            // Клавиатура не двигает/не растит контент шита.
-            .ignoresSafeArea(.keyboard, edges: .bottom)
             .navigationTitle("BPM")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -45,17 +43,22 @@ struct BPMSheet: View {
                         Image(systemName: "xmark")
                     }
                 }
-                // Чек справа — подтвердить.
+                // Чек справа — белая prominent-кнопка, чёрная иконка.
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         dismiss()
                     }) {
                         Image(systemName: "checkmark")
+                            .foregroundStyle(.black)
                     }
+                    .buttonStyle(.glassProminent)
+                    .tint(.white)
                 }
             }
         }
+        // Клавиатура не растит/не двигает шит (на весь NavigationStack).
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         .presentationDetents([.fraction(2.0 / 3.0)])
         .presentationDragIndicator(.visible)
         // Сплошной фон как у large-шита (не Liquid Glass middle-стиль).
