@@ -154,11 +154,13 @@ struct ContentView: View {
                     Text("Hello I'm notification")
                         .font(.headline)
                         .foregroundStyle(.white)
+                    Spacer()
                 }
                 .frame(height: 60)
+                .padding(.horizontal, 24)
                 .containerRelativeFrame(.horizontal) { width, _ in width - 32 }
                 .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
-                .padding(16)
+                .padding(EdgeInsets(top: 16, leading: 16, bottom: 0, trailing: 16))
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
