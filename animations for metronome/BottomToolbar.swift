@@ -16,6 +16,7 @@ struct BottomToolbar: View {
 
     @State private var value: Double = 0.5
     @State private var showSheet = false
+    @State private var showBPM = false
 
     /// Иконки громкости видны только во время взаимодействия со слайдером.
     @State private var showVolumeIcons = false
@@ -61,11 +62,12 @@ struct BottomToolbar: View {
                         .opacity(showVolumeIcons ? 1 : 0)
                 }
 
+                // Правая кнопка — второй шит (ввод BPM).
                 GlassIconButton(
                     systemName: icon,
                     glassID: nil,
                     namespace: ns,
-                    action: { showSheet = true }
+                    action: { showBPM = true }
                 )
             }
             .frame(height: 60)
@@ -76,6 +78,10 @@ struct BottomToolbar: View {
             SheetView()
                 .presentationDetents([.large])           // только .large (не medium)
                 .presentationDragIndicator(.visible)     // grabber сверху
+        }
+        // Второй шит — ввод BPM (правая кнопка).
+        .sheet(isPresented: $showBPM) {
+            BPMSheet()
         }
     }
 }
