@@ -135,7 +135,9 @@ private struct SheetView: View {
                 }
             }
             .navigationTitle("Sheet")
-            .navigationBarTitleDisplayMode(.large)
+            // iOS 26: большой заголовок ВНУТРИ тулбара (inline), не сворачивается
+            // при скролле — крестик остаётся на той же строке справа.
+            .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
                 // Нативная кнопка тулбара — iOS 26 сама оборачивает в Liquid Glass.
                 ToolbarItem(placement: .topBarTrailing) {
