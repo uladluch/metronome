@@ -17,6 +17,7 @@ struct GlassButton<Label: View>: View {
     private let action: () -> Void
     private let label: Label
     private let showDome: Bool
+    private let scaleOnPress: Bool
 
     @State private var isPressed = false
 
@@ -26,6 +27,7 @@ struct GlassButton<Label: View>: View {
         namespace: Namespace.ID,
         action: @escaping () -> Void,
         showDome: Bool = true,
+        scaleOnPress: Bool = false,
         @ViewBuilder label: () -> Label
     ) {
         self.shape = AnyShape(shape)
@@ -33,6 +35,7 @@ struct GlassButton<Label: View>: View {
         self.namespace = namespace
         self.action = action
         self.showDome = showDome
+        self.scaleOnPress = scaleOnPress
         self.label = label()
     }
 
@@ -103,5 +106,7 @@ struct GlassButton<Label: View>: View {
                 }
         )
         .accessibilityAddTraits(.isButton)
+        // Лёгкое увеличение на нажатие (опционально).
+        .scaleEffect(scaleOnPress && isPressed ? 1.05 : 1.0)
     }
 }
