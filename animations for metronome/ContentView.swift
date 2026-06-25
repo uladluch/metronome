@@ -144,7 +144,7 @@ struct ContentView: View {
         // Клавиатура из BPM-шита не должна двигать контент под ним (иначе кнопки
         // и рулер прыгают при разворачивании/сворачивании шита).
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        // Overlay нотификации (левый край, под safe area).
+        // Overlay нотификации (левый край, под safe area, с отступами по сторонам).
         .overlay(alignment: .topLeading) {
             if showNotification {
                 HStack(spacing: 12) {
@@ -155,9 +155,8 @@ struct ContentView: View {
                         .font(.headline)
                         .foregroundStyle(.white)
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
                 .frame(height: 60)
-                .padding(.horizontal, 16)
+                .containerRelativeFrame(.horizontal) { width in width - 32 }
                 .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
                 .padding(16)
                 .transition(.move(edge: .top).combined(with: .opacity))
