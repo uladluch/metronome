@@ -61,10 +61,17 @@ struct GlassIconButton: View {
     let namespace: Namespace.ID
     var size: CGFloat = 60
     var iconSize: CGFloat = 22
+    var repeatAction: (() -> Void)? = nil
     let action: () -> Void
 
     var body: some View {
-        GlassButton(shape: Circle(), glassID: glassID, namespace: namespace, action: action) {
+        GlassButton(
+            shape: Circle(),
+            glassID: glassID,
+            namespace: namespace,
+            action: action,
+            repeatAction: repeatAction
+        ) {
             Image(systemName: systemName)
                 .font(.system(size: iconSize, weight: .medium))
                 .foregroundStyle(.white)

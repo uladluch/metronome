@@ -18,6 +18,10 @@ struct ContentView: View {
     /// Значение «линейки» (tick-слайдер) под кнопками.
     @State private var tempo: Double = 120
 
+    /// Видны ли кнопки +/- (по умолчанию скрыты, появляются при взаимодействии).
+    @State private var controlsVisible = false
+    @State private var hideTask: Task<Void, Never>?
+
     var body: some View {
         ZStack(alignment: .top) {
             // Тёмная тема: основной фон полностью чёрный.
@@ -82,18 +86,23 @@ struct ContentView: View {
                 .frame(width: 240)
 
                 // Рулер с кнопками шага слева/справа (тот же GlassIconButton, 40×40).
-                HStack(spacing: 10) {
+                // Кнопки скрыты по умолчанию, появляются при взаимодействии с рулером.
+                HStack(spacing: 8) {
                     GlassIconButton(
                         systemName: "minus",
                         glassID: nil,
                         namespace: glassNS,
                         size: 40,
                         iconSize: 18,
-                        action: { tempo = max(tempo - 1, 40) }
+                        repeatAction: { step(-1) },
+                        action: { step(-1) }
                     )
+                    .opacity(controlsVisible ? 1 : 0)
 
-                    TickSlider(value: $tempo)
-                        .frame(width: 250, height: 44)
+                    TickSlider(value: $tempo, onInteractingChange: { interacting in
+                        if interacting { showControls() } else { scheduleHide() }
+                    })
+                    .frame(width: 250, height: 44)
 
                     GlassIconButton(
                         systemName: "plus",
@@ -101,8 +110,10 @@ struct ContentView: View {
                         namespace: glassNS,
                         size: 40,
                         iconSize: 18,
-                        action: { tempo = min(tempo + 1, 240) }
+                        repeatAction: { step(1) },
+                        action: { step(1) }
                     )
+                    .opacity(controlsVisible ? 1 : 0)
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
@@ -112,6 +123,31 @@ struct ContentView: View {
             BottomToolbar()
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 8)
+        }
+    }
+
+    // MARK: - Шаг рулера и видимость кнопок +/-
+
+    /// Шаг на ±1 (clamp 40...240) + держим кнопки видимыми.
+    private func step(_ delta: Double) {
+        tempo = min(max(tempo + delta, 40), 240)
+        showControls()
+        scheduleHide()
+    }
+
+    /// Быстро показать кнопки.
+    private func showControls() {
+        hideTask?.cancel()
+        withAnimation(.easeOut(duration: 0.12)) { controlsVisible = true }
+    }
+
+    /// Спрятать кнопки: лёгкая задержка, потом плавное затухание (300ms).
+    private func scheduleHide() {
+        hideTask?.cancel()
+        hideTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(400))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeInOut(duration: 0.3)) { controlsVisible = false }
         }
     }
 }

@@ -13,6 +13,8 @@ struct TickSlider: View {
 
     @Binding var value: Double
     var range: ClosedRange<Double> = 40...240
+    /// Сообщает наружу: true — начали тянуть, false — отпустили.
+    var onInteractingChange: (Bool) -> Void = { _ in }
 
     /// Расстояние между тиками в точках.
     private let tickSpacing: CGFloat = 11
@@ -90,7 +92,10 @@ struct TickSlider: View {
             .gesture(
                 DragGesture()
                     .onChanged { g in
-                        if dragStart == nil { dragStart = displayValue }
+                        if dragStart == nil {
+                            dragStart = displayValue
+                            onInteractingChange(true)
+                        }
                         active = true
                         let start = dragStart ?? displayValue
                         let raw = start - Double(g.translation.width / tickSpacing)
@@ -100,6 +105,7 @@ struct TickSlider: View {
                     .onEnded { _ in
                         dragStart = nil
                         active = false
+                        onInteractingChange(false)
                         // Снап: меняем value → onChange плавно доводит displayValue до черточки.
                         value = min(max(displayValue.rounded(), range.lowerBound), range.upperBound)
                     }
