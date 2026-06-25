@@ -73,10 +73,13 @@ struct BPMSheet: View {
             }
         }
         .presentationDetents([.large])
-        // Дать шиту открыться, затем фокус → клавиатура + хаптик на её появление.
+        // Дать шиту открыться, затем фокус → клавиатура.
         .task {
             try? await Task.sleep(for: .milliseconds(350))
             focused = true
+        }
+        // Хаптик именно в момент появления клавиатуры (а не на фокус).
+        .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in
             UIImpactFeedbackGenerator(style: .soft).impactOccurred()
         }
     }
