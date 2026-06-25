@@ -32,9 +32,10 @@ struct PanelContent: View {
                     }
                 }
             }
-            .toolbarBackground(.hidden, for: .navigationBar)
-            // КЛЮЧЕВОЕ: убирает серый фон контейнера NavigationStack (не только bar),
-            // чтобы стекло под ним было видно (iOS 26 Liquid Glass).
+            // КЛЮЧЕВОЕ: убирает серый фон контейнера NavigationStack, чтобы стекло
+            // под ним было видно. НЕ используем .toolbarBackground(.hidden) — он
+            // снимает Liquid Glass и с самой тулбар-кнопки (в sheet его нет, поэтому
+            // там у кнопки есть кромка-стекло).
             .containerBackground(.clear, for: .navigation)
             .scrollContentBackground(.hidden)
         }
