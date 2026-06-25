@@ -31,7 +31,7 @@ struct TickSlider: View {
 
             // Общая нижняя линия для тиков и центральной черточки.
             let baseline = h - 4
-            let indicatorH = h * 0.7
+            let indicatorH = h * 0.8
             // Смещение капсулы вниз, чтобы её низ совпал с baseline.
             let indicatorOffset = baseline - indicatorH / 2 - h / 2
 
@@ -41,7 +41,7 @@ struct TickSlider: View {
                 // чтобы было видно движение и направление.
                 Canvas { ctx, size in
                     let minorH = size.height * 0.38
-                    let majorH = size.height * 0.62
+                    let majorH = size.height * 0.55
                     let half = Int(cx / tickSpacing) + 2
                     let base = displayValue.rounded()
                     let maxDist = cx * 0.85  // за этим — полностью погасли (жёстко)
