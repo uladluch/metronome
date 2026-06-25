@@ -48,8 +48,9 @@ struct ContentView: View {
                     action: {
                         withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
                     },
-                    showDome: false,
-                    pressScale: 1.1           // сильнее увеличение на нажатие
+                    showDome: false
+                    // без кастомного pressScale — только нативный интерактив стекла,
+                    // чтобы реакция совпадала с белой кнопкой
                 ) {
                     Text(glowOn ? "Turn off glow" : "Turn on glow")
                         .font(.headline)
