@@ -110,11 +110,12 @@ private struct SheetView: View {
             }
             .navigationTitle("Sheet")
             .navigationBarTitleDisplayMode(.large)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    CloseButton { dismiss() }  // та же кнопка, что в оверлее
-                }
-            }
+        }
+        // Кнопка ВНЕ тулбара — иначе iOS оборачивает её в своё стекло (двойное).
+        .overlay(alignment: .topTrailing) {
+            CloseButton { dismiss() }  // та же кнопка, что в оверлее
+                .padding(.trailing, 12)
+                .padding(.top, 4)
         }
     }
 }

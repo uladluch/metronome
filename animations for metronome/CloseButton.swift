@@ -3,7 +3,10 @@
 //  animations for metronome
 //
 //  Единая кнопка закрытия (крестик) для всех оверлеев и sheet'ов.
-//  Один источник правды — меняешь тут, меняется везде.
+//  44×44, полностью Liquid Glass (.clear). Один источник правды.
+//
+//  ВАЖНО: НЕ класть в ToolbarItem — там iOS 26 сама оборачивает в стекло,
+//  получится «кнопка в кнопке». Ставить вручную (overlay / HStack).
 //
 
 import SwiftUI
@@ -18,8 +21,11 @@ struct CloseButton: View {
             action()
         }) {
             Image(systemName: "xmark")
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(.white)
+                .frame(width: 44, height: 44)
+                .appGlass(in: Circle(), interactive: true)  // clear glass, 44×44
         }
-        .buttonStyle(.glass)        // нативная iOS 26 glass-кнопка
-        .buttonBorderShape(.circle) // круглая
+        .buttonStyle(.plain)
     }
 }
