@@ -89,6 +89,7 @@ private struct SheetView: View {
     @State private var toggleOn = true
     @State private var sliderValue: Double = 0.5
     @State private var selectedSegment = 0
+    @State private var showPopover = false
 
     var body: some View {
         NavigationStack {
@@ -131,6 +132,23 @@ private struct SheetView: View {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         }
                         .frame(maxWidth: 180)
+                    }
+
+                    // Popover row
+                    HStack {
+                        Text("Popover")
+                        Spacer()
+                        Button("Show") {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            showPopover = true
+                        }
+                        .popover(isPresented: $showPopover) {
+                            Text("Hello")
+                                .font(.headline)
+                                .padding()
+                                // На iPhone (compact) форсируем именно popover, а не sheet.
+                                .presentationCompactAdaptation(.popover)
+                        }
                     }
                 }
 
