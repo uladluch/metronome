@@ -33,8 +33,9 @@ struct ContentView: View {
 
     /// Показать ли нотификацию.
     @State private var showNotification = false
-    /// Таск для автоскрытия нотификации через 2.5с.
-    @State private var notificationHideTask: Task<Void, Never>?
+    /// Отложенное скрытие нотификации (2.5с). DispatchWorkItem — чтобы withAnimation
+    /// гарантированно проигрывал transition (внутри Task после await не работает).
+    @State private var notificationHideWork: DispatchWorkItem?
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -222,20 +223,21 @@ struct ContentView: View {
     }
 
     /// Показать нотификацию и скрыть через 2.5s.
-    /// Apple-style: въезд — пружина с лёгким bounce; выезд — быстро и чисто.
+    /// Apple-style: вход и выход — одна и та же красивая пружина (зеркально).
     private func showNotificationAction() {
-        notificationHideTask?.cancel()
+        notificationHideWork?.cancel()
         withAnimation(.spring(response: 0.5, dampingFraction: 0.72)) {
             showNotification = true
         }
-        notificationHideTask = Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(2500))
-            guard !Task.isCancelled else { return }
-            // Выезд той же пружиной что и въезд — зеркальная красивая анимация.
+        // DispatchQueue.main.asyncAfter (а НЕ Task): withAnimation в чистом тике
+        // runloop надёжно проигрывает transition удаления.
+        let work = DispatchWorkItem {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.72)) {
                 showNotification = false
             }
         }
+        notificationHideWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5, execute: work)
     }
 
     /// Быстро показать кнопки.
