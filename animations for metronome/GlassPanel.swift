@@ -3,10 +3,10 @@
 //  animations for metronome
 //
 //  Внутренний контент панели, который раскрывается из шестерёнки через
-//  ExpandableGlassMenu. NavigationStack с нативным toolbar и inline-тайтлом —
-//  кнопка-крестик нативная (её рисует ToolbarItem). Прозрачность navigation bar
-//  глобально настроена в App.init (UINavigationBarAppearance), плюс
-//  .toolbarBackground(.hidden) — поэтому стекло видно и фон не светлеет.
+//  ExpandableGlassMenu. NavigationStack с нативным toolbar и inline-тайтлом.
+//  Крестик — голый Image в ToolbarItem (стекло даёт сам тулбар, без «кнопки в
+//  кнопке»). Серый фон КОНТЕЙНЕРА убран (.containerBackground(.clear)), а стекло
+//  самого bar явно включено (.toolbarBackground(.visible)).
 //
 
 import SwiftUI
@@ -35,9 +35,11 @@ struct PanelContent: View {
                         }
                 }
             }
-            // Убирает серый фон контейнера NavigationStack → стекло под ним видно.
+            // Серый фон КОНТЕЙНЕРА убираем (окно прозрачное)...
             .containerBackground(.clear, for: .navigation)
             .scrollContentBackground(.hidden)
+            // ...но стекло самого TOOLBAR-bar возвращаем явно.
+            .toolbarBackground(.visible, for: .navigationBar)
         }
     }
 }
