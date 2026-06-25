@@ -30,6 +30,10 @@ struct PanelContent: View {
                     }) {
                         Image(systemName: "xmark")
                     }
+                    // Своё стекло у кнопки — подложку тулбара убрал containerBackground,
+                    // поэтому кромку даём явно (.glass), чтобы было как в sheet.
+                    .buttonStyle(.glass)
+                    .buttonBorderShape(.circle)
                 }
             }
             // КЛЮЧЕВОЕ: убирает серый фон контейнера NavigationStack, чтобы стекло
