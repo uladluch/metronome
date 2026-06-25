@@ -58,9 +58,9 @@ struct ContentView: View {
                         .frame(height: 50)
                 }
 
-                // Белая prominent-кнопка (тот же функционал), чёрный шрифт.
-                // Высоту зажимаем на 50pt всей кнопке (иначе паддинги .glassProminent
-                // делают её выше чёрной).
+                // Белая кнопка (тот же функционал), чёрный шрифт.
+                // Стекло прямо на лейбле 50pt (как у чёрной) → ровно 50pt, не сдавлено.
+                // .regular.tint(.white) — белая заливка + интерактив.
                 Button(action: {
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
@@ -69,10 +69,10 @@ struct ContentView: View {
                         .font(.headline)
                         .foregroundStyle(.black)
                         .frame(maxWidth: .infinity)
+                        .frame(height: 50)
+                        .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
                 }
-                .buttonStyle(.glassProminent)
-                .tint(.white)
-                .frame(height: 50)
+                .buttonStyle(.plain)
             }
             .frame(width: 240)
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
