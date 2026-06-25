@@ -85,44 +85,18 @@ struct ContentView: View {
                 }
                 .frame(width: 240)
 
-                // Рулер с кнопками шага слева/справа (тот же GlassIconButton, 40×40).
-                // Кнопки скрыты по умолчанию, появляются при взаимодействии с рулером.
-                HStack(spacing: -14) {
-                    GlassIconButton(
-                        systemName: "minus",
-                        glassID: nil,
-                        namespace: glassNS,
-                        size: 40,
-                        iconSize: 18,
-                        repeatAction: { step(-1) },
-                        action: { step(-1) }
-                    )
-                    .opacity(controlsVisible ? 1 : 0)
-                    .zIndex(1)  // тапаются даже скрытыми: тап показывает и сразу жмёт
+                // Рулер с широкими тап-зонами слева/справа. Кнопки 44×44 скрыты по
+                // умолчанию; тап в зоне (даже мимо кнопки) показывает их и делает шаг.
+                HStack(spacing: 0) {
+                    stepZone(systemName: "minus", delta: -1, buttonAlignment: .trailing)
 
                     TickSlider(value: $tempo, onInteractingChange: { interacting in
                         if interacting { showControls() } else { scheduleHide() }
                     })
-                    .frame(width: 250, height: 100)  // выше — зона свайпа больше
+                    .frame(width: 230, height: 100)  // выше — зона свайпа больше
 
-                    GlassIconButton(
-                        systemName: "plus",
-                        glassID: nil,
-                        namespace: glassNS,
-                        size: 40,
-                        iconSize: 18,
-                        repeatAction: { step(1) },
-                        action: { step(1) }
-                    )
-                    .opacity(controlsVisible ? 1 : 0)
-                    .zIndex(1)  // тапаются даже скрытыми: тап показывает и сразу жмёт
+                    stepZone(systemName: "plus", delta: 1, buttonAlignment: .leading)
                 }
-                // Любое касание в зоне роу (вкл. место скрытых кнопок) показывает их.
-                .simultaneousGesture(
-                    DragGesture(minimumDistance: 0)
-                        .onChanged { _ in showControls() }
-                        .onEnded { _ in scheduleHide() }
-                )
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .offset(y: -60)  // чуть выше середины
@@ -141,6 +115,29 @@ struct ContentView: View {
         tempo = min(max(tempo + delta, 40), 240)
         showControls()
         scheduleHide()
+    }
+
+    /// Широкая тап-зона сбоку от рулера: тап в любом месте зоны (даже мимо кнопки)
+    /// показывает кнопку и делает шаг. Кнопка 44×44 прижата к рулеру (alignment).
+    @ViewBuilder
+    private func stepZone(systemName: String, delta: Double, buttonAlignment: Alignment) -> some View {
+        ZStack(alignment: buttonAlignment) {
+            Color.clear
+                .contentShape(Rectangle())
+                .onTapGesture { step(delta) }
+
+            GlassIconButton(
+                systemName: systemName,
+                glassID: nil,
+                namespace: glassNS,
+                size: 44,
+                iconSize: 20,
+                repeatAction: { step(delta) },
+                action: { step(delta) }
+            )
+            .opacity(controlsVisible ? 1 : 0)
+        }
+        .frame(width: 56, height: 100)
     }
 
     /// Быстро показать кнопки.
