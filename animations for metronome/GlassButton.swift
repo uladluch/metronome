@@ -17,7 +17,8 @@ struct GlassButton<Label: View>: View {
     private let action: () -> Void
     private let label: Label
     private let showDome: Bool
-    private let scaleOnPress: Bool
+    private let pressScale: CGFloat
+    private let glassStyle: Glass
 
     @State private var isPressed = false
 
@@ -27,7 +28,8 @@ struct GlassButton<Label: View>: View {
         namespace: Namespace.ID,
         action: @escaping () -> Void,
         showDome: Bool = true,
-        scaleOnPress: Bool = false,
+        pressScale: CGFloat = 1.0,        // 1.0 = без увеличения на нажатие
+        glassStyle: Glass = AppGlass.style,
         @ViewBuilder label: () -> Label
     ) {
         self.shape = AnyShape(shape)
@@ -35,7 +37,8 @@ struct GlassButton<Label: View>: View {
         self.namespace = namespace
         self.action = action
         self.showDome = showDome
-        self.scaleOnPress = scaleOnPress
+        self.pressScale = pressScale
+        self.glassStyle = glassStyle
         self.label = label()
     }
 
@@ -64,9 +67,9 @@ struct GlassButton<Label: View>: View {
                     .animation(.easeOut(duration: 0.22), value: isPressed)
             }
 
-            // Стекло поверх полусферы.
+            // Стекло поверх полусферы (стиль настраивается параметром).
             label
-                .appGlass(in: shape, interactive: true)
+                .glassEffect(glassStyle.interactive(), in: shape)
                 .glassMorphID(glassID, in: namespace)
         }
         .clipShape(shape)
@@ -106,7 +109,7 @@ struct GlassButton<Label: View>: View {
                 }
         )
         .accessibilityAddTraits(.isButton)
-        // Лёгкое увеличение на нажатие (опционально).
-        .scaleEffect(scaleOnPress && isPressed ? 1.05 : 1.0)
+        // Увеличение на нажатие (pressScale, 1.0 = выкл).
+        .scaleEffect(isPressed ? pressScale : 1.0)
     }
 }
