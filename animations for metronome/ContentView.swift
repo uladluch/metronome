@@ -98,8 +98,7 @@ struct ContentView: View {
                         action: { step(-1) }
                     )
                     .opacity(controlsVisible ? 1 : 0)
-                    .allowsHitTesting(controlsVisible)  // скрытые — не тапаются
-                    .zIndex(1)
+                    .zIndex(1)  // тапаются даже скрытыми: тап показывает и сразу жмёт
 
                     TickSlider(value: $tempo, onInteractingChange: { interacting in
                         if interacting { showControls() } else { scheduleHide() }
@@ -116,8 +115,7 @@ struct ContentView: View {
                         action: { step(1) }
                     )
                     .opacity(controlsVisible ? 1 : 0)
-                    .allowsHitTesting(controlsVisible)  // скрытые — не тапаются
-                    .zIndex(1)
+                    .zIndex(1)  // тапаются даже скрытыми: тап показывает и сразу жмёт
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
@@ -145,11 +143,11 @@ struct ContentView: View {
         withAnimation(.easeOut(duration: 0.12)) { controlsVisible = true }
     }
 
-    /// Спрятать кнопки: лёгкая задержка, потом плавное затухание (300ms).
+    /// Спрятать кнопки: через 3 секунды бездействия — плавное затухание (300ms).
     private func scheduleHide() {
         hideTask?.cancel()
         hideTask = Task { @MainActor in
-            try? await Task.sleep(for: .milliseconds(400))
+            try? await Task.sleep(for: .seconds(3))
             guard !Task.isCancelled else { return }
             withAnimation(.easeInOut(duration: 0.3)) { controlsVisible = false }
         }
