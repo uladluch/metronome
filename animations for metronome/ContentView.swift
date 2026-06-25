@@ -37,20 +37,37 @@ struct ContentView: View {
                 .padding(.top, 8)
             }
 
-            // Кнопка по центру: включает/выключает подсветку (свечение Path).
-            GlassButton(
-                shape: Capsule(),
-                namespace: glassNS,
-                action: {
+            // Две кнопки по центру: обе включают/выключают подсветку (Path).
+            VStack(spacing: 12) {
+                // Стеклянная кнопка.
+                GlassButton(
+                    shape: Capsule(),
+                    namespace: glassNS,
+                    action: {
+                        withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
+                    },
+                    showDome: false
+                ) {
+                    Text(glowOn ? "Turn off glow" : "Turn on glow")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                        .padding(.horizontal, 24)
+                        .frame(height: 50)
+                }
+
+                // Белая prominent-кнопка (тот же функционал), чёрный шрифт.
+                Button(action: {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
-                },
-                showDome: false
-            ) {
-                Text(glowOn ? "Turn off glow" : "Turn on glow")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-                    .padding(.horizontal, 24)
-                    .frame(height: 50)
+                }) {
+                    Text(glowOn ? "Turn off glow" : "Turn on glow")
+                        .font(.headline)
+                        .foregroundStyle(.black)
+                        .padding(.horizontal, 24)
+                        .frame(height: 50)
+                }
+                .buttonStyle(.glassProminent)
+                .tint(.white)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .offset(y: 80)
