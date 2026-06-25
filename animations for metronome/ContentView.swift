@@ -145,24 +145,26 @@ struct ContentView: View {
         // и рулер прыгают при разворачивании/сворачивании шита).
         .ignoresSafeArea(.keyboard, edges: .bottom)
         // Overlay нотификации: прилетает сверху по ЦЕНТРУ, с отступами по сторонам.
-        // alignment: .top + maxWidth: .infinity + симметричный padding = центр.
+        // GeometryReader даёт ТОЧНУЮ ширину (screenWidth - 32), .frame(maxWidth:
+        // .infinity) центрирует её по горизонтали. Никакой неоднозначности.
         .overlay(alignment: .top) {
             if showNotification {
-                HStack(spacing: 12) {
-                    Image(systemName: "bell.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(.white)
-                    Text("Hello I'm notification")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                    Spacer()
+                GeometryReader { geo in
+                    HStack(spacing: 12) {
+                        Image(systemName: "bell.fill")
+                            .font(.system(size: 18, weight: .semibold))
+                            .foregroundStyle(.white)
+                        Text("Hello I'm notification")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                        Spacer(minLength: 0)
+                    }
+                    .padding(.horizontal, 24)                     // внутренний отступ
+                    .frame(width: geo.size.width - 32, height: 60) // ширина = экран - 32
+                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+                    .frame(maxWidth: .infinity)                    // центрируем по горизонтали
+                    .padding(.top, 16)
                 }
-                .padding(.horizontal, 24)          // внутренний отступ контента
-                .frame(height: 60)
-                .frame(maxWidth: .infinity)         // тянем на всю ширину контейнера
-                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
-                .padding(.horizontal, 16)           // отступы от краёв экрана (симметрично)
-                .padding(.top, 16)
                 .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
