@@ -31,6 +31,11 @@ struct ContentView: View {
     @State private var controlsVisible = false
     @State private var hideTask: Task<Void, Never>?
 
+    /// Показать ли нотификацию.
+    @State private var showNotification = false
+    /// Таск для автоскрытия нотификации через 2.5с.
+    @State private var notificationHideTask: Task<Void, Never>?
+
     var body: some View {
         ZStack(alignment: .top) {
             // Тёмная тема: основной фон полностью чёрный.
@@ -92,19 +97,16 @@ struct ContentView: View {
 
                     // Две кнопки glow (теперь СНИЗУ).
                     VStack(spacing: 12) {
-                        // Тёмная стеклянная кнопка. glassStyle: .regular (вместо .clear)
-                        // — чтобы интерактивный отклик (свет за пальцем) был ВИДЕН;
-                        // .clear стекло его почти не показывает. В dark mode .regular
-                        // рендерится тёмным, так что кнопка остаётся «чёрной».
+                        // Тёмная стеклянная кнопка — показать нотификацию.
                         GlassButton(
                             shape: Capsule(),
                             namespace: glassNS,
-                            action: { toggleGlow() },
+                            action: { showNotificationAction() },
                             showDome: false,
                             pressScale: 1.08,
                             glassStyle: .regular
                         ) {
-                            Text(glowOn ? "Turn off glow" : "Turn on glow")
+                            Text("Show notification")
                                 .font(.headline)
                                 .foregroundStyle(.white)
                                 .frame(maxWidth: .infinity)
@@ -142,6 +144,25 @@ struct ContentView: View {
         // Клавиатура из BPM-шита не должна двигать контент под ним (иначе кнопки
         // и рулер прыгают при разворачивании/сворачивании шита).
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        // Overlay нотификации (левый край, под safe area).
+        .overlay(alignment: .topLeading) {
+            if showNotification {
+                HStack(spacing: 12) {
+                    Image(systemName: "bell.fill")
+                        .font(.system(size: 16, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Text("Hello I'm notification")
+                        .font(.body)
+                        .foregroundStyle(.white)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 16)
+                .padding(.vertical, 12)
+                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
+                .padding(16)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
+        }
     }
 
     // MARK: - Шаг рулера и видимость кнопок +/-
@@ -188,6 +209,21 @@ struct ContentView: View {
         tempo = min(max(tempo + delta, 40), 240)
         showControls()
         scheduleHide()
+    }
+
+    /// Показать нотификацию и скрыть через 2.5s.
+    private func showNotificationAction() {
+        notificationHideTask?.cancel()
+        withAnimation(.easeOut(duration: 0.2)) {
+            showNotification = true
+        }
+        notificationHideTask = Task { @MainActor in
+            try? await Task.sleep(for: .milliseconds(2500))
+            guard !Task.isCancelled else { return }
+            withAnimation(.easeOut(duration: 0.2)) {
+                showNotification = false
+            }
+        }
     }
 
     /// Быстро показать кнопки.
