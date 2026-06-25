@@ -38,23 +38,21 @@ struct ContentView: View {
             }
 
             // Две кнопки по центру: обе включают/выключают подсветку (Path).
-            // Одинаковая ширина — обе растянуты на ширину VStack.
+            // Обе — нативный Liquid Glass (.glass и .glassProminent) → одинаковый
+            // размер и родное поведение на нажатие.
             VStack(spacing: 12) {
-                // Стеклянная кнопка.
-                GlassButton(
-                    shape: Capsule(),
-                    namespace: glassNS,
-                    action: {
-                        withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
-                    },
-                    showDome: false
-                ) {
+                // Тёмная стеклянная кнопка (native .glass).
+                Button(action: {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    withAnimation(.easeInOut(duration: 0.35)) { glowOn.toggle() }
+                }) {
                     Text(glowOn ? "Turn off glow" : "Turn on glow")
                         .font(.headline)
                         .foregroundStyle(.white)
                         .frame(maxWidth: .infinity)
                         .frame(height: 50)
                 }
+                .buttonStyle(.glass)
 
                 // Белая prominent-кнопка (тот же функционал), чёрный шрифт.
                 Button(action: {
