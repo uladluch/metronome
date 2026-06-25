@@ -90,30 +90,6 @@ private struct SheetView: View {
     @State private var sliderValue: Double = 0.5
     @State private var selectedSegment = 0
 
-    init() {
-        // Отключаем «сворачивание» заголовка при скролле: форсируем крупный шрифт
-        // у inline-заголовка в standard/compact (на скролле он перестаёт уменьшаться).
-        // scrollEdge оставляем прозрачным — фон bar всё равно затемняется на скролле.
-        let big: [NSAttributedString.Key: Any] = [
-            .font: UIFont.systemFont(ofSize: 28, weight: .bold),
-            .foregroundColor: UIColor.white
-        ]
-
-        let standard = UINavigationBarAppearance()
-        standard.configureWithDefaultBackground()
-        standard.titleTextAttributes = big
-        standard.largeTitleTextAttributes = big
-
-        let scrollEdge = UINavigationBarAppearance()
-        scrollEdge.configureWithTransparentBackground()
-        scrollEdge.titleTextAttributes = big
-        scrollEdge.largeTitleTextAttributes = big
-
-        UINavigationBar.appearance().standardAppearance = standard
-        UINavigationBar.appearance().compactAppearance = standard
-        UINavigationBar.appearance().scrollEdgeAppearance = scrollEdge
-    }
-
     var body: some View {
         NavigationStack {
             Form {
@@ -171,9 +147,8 @@ private struct SheetView: View {
                 }
             }
             .navigationTitle("Sheet")
-            // Штатный режим: большой заголовок зафиксирован в тулбаре, не уходит
-            // в маленький inline при скролле.
-            .toolbarTitleDisplayMode(.inlineLarge)
+            // Стандартный large: большой заголовок, сворачивается в inline при скролле.
+            .navigationBarTitleDisplayMode(.large)
             .toolbar {
                 // Нативная кнопка тулбара — iOS 26 сама оборачивает в Liquid Glass.
                 ToolbarItem(placement: .topBarTrailing) {
