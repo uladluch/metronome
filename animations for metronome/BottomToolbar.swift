@@ -88,14 +88,13 @@ private struct SheetView: View {
 
     @State private var toggleOn = true
     @State private var sliderValue: Double = 0.5
-    @State private var selectedSegment = 0
     @State private var showPopover = false
     @State private var containerWidth: CGFloat = 0
 
     var body: some View {
         NavigationStack {
             Form {
-                Section {
+                Section("Microanimations") {
                     // Toggle row
                     HStack {
                         Text("Toggle")
@@ -117,22 +116,6 @@ private struct SheetView: View {
                             // Тот же нежный хаптик, что и у слайдера в тулбаре.
                             .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.4),
                                              trigger: Int(sliderValue * 20))
-                    }
-
-                    // Segmented Control row
-                    HStack {
-                        Text("Segment")
-                        Spacer()
-                        Picker("", selection: $selectedSegment) {
-                            Text("Fast").tag(0)
-                            Text("Normal").tag(1)
-                            Text("Slow").tag(2)
-                        }
-                        .pickerStyle(.segmented)
-                        .onChange(of: selectedSegment) { _, _ in
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        }
-                        .frame(maxWidth: 180)
                     }
 
                     // Popover row
@@ -158,7 +141,7 @@ private struct SheetView: View {
 
                 // Большой длинный блок — просто чтобы шит скроллился. Подсказка
                 // пользователю: проскролль и посмотри, как затемняется топ-тулбар.
-                Section {
+                Section("Scroll") {
                     Text("Scroll up — watch the top toolbar dim as the content scrolls under it.")
                         .font(.title3)
                         .foregroundStyle(.white)
