@@ -167,12 +167,12 @@ struct ContentView: View {
         beatTimer = timer
     }
 
-    /// Один удар метронома: резкая вспышка (snap до 1.0) → плавное затухание.
+    /// Один удар метронома: резкая вспышка (snap до 1.0) → быстрое затухание.
     /// Боб переключается через beatIndex в том же callback → синхронно с вспышкой.
     private func flashBeat() {
         glowLevel = 1.0  // мгновенно — резкая «атака» удара
-        withAnimation(.easeOut(duration: beatInterval * 0.85)) {
-            glowLevel = 0.5  // плавное затухание к следующему удару
+        withAnimation(.easeOut(duration: 0.25)) {
+            glowLevel = 0.5  // быстрое затухание к следующему удару
         }
     }
 
