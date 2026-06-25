@@ -92,13 +92,17 @@ struct ContentView: View {
 
                     // Две кнопки glow (теперь СНИЗУ).
                     VStack(spacing: 12) {
-                        // Тёмная стеклянная кнопка (кастомный GlassButton — плотнее, «чернее»).
+                        // Тёмная стеклянная кнопка. glassStyle: .regular (вместо .clear)
+                        // — чтобы интерактивный отклик (свет за пальцем) был ВИДЕН;
+                        // .clear стекло его почти не показывает. В dark mode .regular
+                        // рендерится тёмным, так что кнопка остаётся «чёрной».
                         GlassButton(
                             shape: Capsule(),
                             namespace: glassNS,
                             action: { toggleGlow() },
                             showDome: false,
-                            pressScale: 1.08
+                            pressScale: 1.08,
+                            glassStyle: .regular
                         ) {
                             Text(glowOn ? "Turn off glow" : "Turn on glow")
                                 .font(.headline)
@@ -107,9 +111,10 @@ struct ContentView: View {
                                 .frame(height: 50)
                         }
 
-                        // Белая кнопка — НАТИВНЫЙ Liquid Glass стиль (.glassProminent).
-                        // Даёт встроенный интерактивный отклик: свет следует за пальцем
-                        // из коробки, без ручных overlay / gesture / spotlight.
+                        // Белая кнопка — нативный интерактив Liquid Glass через
+                        // .glassEffect(.regular.tint(.white).interactive()): свет следует
+                        // за пальцем из коробки. .plain + glass ВНУТРИ label держит
+                        // размер (height 50), не раздувая кнопку как .glassProminent.
                         Button(action: {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             toggleGlow()
@@ -119,9 +124,10 @@ struct ContentView: View {
                                 .foregroundStyle(.black)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
+                                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
+                                .contentShape(Capsule())
                         }
-                        .buttonStyle(.glassProminent)
-                        .tint(.white)
+                        .buttonStyle(.plain)
                     }
                     .frame(width: 240)
                 }
