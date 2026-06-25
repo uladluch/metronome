@@ -29,10 +29,9 @@ struct PanelContent: View {
                         onClose()
                     }) {
                         Image(systemName: "xmark")
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(.white)
                     }
-                    .buttonStyle(.glass)  // нативная iOS 26 glass-кнопка (как в sheet)
+                    .buttonStyle(.glass)           // нативная iOS 26 glass-кнопка
+                    .buttonBorderShape(.circle)    // круглая, как системная в sheet (не капсула)
                 }
             }
             .padding(.horizontal, 16)
