@@ -141,6 +141,8 @@ struct ContentView: View {
                                 .contentShape(Capsule())
                         }
                         .buttonStyle(.plain)
+                        // Тонкий общий эффект при прессинге.
+                        .brightness(whiteButtonPressed ? 0.04 : 0)
                         // Spotlight эффект под пальцем — только при прессинге.
                         .overlay(alignment: .topLeading) {
                             if whiteButtonPressed {
