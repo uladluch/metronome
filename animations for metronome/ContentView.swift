@@ -156,7 +156,7 @@ struct ContentView: View {
                 }
                 .padding(.horizontal, 24)              // внутренний отступ контента
                 .frame(width: 360, height: 60)         // фиксированная ширина
-                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+                .glassEffect(.regular, in: Capsule())   // капсула — полностью скруглённая
                 .shadow(color: .black.opacity(0.25), radius: 20, y: 8)  // глубина
                 .padding(.top, 8)                       // отступ от верха
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)  // центр X, верх
