@@ -112,9 +112,9 @@ private struct SheetView: View {
                         Slider(value: $sliderValue, in: 0...1)
                             .frame(maxWidth: 150)
                             .tint(.controlAccent)
-                            .onChange(of: sliderValue) { _, _ in
-                                UISelectionFeedbackGenerator().selectionChanged()
-                            }
+                            // Тот же нежный хаптик, что и у слайдера в тулбаре.
+                            .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.4),
+                                             trigger: Int(sliderValue * 20))
                     }
 
                     // Segmented Control row
