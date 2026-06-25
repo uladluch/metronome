@@ -98,7 +98,10 @@ struct ContentView: View {
                         .foregroundStyle(.white)
                         .frame(width: 60, height: 60)
                         .contentShape(Circle())
-                        .onTapGesture { open() }
+                        .onTapGesture {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            open()
+                        }
                         .allowsHitTesting(morphProgress == 0)
                 }
             }

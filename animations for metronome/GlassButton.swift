@@ -86,6 +86,8 @@ struct GlassButton<Label: View>: View {
         .contentShape(shape)
         .onTapGesture {
             print("[GlassButton] onTapGesture triggered")
+            // Лёгкий тактильный импульс при нажатии
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
             action()
         }
         .simultaneousGesture(

@@ -74,6 +74,9 @@ private struct SheetView: View {
                         Spacer()
                         Toggle("", isOn: $toggleOn)
                             .tint(.controlAccent)
+                            .onChange(of: toggleOn) { _, _ in
+                                UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            }
                     }
 
                     // Slider row
@@ -83,6 +86,9 @@ private struct SheetView: View {
                         Slider(value: $sliderValue, in: 0...1)
                             .frame(maxWidth: 150)
                             .tint(.controlAccent)
+                            .onChange(of: sliderValue) { _, _ in
+                                UISelectionFeedbackGenerator().selectionChanged()
+                            }
                     }
 
                     // Segmented Control row
@@ -95,6 +101,9 @@ private struct SheetView: View {
                             Text("Slow").tag(2)
                         }
                         .pickerStyle(.segmented)
+                        .onChange(of: selectedSegment) { _, _ in
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        }
                         .frame(maxWidth: 180)
                     }
                 }
