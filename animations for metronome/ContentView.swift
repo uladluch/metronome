@@ -140,34 +140,32 @@ struct ContentView: View {
             BottomToolbar()
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 8)
+
+            // Нотификация — обычный child ZStack (НЕ overlay), поэтому уважает
+            // safe area: не вылезает под чёлку и за края. Прижата к верху,
+            // отступы 16pt по сторонам, текст слева, внутри padding 24pt.
+            if showNotification {
+                HStack(spacing: 12) {
+                    Image(systemName: "bell.fill")
+                        .font(.system(size: 18, weight: .semibold))
+                        .foregroundStyle(.white)
+                    Text("Hello I'm notification")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    Spacer(minLength: 0)
+                }
+                .padding(.horizontal, 24)              // внутренний отступ контента
+                .frame(height: 60)
+                .frame(maxWidth: .infinity)            // на всю доступную ширину
+                .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
+                .padding(.horizontal, 16)              // отступы от краёв экрана
+                .frame(maxHeight: .infinity, alignment: .top)
+                .transition(.move(edge: .top).combined(with: .opacity))
+            }
         }
         // Клавиатура из BPM-шита не должна двигать контент под ним (иначе кнопки
         // и рулер прыгают при разворачивании/сворачивании шита).
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        // Overlay нотификации: прилетает сверху по ЦЕНТРУ, с отступами по сторонам.
-        // GeometryReader даёт ТОЧНУЮ ширину (screenWidth - 32), .frame(maxWidth:
-        // .infinity) центрирует её по горизонтали. Никакой неоднозначности.
-        .overlay(alignment: .top) {
-            if showNotification {
-                GeometryReader { geo in
-                    HStack(spacing: 12) {
-                        Image(systemName: "bell.fill")
-                            .font(.system(size: 18, weight: .semibold))
-                            .foregroundStyle(.white)
-                        Text("Hello I'm notification")
-                            .font(.headline)
-                            .foregroundStyle(.white)
-                        Spacer(minLength: 0)
-                    }
-                    .padding(.horizontal, 24)                     // внутренний отступ
-                    .frame(width: geo.size.width - 32, height: 60) // ширина = экран - 32
-                    .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
-                    .frame(maxWidth: .infinity)                    // центрируем по горизонтали
-                    .padding(.top, 16)
-                }
-                .transition(.move(edge: .top).combined(with: .opacity))
-            }
-        }
     }
 
     // MARK: - Шаг рулера и видимость кнопок +/-
