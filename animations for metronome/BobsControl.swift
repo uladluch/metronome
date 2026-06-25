@@ -34,6 +34,8 @@ struct BobsControl: View {
     @State private var bobSizeModes: [Int] = [0, 0, 0, 0]
     /// Для каждого боба: масштаб для bounce анимации.
     @State private var bobBounceScales: [CGFloat] = [1, 1, 1, 1]
+    /// Для каждого боба: нажат ли (визуальная обратная связь).
+    @State private var bobPressed: [Bool] = [false, false, false, false]
 
     /// Нормализованная сила удара: 0 (затухло) … 1 (пик). Из glowLevel 0.5…1.0.
     private var pulse: Double {
@@ -44,11 +46,27 @@ struct BobsControl: View {
         HStack(spacing: 6) {
             ForEach(heightVariants.indices, id: \.self) { i in
                 let height = sizeRotations[bobSizeModes[i]][i]
-                bob(height: height, isActive: glowOn && i == activeIndex)
-                    .scaleEffect(bobBounceScales[i])
+                bob(height: height, isActive: glowOn && i == activeIndex, isPressed: bobPressed[i])
+                    .scaleEffect(bobBounceScales[i] * (bobPressed[i] ? 0.92 : 1.0))
+                    .contentShape(Capsule())
                     .onTapGesture {
                         tapBob(at: i)
                     }
+                    .simultaneousGesture(
+                        DragGesture(minimumDistance: 0)
+                            .onChanged { _ in
+                                if !bobPressed[i] {
+                                    withAnimation(.easeOut(duration: 0.12)) {
+                                        bobPressed[i] = true
+                                    }
+                                }
+                            }
+                            .onEnded { _ in
+                                withAnimation(.easeOut(duration: 0.3)) {
+                                    bobPressed[i] = false
+                                }
+                            }
+                    )
             }
         }
     }
@@ -69,12 +87,14 @@ struct BobsControl: View {
         }
     }
 
-    private func bob(height: CGFloat, isActive: Bool) -> some View {
+    private func bob(height: CGFloat, isActive: Bool, isPressed: Bool) -> some View {
         // Подложка: 40% серая по умолчанию. Активная вспыхивает к белому на пике удара и
         // плавно гаснет к серому вместе с pulse → к следующему удару уже серая.
         let fillOpacity = isActive ? (0.4 + 0.6 * pulse) : 0.4
         // Свечение — только у активного, его сила = pulse (синхронно с картинкой).
         let glow = isActive ? pulse : 0
+        // Dome (полусфера) светлеет при нажатии.
+        let domeOpacity = isPressed ? 0.24 : 0.12
 
         return ZStack {
             // Белая подложка ПОД стеклом, меньше на 12pt (по 6pt с каждой стороны),
@@ -90,9 +110,43 @@ struct BobsControl: View {
                 .frame(width: bobWidth, height: height)
         }
         .frame(width: bobWidth, height: height)
+        // Полусфера (dome) под стеклом, светлеет при нажатии.
+        .background(alignment: .topLeading) {
+            GeometryReader { g in
+                let s = min(g.size.width, g.size.height)
+                Circle()
+                    .fill(
+                        RadialGradient(
+                            colors: [.white.opacity(domeOpacity), .white.opacity(0)],
+                            center: .center,
+                            startRadius: 0,
+                            endRadius: s * 0.43
+                        )
+                    )
+                    .frame(width: s * 0.87, height: s * 0.87)
+                    .offset(x: -s * 0.1, y: -s * 0.1)
+                    .animation(.easeOut(duration: 0.22), value: isPressed)
+            }
+        }
+        .clipShape(Capsule())
+        // Inner shadow: белый stroke с градиентом по верхней кромке.
+        .overlay {
+            Capsule()
+                .stroke(Color.white.opacity(0.22), lineWidth: 5)
+                .blur(radius: 7)
+                .offset(y: 3)
+                .mask(
+                    Capsule().fill(
+                        LinearGradient(
+                            colors: [.white, .clear],
+                            startPoint: .top,
+                            endPoint: .center
+                        )
+                    )
+                )
+        }
         // Свечение вокруг боба, пульсирует с ударом.
         .shadow(color: .white.opacity(0.1 + 0.45 * glow), radius: 6 + 14 * glow)
         .shadow(color: .white.opacity(0.35 * glow), radius: 28 * glow)
-        .contentShape(Capsule())  // точный hit-box для тапа
     }
 }
