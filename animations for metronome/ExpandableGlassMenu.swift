@@ -71,6 +71,23 @@ struct ExpandableGlassMenu<Content: View, Label: View>: View, Animatable {
                 label
             }
             .frame(width: labelSize.width, height: labelSize.height)
+            .overlay {
+                // Inner shadow для кнопки-шестерёнки (как в GlassButton).
+                Circle()
+                    .stroke(Color.white.opacity(0.22), lineWidth: 5)
+                    .blur(radius: 7)
+                    .offset(y: 3)
+                    .mask(
+                        Circle()
+                            .fill(
+                                LinearGradient(
+                                    colors: [.white, .clear],
+                                    startPoint: .top,
+                                    endPoint: .center
+                                )
+                            )
+                    )
+            }
             .opacity(1 - labelOpacity)
         }
         // Рамка-окно: от кнопки до полного размера, якорь — угол кнопки.
