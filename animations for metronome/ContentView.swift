@@ -142,34 +142,30 @@ struct ContentView: View {
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 8)
 
-            // Нотификация — обычный child ZStack (НЕ overlay), поэтому уважает
-            // safe area: не вылезает под чёлку и за края. Прижата к верху,
-            // отступы 16pt по сторонам, текст слева, внутри padding 24pt.
-            if showNotification {
-                HStack(spacing: 12) {
-                    Image(systemName: "bell.fill")
-                        .font(.system(size: 18, weight: .semibold))
-                        .foregroundStyle(.white)
-                    Text("Hello I'm notification")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                    Spacer(minLength: 0)
-                }
-                .padding(.horizontal, 24)              // внутренний отступ контента
-                .frame(width: 360, height: 60)         // фиксированная ширина
-                .glassEffect(.regular, in: Capsule())   // капсула — полностью скруглённая
-                .shadow(color: .black.opacity(0.25), radius: 20, y: 8)  // глубина
-                // Apple-style transition НА САМОЙ КАПСУЛЕ (до центрирующего фрейма),
-                // иначе полноэкранный фрейм схлопывается мгновенно и выезд не играет.
-                // Симметрично: вход/выход = slide + scale к 0.9 (якорь сверху) + fade.
-                .transition(
-                    .move(edge: .top)
-                        .combined(with: .opacity)
-                        .combined(with: .scale(scale: 0.9, anchor: .top))
-                )
-                .padding(.top, 8)                       // отступ от верха
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)  // центр X, верх
+            // Нотификация — ВСЕГДА в дереве, анимируем opacity (+ лёгкий scale/offset)
+            // через состояние. Анимация СВОЙСТВ работает в обе стороны железно, в
+            // отличие от .transition при условном вставлении/удалении. Обычный child
+            // ZStack (НЕ overlay) → уважает safe area.
+            HStack(spacing: 12) {
+                Image(systemName: "bell.fill")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundStyle(.white)
+                Text("Hello I'm notification")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                Spacer(minLength: 0)
             }
+            .padding(.horizontal, 24)              // внутренний отступ контента
+            .frame(width: 360, height: 60)         // фиксированная ширина
+            .glassEffect(.regular, in: Capsule())   // капсула — полностью скруглённая
+            .shadow(color: .black.opacity(0.25), radius: 20, y: 8)  // глубина
+            .padding(.top, 8)                       // отступ от верха
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)  // центр X, верх
+            // Плавный fade + лёгкий slide/scale — управляется состоянием.
+            .opacity(showNotification ? 1 : 0)
+            .scaleEffect(showNotification ? 1 : 0.94, anchor: .top)
+            .offset(y: showNotification ? 0 : -12)
+            .allowsHitTesting(showNotification)     // скрытая не перехватывает тапы
         }
         // Клавиатура из BPM-шита не должна двигать контент под ним (иначе кнопки
         // и рулер прыгают при разворачивании/сворачивании шита).
