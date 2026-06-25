@@ -158,15 +158,16 @@ struct ContentView: View {
                 .frame(width: 360, height: 60)         // фиксированная ширина
                 .glassEffect(.regular, in: Capsule())   // капсула — полностью скруглённая
                 .shadow(color: .black.opacity(0.25), radius: 20, y: 8)  // глубина
-                .padding(.top, 8)                       // отступ от верха
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)  // центр X, верх
-                // Apple-style: симметрично — выезд это зеркало въезда.
-                // slide вверх + scale к 0.9 (якорь сверху) + fade.
+                // Apple-style transition НА САМОЙ КАПСУЛЕ (до центрирующего фрейма),
+                // иначе полноэкранный фрейм схлопывается мгновенно и выезд не играет.
+                // Симметрично: вход/выход = slide + scale к 0.9 (якорь сверху) + fade.
                 .transition(
                     .move(edge: .top)
                         .combined(with: .opacity)
                         .combined(with: .scale(scale: 0.9, anchor: .top))
                 )
+                .padding(.top, 8)                       // отступ от верха
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)  // центр X, верх
             }
         }
         // Клавиатура из BPM-шита не должна двигать контент под ним (иначе кнопки
