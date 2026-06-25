@@ -73,9 +73,9 @@ struct BPMSheet: View {
             }
         }
         .presentationDetents([.large])
-        // Дать шиту открыться, затем фокус → клавиатура.
+        // Дать шиту открыться, затем фокус → клавиатура (ускорено до 200ms).
         .task {
-            try? await Task.sleep(for: .milliseconds(350))
+            try? await Task.sleep(for: .milliseconds(200))
             focused = true
         }
         // Хаптик именно в момент появления клавиатуры (а не на фокус).
