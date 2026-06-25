@@ -24,6 +24,10 @@ struct ContentView: View {
     private let bpm: Double = 90
     private var beatInterval: Double { 60.0 / bpm }
 
+    /// Отслеживание прессинга на кнопки для переливающегося эффекта стекла.
+    @State private var darkButtonPressed = false
+    @State private var whiteButtonPressed = false
+
     /// Значение «линейки» (tick-слайдер) под кнопками.
     @State private var tempo: Double = 120
 
@@ -106,6 +110,18 @@ struct ContentView: View {
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
                         }
+                        .brightness(darkButtonPressed ? 0.15 : 0)
+                        .simultaneousGesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { _ in
+                                    if !darkButtonPressed {
+                                        withAnimation(.easeOut(duration: 0.08)) { darkButtonPressed = true }
+                                    }
+                                }
+                                .onEnded { _ in
+                                    withAnimation(.easeOut(duration: 0.15)) { darkButtonPressed = false }
+                                }
+                        )
 
                         // Белая кнопка (тот же функционал), чёрный шрифт.
                         Button(action: {
@@ -117,10 +133,27 @@ struct ContentView: View {
                                 .foregroundStyle(.black)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
-                                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
+                                .glassEffect(
+                                    whiteButtonPressed
+                                        ? Glass(tint: .yellow.opacity(0.4))
+                                        : .regular.tint(.white),
+                                    in: Capsule()
+                                )
                                 .contentShape(Capsule())  // тапается вся кнопка
                         }
                         .buttonStyle(.plain)
+                        .brightness(whiteButtonPressed ? 0.1 : 0)
+                        .simultaneousGesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { _ in
+                                    if !whiteButtonPressed {
+                                        withAnimation(.easeOut(duration: 0.08)) { whiteButtonPressed = true }
+                                    }
+                                }
+                                .onEnded { _ in
+                                    withAnimation(.easeOut(duration: 0.15)) { whiteButtonPressed = false }
+                                }
+                        )
                     }
                     .frame(width: 240)
                 }
