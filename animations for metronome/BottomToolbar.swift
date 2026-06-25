@@ -172,14 +172,26 @@ private struct SheetView: View {
             // Стандартный large: большой заголовок, сворачивается в inline при скролле.
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                // Нативная кнопка тулбара — iOS 26 сама оборачивает в Liquid Glass.
-                ToolbarItem(placement: .topBarTrailing) {
+                // Крестик слева — закрыть.
+                ToolbarItem(placement: .topBarLeading) {
                     Button(action: {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         dismiss()
                     }) {
                         Image(systemName: "xmark")
                     }
+                }
+                // Чек справа — белая prominent-кнопка, чёрная иконка.
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        dismiss()
+                    }) {
+                        Image(systemName: "checkmark")
+                            .foregroundStyle(.black)
+                    }
+                    .buttonStyle(.glassProminent)
+                    .tint(.white)
                 }
             }
         }
