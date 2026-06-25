@@ -22,16 +22,22 @@ struct PanelContent: View {
             }
             .navigationTitle("Settings")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    // Голый крестик без обёртки в Button — стекло даёт сам тулбар,
+                    // своей кнопки нет → не должно быть «кнопки в кнопке».
+                    Image(systemName: "xmark")
+                        .font(.system(size: 15, weight: .semibold))
+                        .foregroundStyle(.white)
+                        .onTapGesture {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            onClose()
+                        }
+                }
+            }
             // Убирает серый фон контейнера NavigationStack → стекло под ним видно.
             .containerBackground(.clear, for: .navigation)
             .scrollContentBackground(.hidden)
-        }
-        // Крестик — НЕ в ToolbarItem (там iOS даёт второе стекло → «кнопка в кнопке»),
-        // а отдельным overlay со своим контролируемым стеклом 40×40.
-        .overlay(alignment: .topTrailing) {
-            CloseButton(action: onClose)
-                .padding(.trailing, 10)
-                .padding(.top, 2)
         }
     }
 }
