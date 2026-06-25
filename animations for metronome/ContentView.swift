@@ -156,7 +156,7 @@ struct ContentView: View {
                         .foregroundStyle(.white)
                 }
                 .frame(height: 60)
-                .containerRelativeFrame(.horizontal) { width in width - 32 }
+                .containerRelativeFrame(.horizontal) { width, _ in width - 32 }
                 .glassEffect(.regular, in: RoundedRectangle(cornerRadius: 12))
                 .padding(16)
                 .transition(.move(edge: .top).combined(with: .opacity))
