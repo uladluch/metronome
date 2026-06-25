@@ -24,6 +24,7 @@ struct StepZone: View {
     @State private var pressing = false
     @State private var repeatTimer: Timer?
     @State private var didRepeat = false
+    @State private var repeatCount = 0
 
     var body: some View {
         ZStack(alignment: alignment) {
@@ -66,19 +67,30 @@ struct StepZone: View {
 
     private func startRepeat() {
         didRepeat = false
+        repeatCount = 0
         repeatTimer?.invalidate()
-        // Пауза перед авто-повтором (чтобы обычный тап не триггерил), потом частые шаги.
+        // Пауза перед авто-повтором (чтобы обычный тап не триггерил), потом — ускорение.
         repeatTimer = Timer.scheduledTimer(withTimeInterval: 0.4, repeats: false) { _ in
             didRepeat = true
-            onStep()
-            repeatTimer = Timer.scheduledTimer(withTimeInterval: 0.08, repeats: true) { _ in
-                onStep()
-            }
+            fireRepeat()
+        }
+    }
+
+    /// Один шаг авто-повтора + перепланирование с УМЕНЬШАЮЩИМСЯ интервалом
+    /// (чем дольше держишь — тем быстрее листает; хэптик ускоряется вместе со сменой значения).
+    private func fireRepeat() {
+        onStep()
+        repeatCount += 1
+        let interval = max(0.025, 0.16 - Double(repeatCount) * 0.012)  // от ~0.15 до 0.025
+        repeatTimer?.invalidate()
+        repeatTimer = Timer.scheduledTimer(withTimeInterval: interval, repeats: false) { _ in
+            fireRepeat()
         }
     }
 
     private func stopRepeat() {
         repeatTimer?.invalidate()
         repeatTimer = nil
+        repeatCount = 0
     }
 }

@@ -83,10 +83,10 @@ struct TickSlider: View {
             .frame(width: w, height: h)
             .contentShape(Rectangle())
             .onAppear { displayValue = value }
-            // Внешние изменения (кнопки +/-) — плавно доезжаем до значения.
+            // Внешние изменения (кнопки +/-) — снаппи доезжаем (успеваем при ускорении).
             .onChange(of: value) { _, newValue in
                 if dragStart == nil {
-                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                    withAnimation(.spring(response: 0.2, dampingFraction: 0.85)) {
                         displayValue = newValue
                     }
                 }
