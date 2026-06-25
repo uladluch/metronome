@@ -10,27 +10,27 @@ import SwiftUI
 
 struct PanelContent: View {
 
-    @Environment(\.dismiss) private var dismiss
     var onClose: () -> Void
 
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                Spacer()
-            }
-            .navigationTitle("Settings")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        onClose()
-                    }) {
-                        Image(systemName: "xmark")
-                    }
-                }
-            }
-            .background(Color.clear)  // Glass effect: прозрачный фон вместо серого
+        VStack(spacing: 0) {
+            Spacer()
         }
+        .navigationTitle("Settings")
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    onClose()
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 15, weight: .semibold))
+                }
+                .foregroundStyle(.white.opacity(0.6))
+                .tint(.white.opacity(0.6))
+            }
+        }
+        .background(Color.clear)
     }
 }
