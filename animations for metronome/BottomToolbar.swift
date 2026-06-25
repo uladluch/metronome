@@ -67,22 +67,36 @@ private struct SheetView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Микроанимации") {
-                    // Toggle
-                    Toggle("Микроанимация", isOn: $toggleOn)
-                        .tint(.controlAccent)
-
-                    // Slider
-                    Slider(value: $sliderValue, in: 0...1)
-                        .tint(.controlAccent)
-
-                    // Segmented Control
-                    Picker("Тип", selection: $selectedSegment) {
-                        Text("Быстро").tag(0)
-                        Text("Нормально").tag(1)
-                        Text("Медленно").tag(2)
+                Section("Microanimations") {
+                    // Toggle row
+                    HStack {
+                        Text("Toggle")
+                        Spacer()
+                        Toggle("", isOn: $toggleOn)
+                            .tint(.controlAccent)
                     }
-                    .pickerStyle(.segmented)
+
+                    // Slider row
+                    HStack {
+                        Text("Slider")
+                        Spacer()
+                        Slider(value: $sliderValue, in: 0...1)
+                            .frame(maxWidth: 150)
+                            .tint(.controlAccent)
+                    }
+
+                    // Segmented Control row
+                    HStack {
+                        Text("Segment")
+                        Spacer()
+                        Picker("", selection: $selectedSegment) {
+                            Text("Fast").tag(0)
+                            Text("Normal").tag(1)
+                            Text("Slow").tag(2)
+                        }
+                        .pickerStyle(.segmented)
+                        .frame(maxWidth: 180)
+                    }
                 }
             }
             .navigationTitle("Sheet")
