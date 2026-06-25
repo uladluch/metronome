@@ -59,14 +59,16 @@ struct GlassIconButton: View {
     let systemName: String
     let glassID: String?
     let namespace: Namespace.ID
+    var size: CGFloat = 60
+    var iconSize: CGFloat = 22
     let action: () -> Void
 
     var body: some View {
         GlassButton(shape: Circle(), glassID: glassID, namespace: namespace, action: action) {
             Image(systemName: systemName)
-                .font(.system(size: 22, weight: .medium))
+                .font(.system(size: iconSize, weight: .medium))
                 .foregroundStyle(.white)
-                .frame(width: 60, height: 60)
+                .frame(width: size, height: size)
         }
     }
 }

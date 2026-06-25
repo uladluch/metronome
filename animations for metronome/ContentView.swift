@@ -81,9 +81,29 @@ struct ContentView: View {
                 }
                 .frame(width: 240)
 
-                // «Линейка» (tick-слайдер) под кнопками — та же ширина, что у кнопок (240).
-                TickSlider(value: $tempo)
-                    .frame(width: 240, height: 44)
+                // Рулер с кнопками шага слева/справа (тот же GlassIconButton, 40×40).
+                HStack(spacing: 10) {
+                    GlassIconButton(
+                        systemName: "minus",
+                        glassID: nil,
+                        namespace: glassNS,
+                        size: 40,
+                        iconSize: 18,
+                        action: { tempo = max(tempo - 1, 40) }
+                    )
+
+                    TickSlider(value: $tempo)
+                        .frame(width: 250, height: 44)
+
+                    GlassIconButton(
+                        systemName: "plus",
+                        glassID: nil,
+                        namespace: glassNS,
+                        size: 40,
+                        iconSize: 18,
+                        action: { tempo = min(tempo + 1, 240) }
+                    )
+                }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .offset(y: -60)  // чуть выше середины

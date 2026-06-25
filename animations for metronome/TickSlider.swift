@@ -60,8 +60,9 @@ struct TickSlider: View {
                         var p = Path()
                         p.move(to: CGPoint(x: x, y: baseline - tickH))
                         p.addLine(to: CGPoint(x: x, y: baseline))
+                        // Скруглённые концы у черточек.
                         ctx.stroke(p, with: .color(.white.opacity(brightness)),
-                                   lineWidth: isMajor ? 2.5 : 2)
+                                   style: StrokeStyle(lineWidth: isMajor ? 2.5 : 2, lineCap: .round))
                     }
                 }
 
@@ -78,6 +79,14 @@ struct TickSlider: View {
             .frame(width: w, height: h)
             .contentShape(Rectangle())
             .onAppear { displayValue = value }
+            // Внешние изменения (кнопки +/-) — плавно доезжаем до значения.
+            .onChange(of: value) { _, newValue in
+                if dragStart == nil {
+                    withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
+                        displayValue = newValue
+                    }
+                }
+            }
             .gesture(
                 DragGesture()
                     .onChanged { g in
@@ -91,12 +100,8 @@ struct TickSlider: View {
                     .onEnded { _ in
                         dragStart = nil
                         active = false
-                        // Снап: доезжаем до ближайшей черточки с анимацией.
-                        let snapped = min(max(displayValue.rounded(), range.lowerBound), range.upperBound)
-                        withAnimation(.spring(response: 0.3, dampingFraction: 0.8)) {
-                            displayValue = snapped
-                        }
-                        value = snapped
+                        // Снап: меняем value → onChange плавно доводит displayValue до черточки.
+                        value = min(max(displayValue.rounded(), range.lowerBound), range.upperBound)
                     }
             )
             // Чёткий хаптик на каждом пройденном тике.
