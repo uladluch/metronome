@@ -3,10 +3,10 @@
 //  animations for metronome
 //
 //  Внутренний контент панели, который раскрывается из шестерёнки через
-//  ExpandableGlassMenu. Тулбар собран вручную (БЕЗ NavigationStack) — он добавлял
-//  непрозрачный системный фон и осветлял стекло. Inline-тайтл по центру + standalone
-//  системная glass-кнопка (CloseButton). В sheet используется нативная кнопка
-//  тулбара (там стекло даёт сам ToolbarItem).
+//  ExpandableGlassMenu. NavigationStack с нативным toolbar и inline-тайтлом —
+//  кнопка-крестик нативная (её рисует ToolbarItem). Прозрачность navigation bar
+//  глобально настроена в App.init (UINavigationBarAppearance), плюс
+//  .toolbarBackground(.hidden) — поэтому стекло видно и фон не светлеет.
 //
 
 import SwiftUI
@@ -16,22 +16,23 @@ struct PanelContent: View {
     var onClose: () -> Void
 
     var body: some View {
-        VStack(spacing: 0) {
-            // Самодельный inline-тулбар: тайтл по центру, крестик справа.
-            ZStack {
-                Text("Settings")
-                    .font(.headline)
-                    .foregroundStyle(.white)
-
-                HStack {
-                    Spacer()
-                    CloseButton(action: onClose)  // та же кнопка, что в sheet
+        NavigationStack {
+            VStack(spacing: 0) {
+                Spacer()
+            }
+            .navigationTitle("Settings")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(action: {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        onClose()
+                    }) {
+                        Image(systemName: "xmark")
+                    }
                 }
             }
-            .padding(.horizontal, 16)
-            .frame(height: 56)
-
-            Spacer()
+            .toolbarBackground(.hidden, for: .navigationBar)
         }
     }
 }
