@@ -30,10 +30,10 @@ struct BobsControl: View {
 
     private func bob(height: CGFloat, isActive: Bool) -> some View {
         ZStack {
-            // Белая подложка ПОД стеклом, на 4pt меньше → стекло искажает края.
+            // Белая подложка ПОД стеклом, заметно меньше → стекло искажает края.
             Capsule()
                 .fill(.white.opacity(isActive ? 1.0 : 0.5))   // активный — без прозрачности
-                .padding(4)
+                .padding(6)
 
             // Стекло clear СВЕРХУ — преломляет подложку позади.
             Color.clear
