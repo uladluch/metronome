@@ -75,8 +75,8 @@ struct TickSlider: View {
                     }
                     .onEnded { _ in dragStart = nil }
             )
-            // Лёгкий хаптик на каждом пройденном тике.
-            .sensoryFeedback(.impact(flexibility: .soft, intensity: 0.4),
+            // Чёткий хаптик на каждом пройденном тике (заметнее).
+            .sensoryFeedback(.impact(flexibility: .rigid, intensity: 0.8),
                              trigger: Int(value))
         }
     }
