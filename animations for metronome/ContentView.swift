@@ -24,6 +24,10 @@ struct ContentView: View {
     private let bpm: Double = 90
     private var beatInterval: Double { 60.0 / bpm }
 
+    /// Отслеживание прессинга на кнопки для свечения.
+    @State private var darkButtonPressed = false
+    @State private var whiteButtonPressed = false
+
     /// Значение «линейки» (tick-слайдер) под кнопками.
     @State private var tempo: Double = 120
 
@@ -106,6 +110,18 @@ struct ContentView: View {
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
                         }
+                        .shadow(color: .white.opacity(darkButtonPressed ? 0.4 : 0), radius: darkButtonPressed ? 16 : 0)
+                        .simultaneousGesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { _ in
+                                    if !darkButtonPressed {
+                                        withAnimation(.easeOut(duration: 0.06)) { darkButtonPressed = true }
+                                    }
+                                }
+                                .onEnded { _ in
+                                    withAnimation(.easeOut(duration: 0.2)) { darkButtonPressed = false }
+                                }
+                        )
 
                         // Белая кнопка (тот же функционал), чёрный шрифт.
                         Button(action: {
@@ -121,6 +137,18 @@ struct ContentView: View {
                                 .contentShape(Capsule())  // тапается вся кнопка
                         }
                         .buttonStyle(.plain)
+                        .shadow(color: Color(red: 1, green: 0.84, blue: 0).opacity(whiteButtonPressed ? 0.5 : 0), radius: whiteButtonPressed ? 18 : 0)
+                        .simultaneousGesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { _ in
+                                    if !whiteButtonPressed {
+                                        withAnimation(.easeOut(duration: 0.06)) { whiteButtonPressed = true }
+                                    }
+                                }
+                                .onEnded { _ in
+                                    withAnimation(.easeOut(duration: 0.2)) { whiteButtonPressed = false }
+                                }
+                        )
                     }
                     .frame(width: 240)
                 }
