@@ -92,9 +92,9 @@ struct BobsControl: View {
     }
 
     private func bob(height: CGFloat, isActive: Bool, isPressed: Bool) -> some View {
-        // Подложка: 40% серая по умолчанию. Активная вспыхивает к белому на пике удара и
+        // Подложка: 30% серая по умолчанию. Активная вспыхивает к белому на пике удара и
         // плавно гаснет к серому вместе с pulse → к следующему удару уже серая.
-        let fillOpacity = isActive ? (0.4 + 0.6 * pulse) : 0.4
+        let fillOpacity = isActive ? (0.3 + 0.7 * pulse) : 0.3
         // Свечение — только у активного, его сила = pulse (синхронно с картинкой).
         let glow = isActive ? pulse : 0
         // Dome (полусфера) светлеет при нажатии.
