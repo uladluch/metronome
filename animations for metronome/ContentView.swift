@@ -117,6 +117,12 @@ struct ContentView: View {
                     .opacity(controlsVisible ? 1 : 0)
                     .zIndex(1)  // тапаются даже скрытыми: тап показывает и сразу жмёт
                 }
+                // Любое касание в зоне роу (вкл. место скрытых кнопок) показывает их.
+                .simultaneousGesture(
+                    DragGesture(minimumDistance: 0)
+                        .onChanged { _ in showControls() }
+                        .onEnded { _ in scheduleHide() }
+                )
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .offset(y: -60)  // чуть выше середины
@@ -143,11 +149,11 @@ struct ContentView: View {
         withAnimation(.easeOut(duration: 0.12)) { controlsVisible = true }
     }
 
-    /// Спрятать кнопки: через 3 секунды бездействия — плавное затухание (300ms).
+    /// Спрятать кнопки: через 1.5 секунды бездействия — плавное затухание (300ms).
     private func scheduleHide() {
         hideTask?.cancel()
         hideTask = Task { @MainActor in
-            try? await Task.sleep(for: .seconds(3))
+            try? await Task.sleep(for: .milliseconds(1500))
             guard !Task.isCancelled else { return }
             withAnimation(.easeInOut(duration: 0.3)) { controlsVisible = false }
         }
