@@ -2,18 +2,16 @@
 //  GlassPanel.swift
 //  animations for metronome
 //
-//  Внутренний контент панели, который раскрывается из шестерёнки через
-//  ExpandableGlassMenu. NavigationStack с нативным toolbar и inline-тайтлом.
-//  Крестик — голый Image в ToolbarItem (стекло даёт сам тулбар, без «кнопки в
-//  кнопке»). Серый фон КОНТЕЙНЕРА убран (.containerBackground(.clear)), а стекло
-//  самого bar явно включено (.toolbarBackground(.visible)).
+//  Нативный sheet настроек. Открывается из кнопки-шестерёнки с zoom-переходом
+//  (.navigationTransition(.zoom) ↔ .matchedTransitionSource на кнопке) — система
+//  сама «вырастает» окно из кнопки. Фон, тулбар, крестик — нативные.
 //
 
 import SwiftUI
 
-struct PanelContent: View {
+struct SettingsSheet: View {
 
-    var onClose: () -> Void
+    @Environment(\.dismiss) private var dismiss
 
     var body: some View {
         NavigationStack {
@@ -24,20 +22,16 @@ struct PanelContent: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    // Голый крестик без обёртки в Button — стекло даёт сам тулбар,
-                    // своей кнопки нет → не должно быть «кнопки в кнопке».
-                    Image(systemName: "xmark")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(.white)
-                        .onTapGesture {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                            onClose()
-                        }
+                    Button(action: {
+                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                        dismiss()
+                    }) {
+                        Image(systemName: "xmark")
+                    }
                 }
             }
-            // Фон окна задаёт сам NavigationStack (override-прозрачность убрана),
-            // стекло toolbar-bar — явно видимое.
-            .toolbarBackground(.visible, for: .navigationBar)
         }
+        .presentationDetents([.medium, .large])
+        .presentationDragIndicator(.visible)
     }
 }

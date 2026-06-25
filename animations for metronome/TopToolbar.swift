@@ -2,10 +2,9 @@
 //  TopToolbar.swift
 //  animations for metronome
 //
-//  Верхний тулбар: слева — место под шестерёнку (её рисует и анимирует
-//  ExpandableGlassMenu в ContentView), по центру — капсула, справа — три точки.
-//  Когда шестерёнка разворачивается в панель, капсула и три точки угасают
-//  (за это отвечает opacity в ContentView по morphProgress).
+//  Верхний тулбар: слева — шестерёнка (открывает нативный sheet настроек
+//  с zoom-переходом, .matchedTransitionSource), по центру — капсула,
+//  справа — три точки.
 //
 
 import SwiftUI
@@ -13,16 +12,26 @@ import SwiftUI
 struct TopToolbar: View {
 
     let namespace: Namespace.ID
+    /// Namespace для zoom-перехода sheet'а из шестерёнки.
+    let sheetNamespace: Namespace.ID
 
+    let onLeft: () -> Void
     let onCenter: () -> Void
     let onRight: () -> Void
 
+    private let leftIcon = "gearshape"
     private let rightIcon = "ellipsis"
 
     var body: some View {
         HStack(spacing: 0) {
-            // Место под шестерёнку — её рисует ExpandableGlassMenu (overlay).
-            placeholder(width: 60)
+            // Шестерёнка — источник zoom-перехода: sheet «вырастает» из неё.
+            GlassIconButton(
+                systemName: leftIcon,
+                glassID: nil,
+                namespace: namespace,
+                action: onLeft
+            )
+            .matchedTransitionSource(id: "gear", in: sheetNamespace)
 
             Spacer(minLength: 0)
 
@@ -42,10 +51,6 @@ struct TopToolbar: View {
             )
         }
         .frame(height: 60)
-    }
-
-    private func placeholder(width: CGFloat) -> some View {
-        Color.clear.frame(width: width, height: 60)
     }
 }
 
