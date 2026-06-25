@@ -119,7 +119,7 @@ struct ContentView: View {
                                     }
                                 }
                                 .onEnded { _ in
-                                    withAnimation(.easeOut(duration: 0.5)) { darkButtonPressed = false }
+                                    withAnimation(.easeOut(duration: 0.2)) { darkButtonPressed = false }
                                 }
                         )
 
@@ -146,7 +146,7 @@ struct ContentView: View {
                                     }
                                 }
                                 .onEnded { _ in
-                                    withAnimation(.easeOut(duration: 0.5)) { whiteButtonPressed = false }
+                                    withAnimation(.easeOut(duration: 0.2)) { whiteButtonPressed = false }
                                 }
                         )
                     }
