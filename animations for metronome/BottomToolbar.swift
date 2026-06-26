@@ -159,8 +159,9 @@ struct SheetView: View {
                 }
             }
             .navigationTitle("Sheet")
-            // Стандартный large: большой заголовок, сворачивается в inline при скролле.
-            .navigationBarTitleDisplayMode(.large)
+            // inlineLarge: крупный заголовок, зафиксированный в баре по левому краю —
+            // НЕ сворачивается и не двигается при скролле.
+            .toolbarTitleDisplayMode(.inlineLarge)
             .toolbar {
                 // Крестик справа — закрыть (единственная кнопка).
                 ToolbarItem(placement: .topBarTrailing) {
