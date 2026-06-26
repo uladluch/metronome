@@ -162,26 +162,14 @@ struct SheetView: View {
             // Стандартный large: большой заголовок, сворачивается в inline при скролле.
             .navigationBarTitleDisplayMode(.large)
             .toolbar {
-                // Крестик слева — закрыть.
-                ToolbarItem(placement: .topBarLeading) {
+                // Крестик справа — закрыть (единственная кнопка).
+                ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
                         dismiss()
                     }) {
                         Image(systemName: "xmark")
                     }
-                }
-                // Чек справа — белая prominent-кнопка, чёрная иконка.
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        dismiss()
-                    }) {
-                        Image(systemName: "checkmark")
-                            .foregroundStyle(.black)
-                    }
-                    .buttonStyle(.glassProminent)
-                    .tint(.white)
                 }
             }
         }
