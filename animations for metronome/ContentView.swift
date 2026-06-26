@@ -31,6 +31,10 @@ struct ContentView: View {
     @State private var controlsVisible = false
     @State private var hideTask: Task<Void, Never>?
 
+    /// Главный шит — общий для верхних кнопок (шестерёнка/капсула/троеточие) и
+    /// нижней левой кнопки. Уникальный BPM-шит живёт в BottomToolbar (низ-право).
+    @State private var showMainSheet = false
+
     /// Показать ли нотификацию.
     @State private var showNotification = false
     /// Отложенное скрытие нотификации (2.5с). DispatchWorkItem — чтобы withAnimation
@@ -52,9 +56,9 @@ struct ContentView: View {
                 GlassEffectContainer(spacing: 16) {
                     TopToolbar(
                         namespace: glassNS,
-                        onLeft: {},
-                        onCenter: {},
-                        onRight: {}
+                        onLeft: { showMainSheet = true },
+                        onCenter: { showMainSheet = true },
+                        onRight: { showMainSheet = true }
                     )
                     .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
                 }
@@ -75,6 +79,7 @@ struct ContentView: View {
                             namespace: glassNS,
                             alignment: .trailing,
                             visible: controlsVisible,
+                            disabled: tempo <= 40,
                             onShow: showControls,
                             onStep: { step(-1) },
                             onHide: scheduleHide
@@ -90,6 +95,7 @@ struct ContentView: View {
                             namespace: glassNS,
                             alignment: .leading,
                             visible: controlsVisible,
+                            disabled: tempo >= 240,
                             onShow: showControls,
                             onStep: { step(1) },
                             onHide: scheduleHide
@@ -134,8 +140,8 @@ struct ContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .offset(y: 40)  // опущено ниже
 
-            // Нижний тулбар — прижат к низу.
-            BottomToolbar()
+            // Нижний тулбар — прижат к низу. Левая кнопка открывает тот же главный шит.
+            BottomToolbar(onMainSheet: { showMainSheet = true })
                 .frame(maxHeight: .infinity, alignment: .bottom)
                 .padding(.bottom, 8)
 
@@ -164,6 +170,12 @@ struct ContentView: View {
             .scaleEffect(showNotification ? 1 : 0.9, anchor: .top)
             .offset(y: showNotification ? 0 : -120)
             .allowsHitTesting(showNotification)     // скрытая не перехватывает тапы
+        }
+        // Главный шит — общий для верхних кнопок и нижней левой.
+        .sheet(isPresented: $showMainSheet) {
+            SheetView()
+                .presentationDetents([.large])           // только .large (не medium)
+                .presentationDragIndicator(.visible)     // grabber сверху
         }
         // Клавиатура из BPM-шита не должна двигать контент под ним (иначе кнопки
         // и рулер прыгают при разворачивании/сворачивании шита).

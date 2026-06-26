@@ -16,8 +16,8 @@ struct TopToolbar: View {
     let onCenter: () -> Void
     let onRight: () -> Void
 
-    private let leftIcon = "gearshape"
-    private let rightIcon = "ellipsis"
+    private let leftIcon = "circle"
+    private let rightIcon = "triangle"
 
     var body: some View {
         HStack(spacing: 0) {

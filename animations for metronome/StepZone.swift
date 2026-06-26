@@ -16,6 +16,8 @@ struct StepZone: View {
     let alignment: Alignment
     /// Видимость кнопки (общая с рулером).
     var visible: Bool
+    /// Достигнут предел диапазона — кнопка недоступна (не реагирует, выглядит тускло).
+    var disabled: Bool = false
 
     let onShow: () -> Void   // касание началось — показать
     let onStep: () -> Void   // один шаг
@@ -40,15 +42,17 @@ struct StepZone: View {
                 action: {}
             )
             .allowsHitTesting(false)
-            .opacity(visible ? 1 : 0)
+            .opacity(visible ? (disabled ? 0.3 : 1) : 0)
             .scaleEffect(pressing ? 1.1 : 1.0)
             .animation(.easeOut(duration: 0.15), value: pressing)
+            .animation(.easeOut(duration: 0.2), value: disabled)
         }
         .frame(width: 56, height: 100)
         .contentShape(Rectangle())
         .gesture(
             DragGesture(minimumDistance: 0)
                 .onChanged { _ in
+                    guard !disabled else { return }
                     if !pressing {
                         pressing = true
                         onShow()          // проявить под пальцем
@@ -58,11 +62,18 @@ struct StepZone: View {
                 .onEnded { _ in
                     pressing = false
                     stopRepeat()
-                    if !didRepeat { onStep() }  // обычный тап — один шаг
+                    if !didRepeat && !disabled { onStep() }  // обычный тап — один шаг
                     didRepeat = false
                     onHide()
                 }
         )
+        // Упёрлись в предел во время удержания — мгновенно стопаем авто-повтор.
+        .onChange(of: disabled) { _, isDisabled in
+            if isDisabled {
+                stopRepeat()
+                pressing = false
+            }
+        }
     }
 
     private func startRepeat() {

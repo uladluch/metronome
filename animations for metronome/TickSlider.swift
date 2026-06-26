@@ -53,11 +53,11 @@ struct TickSlider: View {
                     let majorH = contentH * 0.55
                     let half = Int(cx / tickSpacing) + 2
                     let base = displayValue.rounded()
-                    let maxDist = cx * 0.85  // за этим — полностью погасли (жёстко)
+                    let maxDist = cx * 0.92  // за этим — полностью погасли (жёстко)
 
                     // За пределами диапазона тики рисуем тоже (чтобы не было чёрной
                     // пустоты на краях), но почти прозрачными — как задизейбленные.
-                    let outOfRangeOpacity = 0.15
+                    let outOfRangeOpacity = 0.25
 
                     for i in -half...half {
                         let tickVal = base + Double(i)
@@ -66,19 +66,13 @@ struct TickSlider: View {
                         let norm = min(abs(x - cx) / maxDist, 1)
                         let brightness = pow(Double(1 - norm), 2.6)  // жёсткое затухание
 
+                        // Задизейбленные тики за упором гаснут к краю тем же
+                        // прожекторным затуханием, что и активные — просто приглушённые,
+                        // чтобы не стояли плоской ровной шеренгой.
                         let inRange = tickVal >= range.lowerBound && tickVal <= range.upperBound
-                        let opacity: Double
-                        if inRange {
-                            opacity = brightness
-                        } else {
-                            // Задизейбленные тики за упором: ровная блёклая видимость
-                            // на всю ширину (без прожекторного провала), гаснут только
-                            // в самых крайних ~25pt у края экрана, чтобы не обрезались.
-                            let edgeDist = Double(cx) - Double(abs(x - cx))
-                            let edgeFade = min(edgeDist / 25.0, 1)
-                            opacity = outOfRangeOpacity * edgeFade
-                        }
+                        let opacity = inRange ? brightness : brightness * outOfRangeOpacity
 
+                        // Каждый 5-й — мажорный (выше и толще), всегда.
                         let isMajor = Int(tickVal) % 5 == 0
                         let tickH = isMajor ? majorH : minorH
 
@@ -186,7 +180,13 @@ struct TickSlider: View {
 
     /// Доезд до ближайшей черточки + плавное уменьшение черточки.
     private func snapAndRest() {
-        value = min(max(displayValue.rounded(), range.lowerBound), range.upperBound)
+        let snapped = min(max(displayValue.rounded(), range.lowerBound), range.upperBound)
+        value = snapped
+        // Магнитно доводим ВИЗУАЛЬНУЮ позицию до целого тика — после ручного
+        // кручения индикатор не должен застывать между полосок.
+        withAnimation(.spring(response: 0.28, dampingFraction: 0.82)) {
+            displayValue = snapped
+        }
         withAnimation(.easeOut(duration: 0.45)) { indicatorScale = 1.0 }
     }
 }

@@ -14,14 +14,19 @@ struct BottomToolbar: View {
     // Кнопки тут не морфят, namespace нужен только для сигнатуры.
     @Namespace private var ns
 
+    /// Открыть главный шит (тот же, что и верхние кнопки) — состояние живёт в ContentView.
+    var onMainSheet: () -> Void = {}
+
     @State private var value: Double = 0.5
-    @State private var showSheet = false
     @State private var showBPM = false
 
     /// Иконки громкости видны только во время взаимодействия со слайдером.
     @State private var showVolumeIcons = false
 
-    private let icon = "square"
+    // Угловые иконки-фигуры: низ-лево — квадрат, низ-право — ромб (не повторяются
+    // с верхними круг/треугольник).
+    private let leftIcon = "square"
+    private let rightIcon = "diamond"
 
     var body: some View {
         // Тот же GlassEffectContainer, что и сверху — чтобы стекло на кнопках
@@ -29,10 +34,10 @@ struct BottomToolbar: View {
         GlassEffectContainer(spacing: 16) {
             HStack(spacing: 16) {
                 GlassIconButton(
-                    systemName: icon,
+                    systemName: leftIcon,
                     glassID: nil,
                     namespace: ns,
-                    action: { showSheet = true }
+                    action: { onMainSheet() }
                 )
 
                 // Слайдер с иконками громкости по бокам. Иконки всегда занимают
@@ -64,7 +69,7 @@ struct BottomToolbar: View {
 
                 // Правая кнопка — второй шит (ввод BPM).
                 GlassIconButton(
-                    systemName: icon,
+                    systemName: rightIcon,
                     glassID: nil,
                     namespace: ns,
                     action: { showBPM = true }
@@ -74,12 +79,7 @@ struct BottomToolbar: View {
             // Конкретная ширина = экран − 32 (по 16pt с боков), центр.
             .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
         }
-        .sheet(isPresented: $showSheet) {
-            SheetView()
-                .presentationDetents([.large])           // только .large (не medium)
-                .presentationDragIndicator(.visible)     // grabber сверху
-        }
-        // Второй шит — ввод BPM (правая кнопка). Пока на весь экран.
+        // Уникальный шит — ввод BPM (нижняя правая кнопка). Пока на весь экран.
         .sheet(isPresented: $showBPM) {
             BPMSheet()
         }
@@ -88,7 +88,8 @@ struct BottomToolbar: View {
 
 // MARK: - Контент полноэкранного sheet
 
-private struct SheetView: View {
+/// Главный шит — общий для верхних кнопок и нижней левой. Презентуется из ContentView.
+struct SheetView: View {
 
     @Environment(\.dismiss) private var dismiss
 
