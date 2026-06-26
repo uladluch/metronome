@@ -8,6 +8,7 @@
 //
 
 import SwiftUI
+import UIKit.UIGestureRecognizerSubclass  // для сеттера .state в кастомном распознавателе
 
 struct BottomToolbar: View {
 
@@ -248,7 +249,7 @@ struct GlassSegmentedControl: View {
                     }
                 }
                 .animation(.spring(response: 0.4, dampingFraction: 0.9), value: selection)
-                .animation(.easeOut(duration: 0.15), value: pressing)
+                // pressing — мгновенно (без анимации), чтобы не было видно чёрного.
                 .allowsHitTesting(false)
             }
             .glassEffect(.regular.interactive(), in: .capsule)
@@ -277,17 +278,30 @@ private struct SegmentedBacking: UIViewRepresentable {
         control.addTarget(context.coordinator,
                           action: #selector(Coordinator.changed(_:)),
                           for: .valueChanged)
-        // Состояние нажатия — родные события UIControl (не конфликтуют со скроллом).
-        control.addTarget(context.coordinator,
-                          action: #selector(Coordinator.pressDown),
-                          for: .touchDown)
-        control.addTarget(context.coordinator,
-                          action: #selector(Coordinator.pressUp),
-                          for: [.touchUpInside, .touchUpOutside, .touchCancel, .touchDragExit])
+        // Состояние нажатия. UISegmentedControl НЕ шлёт надёжно touchDown/touchUp
+        // таргетам, а UILongPressGestureRecognizer выдаёт .began с задержкой.
+        // Кастомный TouchDownGesture ставит .began прямо в touchesBegan → реакция
+        // моментальная. cancelsTouchesInView=false + одновременное распознавание →
+        // не мешает ни переключению, ни скроллу Form.
+        let press = TouchDownGesture(
+            target: context.coordinator,
+            action: #selector(Coordinator.pressed(_:))
+        )
+        press.cancelsTouchesInView = false
+        // По умолчанию распознаватель задерживает доставку касаний контролу, из-за
+        // чего нативный drag-select не коммитится и подсветка отскакивает. Отключаем.
+        press.delaysTouchesBegan = false
+        press.delaysTouchesEnded = false
+        press.delegate = context.coordinator
+        control.addGestureRecognizer(press)
         return control
     }
 
     func updateUIView(_ uiView: UISegmentedControl, context: Context) {
+        context.coordinator.parent = self  // держим биндинги/значения свежими
+        // Во время жеста НЕ переписываем selectedSegmentIndex — иначе writeback
+        // посреди нативного перетягивания сбивает drag и подсветка отскакивает.
+        guard !context.coordinator.interacting else { return }
         if uiView.selectedSegmentIndex != selection {
             uiView.selectedSegmentIndex = selection
         }
@@ -300,8 +314,17 @@ private struct SegmentedBacking: UIViewRepresentable {
 
     func makeCoordinator() -> Coordinator { Coordinator(self) }
 
-    final class Coordinator: NSObject {
-        let parent: SegmentedBacking
+    final class Coordinator: NSObject, UIGestureRecognizerDelegate {
+        var parent: SegmentedBacking
+        /// Жест начался на активном сегменте — тогда держим белый весь жест,
+        /// включая перетягивание подсветки к другому сегменту (иначе исходный
+        /// мигнул бы чёрным, пока selection ещё не переключился).
+        private var startedOnActive = false
+        /// Идёт ли касание/перетягивание — на это время не переписываем selection
+        /// обратно в контрол (иначе сбивается нативный drag).
+        private(set) var interacting = false
+        /// Отложенное «побеление» — чтобы быстрый тап по активному не мигал.
+        private var whitenWork: DispatchWorkItem?
         init(_ parent: SegmentedBacking) { self.parent = parent }
 
         @objc func changed(_ sender: UISegmentedControl) {
@@ -309,7 +332,67 @@ private struct SegmentedBacking: UIViewRepresentable {
             UIImpactFeedbackGenerator(style: .light).impactOccurred()
         }
 
-        @objc func pressDown() { parent.pressing = true }
-        @objc func pressUp() { parent.pressing = false }
+        @objc func pressed(_ g: UIGestureRecognizer) {
+            guard let control = g.view as? UISegmentedControl else { return }
+            switch g.state {
+            case .began:
+                interacting = true
+                let segW = control.bounds.width / CGFloat(max(control.numberOfSegments, 1))
+                let idx = Int(g.location(in: control).x / segW)
+                startedOnActive = (idx == control.selectedSegmentIndex)
+                // Белим НЕ сразу: только если удержание затянулось (hold/drag, а не
+                // быстрый тап). Иначе тап по активному мигает чёрный→белый→чёрный.
+                whitenWork?.cancel()
+                if startedOnActive {
+                    let work = DispatchWorkItem { [weak self] in self?.parent.pressing = true }
+                    whitenWork = work
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.14, execute: work)
+                }
+            case .changed:
+                break  // pressing держится сам после срабатывания таймера
+            case .ended, .cancelled, .failed:
+                whitenWork?.cancel()
+                startedOnActive = false
+                // Контрол коммитит выбор в этом же касании. Читаем ИТОГ в следующем
+                // тике (после коммита) и применяем selection + pressing ОДНИМ кадром,
+                // иначе: writeback вернул бы старое значение (отскок), а снятие
+                // pressing раньше обновления selection мигнуло бы исходный сегмент чёрным.
+                DispatchQueue.main.async {
+                    self.parent.selection = control.selectedSegmentIndex
+                    self.parent.pressing = false
+                    self.interacting = false
+                }
+            default:
+                break
+            }
+        }
+
+        // Распознаём одновременно с внутренними жестами сегмента и скроллом —
+        // не блокируем переключение/прокрутку.
+        func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer,
+                               shouldRecognizeSimultaneouslyWith other: UIGestureRecognizer) -> Bool {
+            true
+        }
+    }
+}
+
+/// Распознаватель, который срабатывает МОМЕНТАЛЬНО по касанию: ставит .began прямо
+/// в touchesBegan (в отличие от UILongPressGestureRecognizer, который медлит).
+private final class TouchDownGesture: UIGestureRecognizer {
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesBegan(touches, with: event)
+        state = .began
+    }
+    override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesMoved(touches, with: event)
+        state = .changed
+    }
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesEnded(touches, with: event)
+        state = .ended
+    }
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent) {
+        super.touchesCancelled(touches, with: event)
+        state = .cancelled
     }
 }
