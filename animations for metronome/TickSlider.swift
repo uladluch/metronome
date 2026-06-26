@@ -55,13 +55,29 @@ struct TickSlider: View {
                     let base = displayValue.rounded()
                     let maxDist = cx * 0.85  // за этим — полностью погасли (жёстко)
 
+                    // За пределами диапазона тики рисуем тоже (чтобы не было чёрной
+                    // пустоты на краях), но почти прозрачными — как задизейбленные.
+                    let outOfRangeOpacity = 0.15
+
                     for i in -half...half {
                         let tickVal = base + Double(i)
-                        guard tickVal >= range.lowerBound, tickVal <= range.upperBound else { continue }
                         let x = cx + CGFloat(tickVal - displayValue) * tickSpacing
 
                         let norm = min(abs(x - cx) / maxDist, 1)
                         let brightness = pow(Double(1 - norm), 2.6)  // жёсткое затухание
+
+                        let inRange = tickVal >= range.lowerBound && tickVal <= range.upperBound
+                        let opacity: Double
+                        if inRange {
+                            opacity = brightness
+                        } else {
+                            // Задизейбленные тики за упором: ровная блёклая видимость
+                            // на всю ширину (без прожекторного провала), гаснут только
+                            // в самых крайних ~25pt у края экрана, чтобы не обрезались.
+                            let edgeDist = Double(cx) - Double(abs(x - cx))
+                            let edgeFade = min(edgeDist / 25.0, 1)
+                            opacity = outOfRangeOpacity * edgeFade
+                        }
 
                         let isMajor = Int(tickVal) % 5 == 0
                         let tickH = isMajor ? majorH : minorH
@@ -70,7 +86,7 @@ struct TickSlider: View {
                         p.move(to: CGPoint(x: x, y: baseline - tickH))
                         p.addLine(to: CGPoint(x: x, y: baseline))
                         // Скруглённые концы у черточек.
-                        ctx.stroke(p, with: .color(.white.opacity(brightness)),
+                        ctx.stroke(p, with: .color(.white.opacity(opacity)),
                                    style: StrokeStyle(lineWidth: isMajor ? 2.5 : 2, lineCap: .round))
                     }
                 }
