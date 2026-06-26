@@ -124,7 +124,7 @@ struct SheetView: View {
                     .padding(.horizontal, 16)
                     .padding(.vertical, 32)
                     .background(
-                        Color(.tertiarySystemBackground),
+                        Color.backgroundSecondary,
                         in: RoundedRectangle(cornerRadius: 28, style: .continuous)
                     )
                     // На всю ширину контейнера (без боковых insets) + внешний margin 16 сверху/снизу.
@@ -177,6 +177,7 @@ struct SheetView: View {
                         }
                     }
                 }
+                .listRowBackground(Color.backgroundSecondary)
 
                 // Большой длинный блок — просто чтобы шит скроллился. Подсказка
                 // пользователю: проскролль и посмотри, как затемняется топ-тулбар.
@@ -189,7 +190,11 @@ struct SheetView: View {
                         .frame(height: 900, alignment: .top)
                         .padding(.top, 40)
                 }
+                .listRowBackground(Color.backgroundSecondary)
             }
+            // Фон шита — основной (чёрный); карточки сверху — вторичный (#1C1C1C).
+            .scrollContentBackground(.hidden)
+            .background(Color.backgroundPrimary)
             .navigationTitle("Sheet")
             // inlineLarge: крупный заголовок, зафиксированный в баре по левому краю —
             // НЕ сворачивается и не двигается при скролле.
@@ -320,11 +325,13 @@ private struct SegmentedBacking: UIViewRepresentable {
         /// включая перетягивание подсветки к другому сегменту (иначе исходный
         /// мигнул бы чёрным, пока selection ещё не переключился).
         private var startedOnActive = false
+        /// Момент касания — чтобы гарантировать минимально видимое время белого
+        /// (быстрый тап иначе схлопывается и белый кадр не успевает отрисоваться).
+        private var pressStart = Date()
+        private let minWhite: TimeInterval = 0.18
         /// Идёт ли касание/перетягивание — на это время не переписываем selection
         /// обратно в контрол (иначе сбивается нативный drag).
         private(set) var interacting = false
-        /// Отложенное «побеление» — чтобы быстрый тап по активному не мигал.
-        private var whitenWork: DispatchWorkItem?
         init(_ parent: SegmentedBacking) { self.parent = parent }
 
         @objc func changed(_ sender: UISegmentedControl) {
@@ -340,27 +347,28 @@ private struct SegmentedBacking: UIViewRepresentable {
                 let segW = control.bounds.width / CGFloat(max(control.numberOfSegments, 1))
                 let idx = Int(g.location(in: control).x / segW)
                 startedOnActive = (idx == control.selectedSegmentIndex)
-                // Белим НЕ сразу: только если удержание затянулось (hold/drag, а не
-                // быстрый тап). Иначе тап по активному мигает чёрный→белый→чёрный.
-                whitenWork?.cancel()
-                if startedOnActive {
-                    let work = DispatchWorkItem { [weak self] in self?.parent.pressing = true }
-                    whitenWork = work
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.14, execute: work)
-                }
+                // Моментально белим, если нажали на активный сегмент (тап и
+                // удержание одинаково) — без задержки.
+                pressStart = Date()
+                parent.pressing = startedOnActive
             case .changed:
-                break  // pressing держится сам после срабатывания таймера
+                break  // pressing держится с .began до .ended (в т.ч. при перетягивании)
             case .ended, .cancelled, .failed:
-                whitenWork?.cancel()
+                let wasActive = startedOnActive
                 startedOnActive = false
-                // Контрол коммитит выбор в этом же касании. Читаем ИТОГ в следующем
-                // тике (после коммита) и применяем selection + pressing ОДНИМ кадром,
-                // иначе: writeback вернул бы старое значение (отскок), а снятие
-                // pressing раньше обновления selection мигнуло бы исходный сегмент чёрным.
+                // selection синкаем с контролом и снимаем interacting сразу (после
+                // коммита, в следующем тике), а вот СНЯТИЕ белого держим минимум
+                // minWhite от касания — иначе быстрый тап схлопывается и белого не видно.
                 DispatchQueue.main.async {
                     self.parent.selection = control.selectedSegmentIndex
-                    self.parent.pressing = false
                     self.interacting = false
+                    if !wasActive { self.parent.pressing = false }
+                }
+                if wasActive {
+                    let remaining = max(0, minWhite - Date().timeIntervalSince(pressStart))
+                    DispatchQueue.main.asyncAfter(deadline: .now() + remaining) {
+                        self.parent.pressing = false
+                    }
                 }
             default:
                 break

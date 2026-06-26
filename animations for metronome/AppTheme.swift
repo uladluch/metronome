@@ -55,7 +55,13 @@ extension View {
 extension Color {
 
     /// Основной фон приложения — полностью чёрный (тёмная тема).
-    static let appBackground = Color.black
+    static let backgroundPrimary = Color.black
+
+    /// Вторичный фон (карточки, блоки) — #1C1C1C.
+    static let backgroundSecondary = Color(red: 0x1C / 255, green: 0x1C / 255, blue: 0x1C / 255)
+
+    /// Псевдоним основного фона (исторический) — равен backgroundPrimary.
+    static let appBackground = backgroundPrimary
 
     /// Акцент контролов (слайдер, тоггл) — #737373.
     static let controlAccent = Color(red: 0x73 / 255, green: 0x73 / 255, blue: 0x73 / 255)
