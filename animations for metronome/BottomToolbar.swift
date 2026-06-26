@@ -97,10 +97,41 @@ struct SheetView: View {
     @State private var sliderValue: Double = 0.5
     @State private var showPopover = false
     @State private var containerWidth: CGFloat = 0
+    /// Выбранная вкладка верхнего сегмент-контрола.
+    @State private var segment = 0
 
     var body: some View {
         NavigationStack {
             Form {
+                // Блок с сегментом сверху и контентом, который меняется по выбору.
+                // Едет вместе со скроллом (не закреплён).
+                Section {
+                    // Карточка: сегмент + контент внутри одного блока. Фон 3-го уровня,
+                    // padding 16pt со всех сторон, без сепаратора.
+                    VStack(spacing: 16) {
+                        GlassSegmentedControl(
+                            titles: ["First", "Second"],
+                            selection: $segment,
+                            height: 46
+                        )
+
+                        // Контент блока — просто текст по центру, меняется по выбору.
+                        Text(segment == 0 ? "Segment A" : "Segment B")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                    }
+                    // Внутренний padding: 16 по бокам, 32 сверху/снизу.
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 32)
+                    .background(
+                        Color(.tertiarySystemBackground),
+                        in: RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    )
+                    // На всю ширину контейнера (без боковых insets) + внешний margin 16 сверху/снизу.
+                    .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+
                 Section("Microanimations") {
                     // Toggle row
                     HStack {
@@ -176,5 +207,109 @@ struct SheetView: View {
         }
         // Ширина контейнера для popover на всю ширину.
         .onGeometryChange(for: CGFloat.self, of: { $0.size.width }, action: { containerWidth = $0 })
+    }
+}
+
+// MARK: - Текстовый сегмент-таб с нативным liquid glass
+
+/// Текстовый сегмент-контрол (по мотивам kai7win/AnimatedGlassTabs).
+/// Подписи рисуем сами — SwiftUI-оверлей с плавной сменой цвета, — а под ними
+/// прячется нативный UISegmentedControl с прозрачными заголовками, который даёт
+/// родное liquid-glass переключение (скользящую подсветку) и ловит тапы. Высоту
+/// задаём снаружи, чего Picker(.segmented) не умеет.
+struct GlassSegmentedControl: View {
+
+    let titles: [String]
+    @Binding var selection: Int
+    var height: CGFloat = 46
+
+    /// Палец на контроле — подсветка «уходит в стекло», поэтому чёрный активный
+    /// текст красим в белый, чтобы оставался читаемым.
+    @State private var pressing = false
+
+    var body: some View {
+        GlassEffectContainer(spacing: 10) {
+            GeometryReader { geo in
+                // 1) Нативная подложка: невидимые заголовки + liquid-glass подсветка.
+                //    pressing обновляется по нативным touch-событиям UIControl —
+                //    SwiftUI-жест конфликтовал бы со скроллом Form и ломал тапы.
+                SegmentedBacking(size: geo.size, count: titles.count,
+                                 selection: $selection, pressing: $pressing)
+
+                // 2) Видимые подписи поверх — тапы проходят сквозь к подложке.
+                HStack(spacing: 0) {
+                    ForEach(titles.indices, id: \.self) { i in
+                        Text(titles[i])
+                            .font(.subheadline.weight(.semibold))
+                            // Активный — чёрный на белой подсветке; при нажатии (стекло)
+                            // и неактивный — белый.
+                            .foregroundStyle(selection == i && !pressing ? Color.black : Color.white)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    }
+                }
+                .animation(.spring(response: 0.4, dampingFraction: 0.9), value: selection)
+                .animation(.easeOut(duration: 0.15), value: pressing)
+                .allowsHitTesting(false)
+            }
+            .glassEffect(.regular.interactive(), in: .capsule)
+        }
+        .frame(height: height)
+    }
+}
+
+/// Нативный UISegmentedControl с прозрачными заголовками — только ради родной
+/// liquid-glass подсветки и обработки тапов; видимый текст рисует оверлей сверху.
+private struct SegmentedBacking: UIViewRepresentable {
+
+    var size: CGSize
+    var count: Int
+    @Binding var selection: Int
+    @Binding var pressing: Bool
+
+    func makeUIView(context: Context) -> UISegmentedControl {
+        let control = UISegmentedControl(items: Array(repeating: "", count: count))
+        control.selectedSegmentIndex = selection
+        control.selectedSegmentTintColor = .white  // белая liquid-glass подсветка
+        // Заголовки невидимы — подписи рисует SwiftUI-оверлей.
+        let clear: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.clear]
+        control.setTitleTextAttributes(clear, for: .normal)
+        control.setTitleTextAttributes(clear, for: .selected)
+        control.addTarget(context.coordinator,
+                          action: #selector(Coordinator.changed(_:)),
+                          for: .valueChanged)
+        // Состояние нажатия — родные события UIControl (не конфликтуют со скроллом).
+        control.addTarget(context.coordinator,
+                          action: #selector(Coordinator.pressDown),
+                          for: .touchDown)
+        control.addTarget(context.coordinator,
+                          action: #selector(Coordinator.pressUp),
+                          for: [.touchUpInside, .touchUpOutside, .touchCancel, .touchDragExit])
+        return control
+    }
+
+    func updateUIView(_ uiView: UISegmentedControl, context: Context) {
+        if uiView.selectedSegmentIndex != selection {
+            uiView.selectedSegmentIndex = selection
+        }
+    }
+
+    // Заполняем всю выделенную геометрию (высота 46pt задаётся снаружи через .frame).
+    func sizeThatFits(_ proposal: ProposedViewSize, uiView: UISegmentedControl, context: Context) -> CGSize? {
+        size
+    }
+
+    func makeCoordinator() -> Coordinator { Coordinator(self) }
+
+    final class Coordinator: NSObject {
+        let parent: SegmentedBacking
+        init(_ parent: SegmentedBacking) { self.parent = parent }
+
+        @objc func changed(_ sender: UISegmentedControl) {
+            parent.selection = sender.selectedSegmentIndex
+            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        }
+
+        @objc func pressDown() { parent.pressing = true }
+        @objc func pressUp() { parent.pressing = false }
     }
 }
