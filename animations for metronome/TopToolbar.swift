@@ -89,6 +89,55 @@ struct GlassIconButton: View {
     }
 }
 
+// MARK: - Обёртки над GlassButton для стандартных форм
+
+/// Капсула с параметрами круглых кнопок (для чёрной кнопки в ContentView).
+struct GlassCapsuleIconButton: View {
+
+    let glassID: String?
+    let namespace: Namespace.ID
+    var size: CGSize = .init(width: 240, height: 50)
+    var pressScale: CGFloat = 1.08
+    var pressScaleHorizontalOnly: Bool = false
+    var repeatAction: (() -> Void)? = nil
+    var showShine: Bool = false
+    var shineImage: String = "Shine"
+    var shineOpacity: Double = 0.04
+    var shineWidthFactor: CGFloat? = nil
+    var shineHeightFactor: CGFloat? = nil
+    var shineForcePressed: Bool = false
+    var externalPressScale: Bool = false
+    var onPressedChange: ((Bool) -> Void)? = nil
+    let action: () -> Void
+    @ViewBuilder let label: () -> any View
+
+    var body: some View {
+        GlassButton(
+            shape: Capsule(),
+            glassID: glassID,
+            namespace: namespace,
+            action: action,
+            repeatAction: repeatAction,
+            pressScale: pressScale,
+            showShine: showShine,
+            shineImage: shineImage,
+            shineOpacity: shineOpacity,
+            shineWidthFactor: shineWidthFactor,
+            shineHeightFactor: shineHeightFactor,
+            shineForcePressed: shineForcePressed,
+            domeAsRadial: false,
+            pressScaleHorizontalOnly: pressScaleHorizontalOnly,
+            externalPressScale: externalPressScale,
+            onPressedChange: onPressedChange
+        ) {
+            // Явная фиксированная ширина — чтобы пивот зума был точно по центру
+            // (с maxWidth:.infinity внутри контейнера центр «уплывал» вправо).
+            AnyView(label())
+                .frame(width: size.width, height: size.height)
+        }
+    }
+}
+
 // MARK: - Центральная капсула 180×60
 
 /// Стеклянная капсула-кнопка 180×60 (обёртка над GlassButton).

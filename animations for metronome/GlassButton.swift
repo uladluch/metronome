@@ -31,6 +31,15 @@ struct GlassButton<Label: View>: View {
     private let shineHeightFactor: CGFloat?
     /// Внешнее «нажатие» для блика (когда жест живёт снаружи, как в StepZone).
     private let shineForcePressed: Bool
+    /// Тип dome: true = радиальная полусфера в углу (для кругов), false = линейный градиент сверху (для капсул).
+    private let domeAsRadial: Bool
+    /// Зум на нажатие только по горизонтали (высота не меняется).
+    private let pressScaleHorizontalOnly: Bool
+    /// Внешний владелец сам применяет зум (например, к GlassEffectContainer снаружи) —
+    /// тогда GlassButton НЕ масштабирует себя сам, но всё равно компенсирует текст.
+    private let externalPressScale: Bool
+    /// Сообщает наружу о смене состояния нажатия (для внешнего зума).
+    private let onPressedChange: ((Bool) -> Void)?
 
     @Environment(\.isEnabled) private var isEnabled
     @State private var isPressed = false
@@ -54,6 +63,10 @@ struct GlassButton<Label: View>: View {
         shineWidthFactor: CGFloat? = nil,    // явный размер блика (доля ширины кнопки)
         shineHeightFactor: CGFloat? = nil,   // явный размер блика (доля высоты кнопки)
         shineForcePressed: Bool = false,     // внешнее «нажатие» для блика
+        domeAsRadial: Bool = true,           // true = радиальная сфера (для кругов), false = линейный градиент (для капсул)
+        pressScaleHorizontalOnly: Bool = false, // зум на нажатие только по ширине
+        externalPressScale: Bool = false,    // зум применяет внешний владелец (контейнер)
+        onPressedChange: ((Bool) -> Void)? = nil, // уведомление о нажатии наружу
         @ViewBuilder label: () -> Label
     ) {
         self.shape = AnyShape(shape)
@@ -71,6 +84,10 @@ struct GlassButton<Label: View>: View {
         self.shineWidthFactor = shineWidthFactor
         self.shineHeightFactor = shineHeightFactor
         self.shineForcePressed = shineForcePressed
+        self.domeAsRadial = domeAsRadial
+        self.pressScaleHorizontalOnly = pressScaleHorizontalOnly
+        self.externalPressScale = externalPressScale
+        self.onPressedChange = onPressedChange
         self.label = label()
     }
 
@@ -80,25 +97,54 @@ struct GlassButton<Label: View>: View {
 
     var body: some View {
         label
+            // Когда зум только по горизонтали — компенсируем растяжение самого
+            // контента (текста), чтобы тянулась капсула, а буквы не «толстели».
+            .scaleEffect(
+                x: (pressScaleHorizontalOnly && isPressed) ? 1.0 / pressScale : 1.0,
+                y: 1.0
+            )
             .glassEffect(glassStyle.interactive(), in: shape)
             .glassMorphID(glassID, in: namespace)
             // Полусфера (блик) ПОД стеклом, масштабируется под размер кнопки.
-            .background(alignment: .topLeading) {
+            .background {
                 if showDome {
-                    GeometryReader { g in
-                        let s = min(g.size.width, g.size.height)
-                        Circle()
-                            .fill(
-                                RadialGradient(
-                                    colors: [.white.opacity(domeOpacity), .white.opacity(0)],
-                                    center: .center,
-                                    startRadius: 0,
-                                    endRadius: s * 0.43
+                    if domeAsRadial {
+                        // Радиальная полусфера в верхнем левом углу (для круглых кнопок).
+                        GeometryReader { g in
+                            let s = min(g.size.width, g.size.height)
+                            Circle()
+                                .fill(
+                                    RadialGradient(
+                                        colors: [.white.opacity(domeOpacity), .white.opacity(0)],
+                                        center: .center,
+                                        startRadius: 0,
+                                        endRadius: s * 0.43
+                                    )
                                 )
-                            )
-                            .frame(width: s * 0.87, height: s * 0.87)
-                            .offset(x: -s * 0.1, y: -s * 0.1)
-                            .animation(.easeOut(duration: 0.22), value: isPressed)
+                                .frame(width: s * 0.87, height: s * 0.87)
+                                .offset(x: -s * 0.1, y: -s * 0.1)
+                                .animation(.easeOut(duration: 0.22), value: isPressed)
+                        }
+                    } else {
+                        // Тот же приём, что и для круга: градиент, ОБРЕЗАННЫЙ формой
+                        // кнопки. Для вытянутой капсулы свет ловится не точкой, а вдоль
+                        // верхней кромки — поэтому градиент сверху-вниз, повторяющий
+                        // изгиб капсулы. Падение яркости совпадает со сферой (~0.7 высоты).
+                        GeometryReader { _ in
+                            Capsule()
+                                .fill(
+                                    LinearGradient(
+                                        stops: [
+                                            .init(color: .white.opacity(domeOpacity), location: 0),
+                                            .init(color: .white.opacity(domeOpacity * 0.5), location: 0.35),
+                                            .init(color: .white.opacity(0), location: 0.72)
+                                        ],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                )
+                                .animation(.easeOut(duration: 0.22), value: isPressed)
+                        }
                     }
                 }
             }
@@ -186,7 +232,16 @@ struct GlassButton<Label: View>: View {
             }
             .accessibilityAddTraits(.isButton)
             // Увеличение на нажатие (pressScale, 1.0 = выкл).
-            .scaleEffect(isPressed ? pressScale : 1.0)
+            // Если pressScaleHorizontalOnly — растягиваем только по ширине, высота прежняя.
+            // Если externalPressScale — зум применяет внешний владелец (контейнер), сами не масштабируем.
+            .scaleEffect(
+                x: (!externalPressScale && isPressed) ? pressScale : 1.0,
+                y: (!externalPressScale && isPressed) ? (pressScaleHorizontalOnly ? 1.0 : pressScale) : 1.0
+            )
+            // Сообщаем наружу о нажатии (для внешнего зума контейнера).
+            .onChange(of: isPressed) { _, pressed in
+                onPressedChange?(pressed)
+            }
     }
 
     // MARK: - Long-press авто-повтор

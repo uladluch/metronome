@@ -38,6 +38,8 @@ struct ContentView: View {
     /// Блик Shine под белой кнопкой (под пальцем, под стеклом).
     @State private var whitePressed = false
     @State private var whiteTouchPoint: CGPoint = .zero
+    /// Нажатие чёрной кнопки — зум применяем снаружи, ко всему GlassEffectContainer.
+    @State private var notifPressed = false
 
     /// Показать ли нотификацию.
     @State private var showNotification = false
@@ -111,26 +113,38 @@ struct ContentView: View {
                     // Две кнопки glow (теперь СНИЗУ).
                     VStack(spacing: 12) {
                         // Тёмная стеклянная кнопка — показать нотификацию.
-                        GlassButton(
-                            shape: Capsule(),
-                            namespace: glassNS,
-                            action: { showNotificationAction() },
-                            showDome: false,
-                            pressScale: 1.08,
-                            glassStyle: .regular,
-                            showShine: true,
-                            shineImage: "shine 2",
-                            shineOpacity: 0.2,
-                            shineHorizontalOnly: true,
-                            shineWidthFactor: 1.6,
-                            shineHeightFactor: 3
-                        ) {
-                            Text("Show notification")
-                                .font(.headline)
-                                .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
+                        // Анатомия как у круглых кнопок: shine 1 (Shine), opacity 0.04.
+                        // В GlassEffectContainer (как круглые) — чтобы стекло «переливалось».
+                        // Зум применяем СНАРУЖИ, ко всему контейнеру (externalPressScale),
+                        // иначе масштабирование внутри ломает морфинг стекла и тянет вбок.
+                        GlassEffectContainer {
+                            GlassCapsuleIconButton(
+                                glassID: nil,
+                                namespace: glassNS,
+                                size: .init(width: 240, height: 50),
+                                pressScaleHorizontalOnly: true,
+                                showShine: true,
+                                shineImage: "Shine",
+                                shineOpacity: 0.14,
+                                // Компактный блик (уже кнопки по ширине) — ездит под
+                                // пальцем по обеим осям, видно как преломляются углы.
+                                shineWidthFactor: 0.5,
+                                shineHeightFactor: 2.2,
+                                externalPressScale: true,
+                                onPressedChange: { pressed in
+                                    withAnimation(.easeOut(duration: pressed ? 0.12 : 0.3)) {
+                                        notifPressed = pressed
+                                    }
+                                },
+                                action: { showNotificationAction() }
+                            ) {
+                                Text("Show notification")
+                                    .font(.headline)
+                                    .foregroundStyle(.white)
+                            }
                         }
+                        // Горизонтальный зум всего контейнера — симметрично, по центру.
+                        .scaleEffect(x: notifPressed ? 1.08 : 1.0, y: 1.0)
 
                         // Белая кнопка (тот же функционал), чёрный шрифт.
                         Button(action: {
