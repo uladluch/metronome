@@ -92,73 +92,76 @@ struct BobsControl: View {
     }
 
     private func bob(height: CGFloat, isActive: Bool, isPressed: Bool) -> some View {
-        // Подложка: 10% серая по умолчанию. Активная вспыхивает к белому на пике удара и
-        // плавно гаснет к серому вместе с pulse → к следующему удару уже серая.
-        let fillOpacity = isActive ? (0.1 + 0.9 * pulse) : 0.1
+        // В ПОКОЕ боб идентичен чёрной кнопке: только .clear-стекло над тёмным фоном,
+        // без заливки и без свечения. Активный боб вспыхивает белым на пике удара
+        // (pulse) и гаснет обратно к тёмному — к следующему удару снова как кнопка.
+        let fillOpacity = isActive ? pulse : 0
         // Свечение — только у активного, его сила = pulse (синхронно с картинкой).
         let glow = isActive ? pulse : 0
-        // Dome (полусфера) светлеет при нажатии.
+        // Dome светлеет при нажатии — как у кнопок.
         let domeOpacity = isPressed ? 0.24 : 0.12
 
         return ZStack {
-            // Белая подложка ПОД стеклом, меньше на 12pt (по 6pt с каждой стороны),
-            // центрирована в полноразмерном контейнере → стекло искажает её края.
+            // Белая вспышка ПОД стеклом (в покое прозрачна → боб тёмный как кнопка),
+            // меньше на 12pt → стекло искажает её края.
             Capsule()
                 .fill(.white.opacity(fillOpacity))
                 .frame(width: bobWidth - 12, height: max(height - 12, 0))
                 .frame(width: bobWidth, height: height, alignment: .center)
 
-            // Shine 2 — НАД белой подложкой, ПОД стеклом; повёрнут на 90° под
-            // вертикальную капсулу. Свой натуральный размер. Виден на нажатии.
+            // Shine 2 — НАД подложкой, ПОД стеклом; повёрнут на 90° под вертикальную
+            // капсулу. Свой натуральный размер. Виден на нажатии.
             Image("shine 2")
                 .rotationEffect(.degrees(90))
                 .opacity(isPressed ? 0.7 : 0)
                 .animation(.easeOut(duration: 0.4), value: isPressed)
                 .allowsHitTesting(false)
 
-            // Стекло с интерактивностью (реагирует на нажатие — liquid glass look).
+            // Стекло с интерактивностью — идентично чёрной кнопке.
             Color.clear
                 .glassEffect(.clear.interactive(), in: Capsule())
                 .frame(width: bobWidth, height: height)
         }
         .frame(width: bobWidth, height: height)
-        // Полусфера (dome) под стеклом, светлеет при нажатии.
-        .background(alignment: .topLeading) {
-            GeometryReader { g in
-                let s = min(g.size.width, g.size.height)
-                Circle()
-                    .fill(
-                        RadialGradient(
-                            colors: [.white.opacity(domeOpacity), .white.opacity(0)],
-                            center: .center,
-                            startRadius: 0,
-                            endRadius: s * 0.43
-                        )
-                    )
-                    .frame(width: s * 0.87, height: s * 0.87)
-                    .offset(x: -s * 0.1, y: -s * 0.1)
-                    .animation(.easeOut(duration: 0.22), value: isPressed)
-            }
-        }
-        .clipShape(Capsule())
-        // Inner shadow: белый stroke с градиентом по верхней кромке.
-        .overlay {
+        // Dome — как у чёрной капсулы: линейный градиент по верхней кромке (capsule),
+        // а не радиальная сфера. Падение яркости до 0.72 высоты.
+        .background {
             Capsule()
-                .stroke(Color.white.opacity(0.22), lineWidth: 5)
-                .blur(radius: 7)
-                .offset(y: 3)
-                .mask(
-                    Capsule().fill(
-                        LinearGradient(
-                            colors: [.white, .clear],
-                            startPoint: .top,
-                            endPoint: .center
-                        )
+                .fill(
+                    LinearGradient(
+                        stops: [
+                            .init(color: .white.opacity(domeOpacity), location: 0),
+                            .init(color: .white.opacity(domeOpacity * 0.5), location: 0.35),
+                            .init(color: .white.opacity(0), location: 0.72)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
                     )
                 )
+                .animation(.easeOut(duration: 0.22), value: isPressed)
         }
-        // Свечение вокруг боба, пульсирует с ударом.
-        .shadow(color: .white.opacity(0.1 + 0.45 * glow + (isPressed ? 0.06 : 0)), radius: 6 + 14 * glow)
+        .clipShape(Capsule())
+        // Inner shadow — масштабируется от размера (как в GlassButton): эталон 60 → 5/7/3.
+        .overlay {
+            GeometryReader { g in
+                let s = min(g.size.width, g.size.height)
+                Capsule()
+                    .stroke(Color.white.opacity(0.22), lineWidth: s * 0.083)
+                    .blur(radius: s * 0.117)
+                    .offset(y: s * 0.05)
+                    .mask(
+                        Capsule().fill(
+                            LinearGradient(
+                                colors: [.white, .clear],
+                                startPoint: .top,
+                                endPoint: .center
+                            )
+                        )
+                    )
+            }
+        }
+        // Свечение вокруг боба — только при ударе/нажатии (в покое нет, как у кнопки).
+        .shadow(color: .white.opacity(0.45 * glow + (isPressed ? 0.06 : 0)), radius: 6 + 14 * glow)
         .shadow(color: .white.opacity(0.35 * glow + (isPressed ? 0.08 : 0)), radius: 28 * glow + (isPressed ? 6 : 0))
     }
 }
