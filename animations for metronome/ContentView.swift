@@ -143,7 +143,7 @@ struct ContentView: View {
                                 // Shine 2 ПОД стеклом, под пальцем, только по горизонтали.
                                 .background {
                                     GeometryReader { g in
-                                        Image("shine 2")
+                                        Image("shine 3")
                                             .resizable()
                                             // Крупнее кнопки — вылезает за края, капсула обрежет.
                                             .frame(width: g.size.width * 1.6, height: g.size.height * 3)
