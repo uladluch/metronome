@@ -25,7 +25,7 @@ struct GlassBackdrop: View {
                 .opacity(level)
                 // Верхняя кромка картинки начинается под капсулой.
                 // Тулбар: padding.top 8, капсула height 60 → нижняя точка на ~68pt.
-                .offset(y: 69)
+                .offset(y: 67)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea()
