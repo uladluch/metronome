@@ -140,12 +140,13 @@ struct ContentView: View {
                                 .foregroundStyle(.black)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
-                                // Shine 2 ПОД стеклом, под пальцем, только по горизонтали.
-                                .background {
+                                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
+                                // Shine 3 ПОВЕРХ всего (над стеклом), под пальцем, по
+                                // горизонтали; обрезается капсулой.
+                                .overlay {
                                     GeometryReader { g in
                                         Image("shine 3")
                                             .resizable()
-                                            // Крупнее кнопки — вылезает за края, капсула обрежет.
                                             .frame(width: g.size.width * 1.6, height: g.size.height * 3)
                                             .position(
                                                 x: whiteTouchPoint == .zero ? g.size.width / 2 : whiteTouchPoint.x,
@@ -157,7 +158,6 @@ struct ContentView: View {
                                             .allowsHitTesting(false)
                                     }
                                 }
-                                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
                                 .clipShape(Capsule())
                                 .contentShape(Capsule())
                         }
