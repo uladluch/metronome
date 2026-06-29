@@ -106,7 +106,7 @@ struct SheetView: View {
             Form {
                 // Блок с сегментом сверху и контентом, который меняется по выбору.
                 // Едет вместе со скроллом (не закреплён).
-                Section {
+                Section("Segment control") {
                     // Карточка: сегмент + контент внутри одного блока. Фон 3-го уровня,
                     // padding 16pt со всех сторон, без сепаратора.
                     VStack(spacing: 16) {
@@ -232,32 +232,54 @@ struct GlassSegmentedControl: View {
     /// Палец на контроле — подсветка «уходит в стекло», поэтому чёрный активный
     /// текст красим в белый, чтобы оставался читаемым.
     @State private var pressing = false
+    /// Интерактивное стекло (блик) — только на лонг-пресс/перетягивание, не на тап.
+    @State private var glassInteractive = false
 
     var body: some View {
         GlassEffectContainer(spacing: 10) {
             GeometryReader { geo in
-                // 1) Нативная подложка: невидимые заголовки + liquid-glass подсветка.
-                //    pressing обновляется по нативным touch-событиям UIControl —
-                //    SwiftUI-жест конфликтовал бы со скроллом Form и ломал тапы.
-                SegmentedBacking(size: geo.size, count: titles.count,
-                                 selection: $selection, pressing: $pressing)
+                let segW = geo.size.width / CGFloat(max(titles.count, 1))
+                ZStack(alignment: .leading) {
+                    // 1) Нативная подложка: невидимые заголовки, СКРЫТАЯ подсветка —
+                    //    только тапы/перетягивание/выбор и интерактивный блик.
+                    SegmentedBacking(size: geo.size, count: titles.count,
+                                     selection: $selection, pressing: $pressing,
+                                     glassInteractive: $glassInteractive)
 
-                // 2) Видимые подписи поверх — тапы проходят сквозь к подложке.
-                HStack(spacing: 0) {
-                    ForEach(titles.indices, id: \.self) { i in
-                        Text(titles[i])
-                            .font(.subheadline.weight(.semibold))
-                            // Активный — чёрный на белой подсветке; при нажатии (стекло)
-                            // и неактивный — белый.
-                            .foregroundStyle(selection == i && !pressing ? Color.black : Color.white)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    // 2) Своя белая «пилюля» — едет к выбранному сегменту с МЯГКОЙ,
+                    //    настраиваемой пружиной (вместо нативного резкого баунса).
+                    Capsule()
+                        .fill(.white)
+                        .padding(3)
+                        .frame(width: segW)
+                        .offset(x: segW * CGFloat(selection))
+                        .allowsHitTesting(false)
+                        // На лонг-прессе (появился LG) прячем белую плашку — её
+                        // возвращаем только после выхода из фокуса (отпускания).
+                        .opacity(glassInteractive ? 0 : 1)
+                        .animation(.spring(response: 0.38, dampingFraction: 0.9), value: selection)
+                        .animation(.easeOut(duration: 0.18), value: glassInteractive)
+
+                    // 3) Видимые подписи поверх — тапы проходят сквозь к подложке.
+                    HStack(spacing: 0) {
+                        ForEach(titles.indices, id: \.self) { i in
+                            Text(titles[i])
+                                .font(.subheadline.weight(.semibold))
+                                // Активный — чёрный на белой пилюле; при нажатии (стекло)
+                                // и неактивный — белый.
+                                .foregroundStyle(selection == i && !pressing ? Color.black : Color.white)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        }
                     }
+                    // Цвет подписи плавно перетекает в такт пилюле (по selection);
+                    // pressing меняет цвет мгновенно (этим модификатором не анимируется).
+                    .animation(.spring(response: 0.38, dampingFraction: 0.9), value: selection)
+                    .allowsHitTesting(false)
                 }
-                .animation(.spring(response: 0.4, dampingFraction: 0.9), value: selection)
-                // pressing — мгновенно (без анимации), чтобы не было видно чёрного.
-                .allowsHitTesting(false)
+                // Блик (.interactive) — только на лонг-пресс/перетягивание; на
+                // обычный тап-переключение стекло обычное, без сияния.
+                .glassEffect(glassInteractive ? .regular.interactive() : .regular, in: .capsule)
             }
-            .glassEffect(.regular.interactive(), in: .capsule)
         }
         .frame(height: height)
     }
@@ -271,11 +293,13 @@ private struct SegmentedBacking: UIViewRepresentable {
     var count: Int
     @Binding var selection: Int
     @Binding var pressing: Bool
+    @Binding var glassInteractive: Bool
 
     func makeUIView(context: Context) -> UISegmentedControl {
         let control = UISegmentedControl(items: Array(repeating: "", count: count))
         control.selectedSegmentIndex = selection
-        control.selectedSegmentTintColor = .white  // белая liquid-glass подсветка
+        // Нативную подсветку прячем — её рисует своя SwiftUI-пилюля (мягкий баунс).
+        control.selectedSegmentTintColor = .clear
         // Заголовки невидимы — подписи рисует SwiftUI-оверлей.
         let clear: [NSAttributedString.Key: Any] = [.foregroundColor: UIColor.clear]
         control.setTitleTextAttributes(clear, for: .normal)
@@ -329,6 +353,9 @@ private struct SegmentedBacking: UIViewRepresentable {
         /// (быстрый тап иначе схлопывается и белый кадр не успевает отрисоваться).
         private var pressStart = Date()
         private let minWhite: TimeInterval = 0.18
+        /// Отложенное включение интерактивного стекла (порог лонг-пресса).
+        private var glassWork: DispatchWorkItem?
+        private let longPressThreshold: TimeInterval = 0.2
         /// Идёт ли касание/перетягивание — на это время не переписываем selection
         /// обратно в контрол (иначе сбивается нативный drag).
         private(set) var interacting = false
@@ -351,17 +378,25 @@ private struct SegmentedBacking: UIViewRepresentable {
                 // удержание одинаково) — без задержки.
                 pressStart = Date()
                 parent.pressing = startedOnActive
+                // Интерактивное стекло — только если удержание затянулось (лонг-пресс),
+                // на обычный тап-переключение блик не показываем.
+                glassWork?.cancel()
+                let gw = DispatchWorkItem { [weak self] in self?.parent.glassInteractive = true }
+                glassWork = gw
+                DispatchQueue.main.asyncAfter(deadline: .now() + longPressThreshold, execute: gw)
             case .changed:
                 break  // pressing держится с .began до .ended (в т.ч. при перетягивании)
             case .ended, .cancelled, .failed:
                 let wasActive = startedOnActive
                 startedOnActive = false
-                // selection синкаем с контролом и снимаем interacting сразу (после
-                // коммита, в следующем тике), а вот СНЯТИЕ белого держим минимум
+                glassWork?.cancel()  // не успел лонг-пресс — блик не включаем
+                // selection синкаем с контролом и снимаем interacting/стекло сразу
+                // (после коммита, в следующем тике), а вот СНЯТИЕ белого держим минимум
                 // minWhite от касания — иначе быстрый тап схлопывается и белого не видно.
                 DispatchQueue.main.async {
                     self.parent.selection = control.selectedSegmentIndex
                     self.interacting = false
+                    self.parent.glassInteractive = false
                     if !wasActive { self.parent.pressing = false }
                 }
                 if wasActive {
