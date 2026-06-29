@@ -184,20 +184,26 @@ struct GlassButton<Label: View>: View {
             }
             .clipShape(shape)
             // Лёгкая имитация inner shadow — белый блик по верхней кромке.
+            // Толщина/размытие/сдвиг масштабируются от размера кнопки (эталон 60pt:
+            // 5 / 7 / 3), иначе на маленьких +/- (44pt) блик выглядит непропорционально
+            // толстым по сравнению с основными кнопками.
             .overlay {
-                shape
-                    .stroke(Color.white.opacity(0.22), lineWidth: 5)
-                    .blur(radius: 7)
-                    .offset(y: 3)
-                    .mask(
-                        shape.fill(
-                            LinearGradient(
-                                colors: [.white, .clear],
-                                startPoint: .top,
-                                endPoint: .center
+                GeometryReader { g in
+                    let s = min(g.size.width, g.size.height)
+                    shape
+                        .stroke(Color.white.opacity(0.22), lineWidth: s * 0.083)
+                        .blur(radius: s * 0.117)
+                        .offset(y: s * 0.05)
+                        .mask(
+                            shape.fill(
+                                LinearGradient(
+                                    colors: [.white, .clear],
+                                    startPoint: .top,
+                                    endPoint: .center
+                                )
                             )
                         )
-                    )
+                }
             }
             .contentShape(shape)
             .onTapGesture {
