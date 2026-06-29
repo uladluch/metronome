@@ -105,7 +105,7 @@ struct SheetView: View {
     /// Выбранная вкладка верхнего сегмент-контрола.
     @State private var segment = 0
     /// Значение кастомного степпера.
-    @State private var stepperValue = 1
+    @State private var stepperValue = 5
 
     var body: some View {
         NavigationStack {
