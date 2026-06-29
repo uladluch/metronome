@@ -204,15 +204,15 @@ struct ContentView: View {
             HStack(spacing: 12) {
                 Image(systemName: "bell.fill")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.black)
                 Text(notificationText)
                     .font(.headline)
-                    .foregroundStyle(.white)
+                    .foregroundStyle(.black)
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 24)              // внутренний отступ контента
             .frame(width: 360, height: 60)         // фиксированная ширина
-            .glassEffect(.regular, in: Capsule())   // капсула — полностью скруглённая
+            .glassEffect(.regular.tint(.white), in: Capsule())  // белое стекло, чёрный шрифт
             .shadow(color: .black.opacity(0.25), radius: 20, y: 8)  // глубина
             .padding(.top, 8)                       // отступ от верха
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)  // центр X, верх

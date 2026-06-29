@@ -48,6 +48,19 @@ extension View {
             self
         }
     }
+
+    /// Тонкая обводка шита: 1pt белый 20% по краю + единый радиус углов
+    /// (radius задаётся явно, чтобы рамка точно совпала с формой шита).
+    func sheetHairlineBorder(cornerRadius: CGFloat = 38) -> some View {
+        self
+            .overlay {
+                RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
+                    .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    .ignoresSafeArea()
+                    .allowsHitTesting(false)
+            }
+            .presentationCornerRadius(cornerRadius)
+    }
 }
 
 // MARK: - Цвета

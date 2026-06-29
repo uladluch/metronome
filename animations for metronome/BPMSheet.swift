@@ -68,6 +68,10 @@ struct BPMSheet: View {
         // Жёстко фиксированная высота — шит не растягивается под клавиатуру
         // (фиксированный .height вместо .medium, который iOS тянет до large).
         .presentationDetents([.height(200)])
+        // Фон шита — вторичный (#1C1C1C).
+        .presentationBackground(Color.backgroundSecondary)
+        // Тонкая обводка по краю шита.
+        .sheetHairlineBorder()
         // Граббер сверху.
         .presentationDragIndicator(.visible)
         // Клавиатура не должна менять высоту контента шита.

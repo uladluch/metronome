@@ -66,6 +66,7 @@ struct GlassIconButton: View {
     var iconColor: Color = .white
     var repeatAction: (() -> Void)? = nil
     var showShine: Bool = false
+    var shineOpacity: Double = 0.04
     var shineForcePressed: Bool = false
     let action: () -> Void
 
@@ -77,6 +78,7 @@ struct GlassIconButton: View {
             action: action,
             repeatAction: repeatAction,
             showShine: showShine,
+            shineOpacity: shineOpacity,
             shineForcePressed: shineForcePressed
         ) {
             Image(systemName: systemName)

@@ -263,9 +263,8 @@ struct SheetView: View {
                 }
                 .listRowBackground(Color.backgroundSecondary)
             }
-            // Фон Form прозрачный — под ним общий чёрный фон шита.
+            // Фон Form прозрачный — под ним полупрозрачный блюр-фон шита.
             .scrollContentBackground(.hidden)
-            .background(Color.backgroundPrimary)
             // Нативный scroll edge effect (iOS 26) сверху — мягкий (soft).
             .scrollEdgeEffectStyle(.soft, for: .top)
             // safeAreaBar (iOS 26) — в отличие от safeAreaInset, включает
@@ -277,6 +276,13 @@ struct SheetView: View {
         }
         // Ширина контейнера для popover на всю ширину.
         .onGeometryChange(for: CGFloat.self, of: { $0.size.width }, action: { containerWidth = $0 })
+        // Фон шита — лёгкий: умеренная тёмная заливка + тонкий блюр.
+        .presentationBackground {
+            Color.backgroundPrimary.opacity(0.55)
+                .background(.ultraThinMaterial)
+        }
+        // Тонкая обводка по краю шита.
+        .sheetHairlineBorder()
     }
 }
 
@@ -298,7 +304,6 @@ struct SheetDetailView: View {
             .listRowBackground(Color.backgroundSecondary)
         }
         .scrollContentBackground(.hidden)
-        .background(Color.backgroundPrimary)
         .navigationTitle("Detail")
         .navigationBarTitleDisplayMode(.inline)
         // Явная видимость бара на дочернем — лечит «прыжок» бара при push из
