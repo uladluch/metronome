@@ -108,6 +108,14 @@ struct BobsControl: View {
                 .frame(width: bobWidth - 12, height: max(height - 12, 0))
                 .frame(width: bobWidth, height: height, alignment: .center)
 
+            // Shine 2 — НАД белой подложкой, ПОД стеклом; повёрнут на 90° под
+            // вертикальную капсулу. Свой натуральный размер. Виден на нажатии.
+            Image("shine 2")
+                .rotationEffect(.degrees(90))
+                .opacity(isPressed ? 0.7 : 0)
+                .animation(.easeOut(duration: 0.4), value: isPressed)
+                .allowsHitTesting(false)
+
             // Стекло с интерактивностью (реагирует на нажатие — liquid glass look).
             Color.clear
                 .glassEffect(.clear.interactive(), in: Capsule())

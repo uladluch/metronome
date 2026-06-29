@@ -39,6 +39,8 @@ struct StepZone: View {
                 namespace: namespace,
                 size: 44,
                 iconSize: 20,
+                showShine: true,
+                shineForcePressed: pressing,
                 action: {}
             )
             .allowsHitTesting(false)

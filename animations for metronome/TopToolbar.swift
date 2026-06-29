@@ -26,6 +26,7 @@ struct TopToolbar: View {
                 systemName: leftIcon,
                 glassID: nil,
                 namespace: namespace,
+                showShine: true,
                 action: onLeft
             )
 
@@ -43,6 +44,7 @@ struct TopToolbar: View {
                 systemName: rightIcon,
                 glassID: nil,
                 namespace: namespace,
+                showShine: true,
                 action: onRight
             )
         }
@@ -62,6 +64,8 @@ struct GlassIconButton: View {
     var size: CGFloat = 60
     var iconSize: CGFloat = 22
     var repeatAction: (() -> Void)? = nil
+    var showShine: Bool = false
+    var shineForcePressed: Bool = false
     let action: () -> Void
 
     var body: some View {
@@ -70,7 +74,9 @@ struct GlassIconButton: View {
             glassID: glassID,
             namespace: namespace,
             action: action,
-            repeatAction: repeatAction
+            repeatAction: repeatAction,
+            showShine: showShine,
+            shineForcePressed: shineForcePressed
         ) {
             Image(systemName: systemName)
                 .font(.system(size: iconSize, weight: .medium))
@@ -95,7 +101,13 @@ private struct GlassCapsuleButton: View {
             glassID: glassID,
             namespace: namespace,
             action: action,
-            showDome: false
+            showDome: false,
+            showShine: true,
+            shineImage: "shine 2",
+            shineOpacity: 0.2,
+            shineHorizontalOnly: true,
+            shineWidthFactor: 1.6,
+            shineHeightFactor: 3
         ) {
             Text("Hello")
                 .font(.headline)

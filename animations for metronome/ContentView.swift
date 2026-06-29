@@ -35,6 +35,10 @@ struct ContentView: View {
     /// нижней левой кнопки. Уникальный BPM-шит живёт в BottomToolbar (низ-право).
     @State private var showMainSheet = false
 
+    /// Блик Shine под белой кнопкой (под пальцем, под стеклом).
+    @State private var whitePressed = false
+    @State private var whiteTouchPoint: CGPoint = .zero
+
     /// Показать ли нотификацию.
     @State private var showNotification = false
     /// Отложенное скрытие нотификации (2.5с). DispatchWorkItem — чтобы withAnimation
@@ -111,7 +115,13 @@ struct ContentView: View {
                             action: { showNotificationAction() },
                             showDome: false,
                             pressScale: 1.08,
-                            glassStyle: .regular
+                            glassStyle: .regular,
+                            showShine: true,
+                            shineImage: "shine 2",
+                            shineOpacity: 0.2,
+                            shineHorizontalOnly: true,
+                            shineWidthFactor: 1.6,
+                            shineHeightFactor: 3
                         ) {
                             Text("Show notification")
                                 .font(.headline)
@@ -130,10 +140,42 @@ struct ContentView: View {
                                 .foregroundStyle(.black)
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
+                                // Shine 2 ПОД стеклом, под пальцем, только по горизонтали.
+                                .background {
+                                    GeometryReader { g in
+                                        Image("shine 2")
+                                            .resizable()
+                                            // Крупнее кнопки — вылезает за края, капсула обрежет.
+                                            .frame(width: g.size.width * 1.6, height: g.size.height * 3)
+                                            .position(
+                                                x: whiteTouchPoint == .zero ? g.size.width / 2 : whiteTouchPoint.x,
+                                                y: g.size.height / 2
+                                            )
+                                            .opacity(whitePressed ? 1 : 0)
+                                            .animation(.easeOut(duration: 0.4), value: whitePressed)
+                                            .animation(.easeOut(duration: 0.55), value: whiteTouchPoint)
+                                            .allowsHitTesting(false)
+                                    }
+                                }
                                 .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
+                                .clipShape(Capsule())
                                 .contentShape(Capsule())
                         }
                         .buttonStyle(.plain)
+                        // Тот же зум на нажатии, что и у чёрной (pressScale 1.08).
+                        .scaleEffect(whitePressed ? 1.08 : 1.0)
+                        .simultaneousGesture(
+                            DragGesture(minimumDistance: 0)
+                                .onChanged { v in
+                                    whiteTouchPoint = v.location
+                                    if !whitePressed {
+                                        withAnimation(.easeOut(duration: 0.12)) { whitePressed = true }
+                                    }
+                                }
+                                .onEnded { _ in
+                                    withAnimation(.easeOut(duration: 0.3)) { whitePressed = false }
+                                }
+                        )
                     }
                     .frame(width: 240)
                 }

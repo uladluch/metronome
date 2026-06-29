@@ -38,6 +38,7 @@ struct BottomToolbar: View {
                     systemName: leftIcon,
                     glassID: nil,
                     namespace: ns,
+                    showShine: true,
                     action: { onMainSheet() }
                 )
 
@@ -73,6 +74,7 @@ struct BottomToolbar: View {
                     systemName: rightIcon,
                     glassID: nil,
                     namespace: ns,
+                    showShine: true,
                     action: { showBPM = true }
                 )
             }
@@ -196,9 +198,8 @@ struct SheetView: View {
             .scrollContentBackground(.hidden)
             .background(Color.backgroundPrimary)
             .navigationTitle("Sheet")
-            // inlineLarge: крупный заголовок, зафиксированный в баре по левому краю —
-            // НЕ сворачивается и не двигается при скролле.
-            .toolbarTitleDisplayMode(.inlineLarge)
+            // Сразу компактный inline-заголовок по центру (не large).
+            .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // Крестик справа — закрыть (единственная кнопка).
                 ToolbarItem(placement: .topBarTrailing) {
