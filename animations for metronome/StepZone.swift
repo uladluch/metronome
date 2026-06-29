@@ -46,6 +46,8 @@ struct StepZone: View {
             .allowsHitTesting(false)
             .opacity(visible ? (disabled ? 0.3 : 1) : 0)
             .scaleEffect(pressing ? 1.1 : 1.0)
+            // Чуть ниже центра — чтобы +/- визуально были на одной линии с рулером.
+            .offset(y: 8)
             .animation(.easeOut(duration: 0.15), value: pressing)
             .animation(.easeOut(duration: 0.2), value: disabled)
         }
