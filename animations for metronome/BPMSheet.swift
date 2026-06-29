@@ -50,7 +50,7 @@ struct BPMSheet: View {
                         Image(systemName: "xmark")
                     }
                 }
-                // Чек справа — белая prominent-кнопка, чёрная иконка.
+                // Чек справа — обычное стекло, как крестик (без tint/prominent).
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
                         UIImpactFeedbackGenerator(style: .light).impactOccurred()
@@ -61,14 +61,17 @@ struct BPMSheet: View {
                         dismiss()
                     }) {
                         Image(systemName: "checkmark")
-                            .foregroundStyle(.black)
                     }
-                    .buttonStyle(.glassProminent)
-                    .tint(.white)
                 }
             }
         }
-        .presentationDetents([.large])
+        // Жёстко фиксированная высота — шит не растягивается под клавиатуру
+        // (фиксированный .height вместо .medium, который iOS тянет до large).
+        .presentationDetents([.height(200)])
+        // Граббер сверху.
+        .presentationDragIndicator(.visible)
+        // Клавиатура не должна менять высоту контента шита.
+        .ignoresSafeArea(.keyboard, edges: .bottom)
         // Дать шиту открыться, затем фокус → клавиатура (200ms).
         .task {
             try? await Task.sleep(for: .milliseconds(200))
