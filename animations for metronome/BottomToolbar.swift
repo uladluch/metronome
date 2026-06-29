@@ -17,6 +17,8 @@ struct BottomToolbar: View {
 
     /// Открыть главный шит (тот же, что и верхние кнопки) — состояние живёт в ContentView.
     var onMainSheet: () -> Void = {}
+    /// BPM превысил лимит — показать нотификацию (баннер живёт в ContentView).
+    var onBPMOverflow: () -> Void = {}
 
     @State private var value: Double = 0.5
     @State private var showBPM = false
@@ -84,7 +86,7 @@ struct BottomToolbar: View {
         }
         // Уникальный шит — ввод BPM (нижняя правая кнопка). Пока на весь экран.
         .sheet(isPresented: $showBPM) {
-            BPMSheet()
+            BPMSheet(onExceedMax: onBPMOverflow)
         }
     }
 }

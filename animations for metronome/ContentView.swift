@@ -41,6 +41,8 @@ struct ContentView: View {
 
     /// Показать ли нотификацию.
     @State private var showNotification = false
+    /// Текст нотификации (меняется в зависимости от того, кто её вызвал).
+    @State private var notificationText = "Hello I'm notification"
     /// Отложенное скрытие нотификации (2.5с). DispatchWorkItem — чтобы withAnimation
     /// гарантированно проигрывал transition (внутри Task после await не работает).
     @State private var notificationHideWork: DispatchWorkItem?
@@ -183,9 +185,17 @@ struct ContentView: View {
             .offset(y: 40)  // опущено ниже
 
             // Нижний тулбар — прижат к низу. Левая кнопка открывает тот же главный шит.
-            BottomToolbar(onMainSheet: { showMainSheet = true })
-                .frame(maxHeight: .infinity, alignment: .bottom)
-                .padding(.bottom, 8)
+            BottomToolbar(
+                onMainSheet: { showMainSheet = true },
+                onBPMOverflow: {
+                    // Небольшая задержка — чтобы баннер влетел уже после закрытия шита.
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
+                        showNotificationAction("Maximum value can't exceed 360")
+                    }
+                }
+            )
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding(.bottom, 8)
 
             // Нотификация — ВСЕГДА в дереве, анимируем opacity (+ лёгкий scale/offset)
             // через состояние. Анимация СВОЙСТВ работает в обе стороны железно, в
@@ -195,7 +205,7 @@ struct ContentView: View {
                 Image(systemName: "bell.fill")
                     .font(.system(size: 18, weight: .semibold))
                     .foregroundStyle(.white)
-                Text("Hello I'm notification")
+                Text(notificationText)
                     .font(.headline)
                     .foregroundStyle(.white)
                 Spacer(minLength: 0)
@@ -270,9 +280,10 @@ struct ContentView: View {
         scheduleHide()
     }
 
-    /// Показать нотификацию и скрыть через 2.5s.
+    /// Показать нотификацию (с заданным текстом) и скрыть через 2.5s.
     /// Apple-style: вход и выход — одна и та же красивая пружина (зеркально).
-    private func showNotificationAction() {
+    private func showNotificationAction(_ text: String = "Hello I'm notification") {
+        notificationText = text
         notificationHideWork?.cancel()
         withAnimation(.spring(response: 0.5, dampingFraction: 0.72)) {
             showNotification = true
