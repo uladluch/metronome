@@ -107,6 +107,36 @@ struct SheetView: View {
     /// Значение кастомного степпера.
     @State private var stepperValue = 5
 
+    /// Верхний бар: тайтл 32pt слева + крестик справа, по центру по вертикали,
+    /// высота 81pt. Без своего фона — системный scroll edge effect делает блюр сам.
+    private var topBar: some View {
+        ZStack {
+            HStack {
+                Spacer()
+                Button(action: {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    dismiss()
+                }) {
+                    Image(systemName: "xmark")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundStyle(.white)
+                        .frame(width: 44, height: 44)
+                        .glassEffect(.regular.interactive(), in: Circle())
+                }
+                .buttonStyle(.plain)
+            }
+            HStack {
+                Text("Sheet")
+                    .font(.system(size: 32, weight: .bold))
+                    .foregroundStyle(.white)
+                Spacer()
+            }
+        }
+        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity)
+        .frame(height: 81)
+    }
+
     var body: some View {
         NavigationStack {
             Form {
@@ -160,6 +190,18 @@ struct SheetView: View {
                     .listRowBackground(Color.clear)
                     .listRowSeparator(.hidden)
                 }
+
+                // Строка-переход: пушит дочерний экран (слайд справа) с НАТИВНЫМ
+                // тулбаром — «назад» слева (авто) + крестик справа. Граббер шита
+                // сохраняется.
+                Section("Navigation") {
+                    NavigationLink {
+                        SheetDetailView(onClose: { dismiss() })
+                    } label: {
+                        Text("Тапни на меня")
+                    }
+                }
+                .listRowBackground(Color.backgroundSecondary)
 
                 Section("Microanimations") {
                     // Toggle row
@@ -221,26 +263,58 @@ struct SheetView: View {
                 }
                 .listRowBackground(Color.backgroundSecondary)
             }
-            // Фон шита — основной (чёрный); карточки сверху — вторичный (#1C1C1C).
+            // Фон Form прозрачный — под ним общий чёрный фон шита.
             .scrollContentBackground(.hidden)
             .background(Color.backgroundPrimary)
-            .navigationTitle("Sheet")
-            // Сразу компактный inline-заголовок по центру (не large).
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                // Крестик справа — закрыть (единственная кнопка).
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {
-                        UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                        dismiss()
-                    }) {
-                        Image(systemName: "xmark")
-                    }
-                }
-            }
+            // Нативный scroll edge effect (iOS 26) сверху — мягкий (soft).
+            .scrollEdgeEffectStyle(.soft, for: .top)
+            // safeAreaBar (iOS 26) — в отличие от safeAreaInset, включает
+            // прогрессивный scroll-edge блюр под кастомным баром.
+            .safeAreaBar(edge: .top, spacing: 0) { topBar }
+            // Системный нав-бар скрыт ТОЛЬКО на корне — свой бар выше. Граббер
+            // даёт презентация. На дочернем экране бар снова нативный.
+            .toolbar(.hidden, for: .navigationBar)
         }
         // Ширина контейнера для popover на всю ширину.
         .onGeometryChange(for: CGFloat.self, of: { $0.size.width }, action: { containerWidth = $0 })
+    }
+}
+
+// MARK: - Детальный экран (нативный тулбар: назад + крестик)
+
+/// Пушится из SheetView (дочерний экран). НАТИВНЫЙ топ-тулбар: «назад» слева
+/// добавляется автоматически при push, крестик справа закрывает весь шит.
+struct SheetDetailView: View {
+
+    /// Закрыть весь шит (а не просто вернуться назад).
+    var onClose: () -> Void
+
+    var body: some View {
+        Form {
+            Section {
+                Text("Detail screen with native toolbar.")
+                    .foregroundStyle(.white)
+            }
+            .listRowBackground(Color.backgroundSecondary)
+        }
+        .scrollContentBackground(.hidden)
+        .background(Color.backgroundPrimary)
+        .navigationTitle("Detail")
+        .navigationBarTitleDisplayMode(.inline)
+        // Явная видимость бара на дочернем — лечит «прыжок» бара при push из
+        // корня со скрытым нав-баром.
+        .toolbar(.visible, for: .navigationBar)
+        .toolbar {
+            // Крестик справа — закрыть весь шит (назад слева — нативный, авто).
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(action: {
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    onClose()
+                }) {
+                    Image(systemName: "xmark")
+                }
+            }
+        }
     }
 }
 
