@@ -32,6 +32,7 @@ struct GlassButton<Label: View>: View {
     /// Внешнее «нажатие» для блика (когда жест живёт снаружи, как в StepZone).
     private let shineForcePressed: Bool
 
+    @Environment(\.isEnabled) private var isEnabled
     @State private var isPressed = false
     @State private var touchPoint: CGPoint = .zero
     @State private var repeatTimer: Timer?
@@ -173,6 +174,16 @@ struct GlassButton<Label: View>: View {
                         stopRepeat()
                     }
             )
+            // Кнопка стала disabled (например, степпер достиг предела) во время
+            // удержания — SwiftUI отменяет жест без onEnded, поэтому глушим
+            // авто-повтор сами, иначе таймер «залипает» и дёргает action.
+            .onChange(of: isEnabled) { _, enabled in
+                if !enabled {
+                    stopRepeat()
+                    didRepeat = false
+                    withAnimation(.easeOut(duration: 0.2)) { isPressed = false }
+                }
+            }
             .accessibilityAddTraits(.isButton)
             // Увеличение на нажатие (pressScale, 1.0 = выкл).
             .scaleEffect(isPressed ? pressScale : 1.0)

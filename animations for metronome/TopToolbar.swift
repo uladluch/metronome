@@ -63,6 +63,7 @@ struct GlassIconButton: View {
     let namespace: Namespace.ID
     var size: CGFloat = 60
     var iconSize: CGFloat = 22
+    var iconColor: Color = .white
     var repeatAction: (() -> Void)? = nil
     var showShine: Bool = false
     var shineForcePressed: Bool = false
@@ -80,7 +81,7 @@ struct GlassIconButton: View {
         ) {
             Image(systemName: systemName)
                 .font(.system(size: iconSize, weight: .medium))
-                .foregroundStyle(.white)
+                .foregroundStyle(iconColor)
                 .frame(width: size, height: size)
         }
     }

@@ -102,6 +102,8 @@ struct SheetView: View {
     @State private var containerWidth: CGFloat = 0
     /// Выбранная вкладка верхнего сегмент-контрола.
     @State private var segment = 0
+    /// Значение кастомного степпера.
+    @State private var stepperValue = 1
 
     var body: some View {
         NavigationStack {
@@ -135,13 +137,36 @@ struct SheetView: View {
                     .listRowSeparator(.hidden)
                 }
 
+                // Отдельная секция — кастомный степпер с LG-кнопками +/- в блоке,
+                // как у segment control (карточка фона 3-го уровня).
+                Section("Stepper") {
+                    VStack(spacing: 16) {
+                        GlassStepper(value: $stepperValue, range: 1...10)
+
+                        // Контент блока под степпером.
+                        Text("Value: \(stepperValue)")
+                            .frame(maxWidth: .infinity, alignment: .center)
+                            .foregroundStyle(.white)
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 32)
+                    .background(
+                        Color.backgroundSecondary,
+                        in: RoundedRectangle(cornerRadius: 28, style: .continuous)
+                    )
+                    .listRowInsets(EdgeInsets(top: 16, leading: 0, bottom: 16, trailing: 0))
+                    .listRowBackground(Color.clear)
+                    .listRowSeparator(.hidden)
+                }
+
                 Section("Microanimations") {
                     // Toggle row
                     HStack {
                         Text("Toggle")
                         Spacer()
                         Toggle("", isOn: $toggleOn)
-                            .tint(.controlAccent)
+                            // Активный цвет светлее, чем у слайдеров (controlAccent).
+                            .tint(Color(white: 0.7))
                             .onChange(of: toggleOn) { _, _ in
                                 UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             }
@@ -217,6 +242,77 @@ struct SheetView: View {
     }
 }
 
+// MARK: - Кастомный степпер с LG-кнопками
+
+/// Степпер: капсула-контейнер с белой обводкой, по краям — наши стеклянные
+/// кнопки +/- (GlassIconButton), число по центру. Высота 46pt, на всю ширину.
+struct GlassStepper: View {
+
+    @Binding var value: Int
+    var range: ClosedRange<Int> = 1...10
+    var step: Int = 1
+
+    @Namespace private var ns
+
+    private var atMin: Bool { value <= range.lowerBound }
+    private var atMax: Bool { value >= range.upperBound }
+
+    var body: some View {
+        HStack(spacing: 0) {
+            GlassIconButton(
+                systemName: "minus",
+                glassID: nil,
+                namespace: ns,
+                size: 44,
+                iconSize: 20,
+                repeatAction: { change(-step) },
+                showShine: true,
+                action: { change(-step) }
+            )
+            // Чёрная подложка под самый низ — стекло над ней читается чёрным,
+            // как у +/- возле скролла (переиспользуем тот же GlassIconButton 1:1).
+            .background(Circle().fill(.black))
+            .opacity(atMin ? 0.3 : 1)       // дизейбл на минимуме
+            .disabled(atMin)
+
+            Spacer(minLength: 0)
+
+            Text("\(value)")
+                .font(.headline)
+                .foregroundStyle(.black)
+                .contentTransition(.numericText())
+
+            Spacer(minLength: 0)
+
+            GlassIconButton(
+                systemName: "plus",
+                glassID: nil,
+                namespace: ns,
+                size: 44,
+                iconSize: 20,
+                repeatAction: { change(step) },
+                showShine: true,
+                action: { change(step) }
+            )
+            // Чёрная подложка под самый низ — стекло над ней читается чёрным.
+            .background(Circle().fill(.black))
+            .opacity(atMax ? 0.3 : 1)       // дизейбл на максимуме
+            .disabled(atMax)
+        }
+        .padding(.horizontal, 2)
+        .frame(width: 155, height: 46)
+        // Белая заливка-капсула.
+        .background(Color.white, in: Capsule())
+    }
+
+    private func change(_ delta: Int) {
+        let next = min(max(value + delta, range.lowerBound), range.upperBound)
+        guard next != value else { return }
+        UIImpactFeedbackGenerator(style: .light).impactOccurred()
+        withAnimation(.snappy(duration: 0.2)) { value = next }
+    }
+}
+
 // MARK: - Текстовый сегмент-таб с нативным liquid glass
 
 /// Текстовый сегмент-контрол (по мотивам kai7win/AnimatedGlassTabs).
@@ -266,9 +362,13 @@ struct GlassSegmentedControl: View {
                         ForEach(titles.indices, id: \.self) { i in
                             Text(titles[i])
                                 .font(.subheadline.weight(.semibold))
-                                // Активный — чёрный на белой пилюле; при нажатии (стекло)
-                                // и неактивный — белый.
-                                .foregroundStyle(selection == i && !pressing ? Color.black : Color.white)
+                                // Чёрный только когда белая плашка под ним ВИДНА
+                                // (активный, не нажат, плашка не скрыта). Иначе — белый:
+                                // при нажатии или когда плашка спрятана под LG.
+                                .foregroundStyle(
+                                    selection == i && !pressing && !glassInteractive
+                                        ? Color.black : Color.white
+                                )
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
                     }

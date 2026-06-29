@@ -50,7 +50,7 @@ struct TickSlider: View {
                 // чтобы было видно движение и направление.
                 Canvas { ctx, size in
                     let minorH = contentH * 0.38
-                    let majorH = contentH * 0.55
+                    let majorH = contentH * 0.46  // лишь чуть выше коротких
                     let half = Int(cx / tickSpacing) + 2
                     let base = displayValue.rounded()
                     let maxDist = cx * 0.92  // за этим — полностью погасли (жёстко)
