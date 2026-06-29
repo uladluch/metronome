@@ -92,7 +92,8 @@ struct GlassButton<Label: View>: View {
     }
 
     private var domeOpacity: Double {
-        isPressed ? 0.24 : 0.12
+        // Dome не меняется на нажатии — постоянная яркость.
+        0.12
     }
 
     var body: some View {

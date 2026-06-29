@@ -98,8 +98,8 @@ struct BobsControl: View {
         let fillOpacity = isActive ? pulse : 0
         // Свечение — только у активного, его сила = pulse (синхронно с картинкой).
         let glow = isActive ? pulse : 0
-        // Dome светлеет при нажатии — как у кнопок.
-        let domeOpacity = isPressed ? 0.24 : 0.12
+        // Dome не меняется на нажатии — постоянная яркость (как у кнопок).
+        let domeOpacity = 0.12
 
         return ZStack {
             // Белая вспышка ПОД стеклом (в покое прозрачна → боб тёмный как кнопка),
