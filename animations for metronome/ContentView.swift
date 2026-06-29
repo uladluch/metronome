@@ -61,15 +61,16 @@ struct ContentView: View {
             // Верхний тулбар + бобы наверху. Между капсулой и бобами — 40pt.
             VStack(spacing: 40) {
                 // Тулбар: шестерёнка + капсула + три точки.
-                GlassEffectContainer(spacing: 16) {
-                    TopToolbar(
-                        namespace: glassNS,
-                        onLeft: { showMainSheet = true },
-                        onCenter: { showMainSheet = true },
-                        onRight: { showMainSheet = true }
-                    )
-                    .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
-                }
+                // Каждая кнопка тулбара — в собственном GlassEffectContainer
+                // (как чёрная кнопка), общего внешнего контейнера нет — иначе у
+                // Hello получалась вложенность контейнеров и стекло выглядело иначе.
+                TopToolbar(
+                    namespace: glassNS,
+                    onLeft: { showMainSheet = true },
+                    onCenter: { showMainSheet = true },
+                    onRight: { showMainSheet = true }
+                )
+                .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
 
                 // Новый контрол — светящиеся бобы. activeIndex и glowLevel — из того
                 // же источника, что и вспышка картинки → синхрон гарантирован.
