@@ -38,14 +38,15 @@ struct TopToolbar: View {
             Spacer(minLength: 0)
 
             // Капсула Hello — те же слои/эффекты, что у чёрной кнопки
-            // (dome, переливание, компактный блик, горизонтальный зум),
-            // только оригинального размера 180×60. Зум — снаружи контейнера.
+            // (переливание, компактный блик, горизонтальный зум), но БЕЗ dome.
+            // Только оригинального размера 180×60. Зум — снаружи контейнера.
             GlassEffectContainer {
                 GlassCapsuleIconButton(
                     glassID: nil,
                     namespace: namespace,
                     size: .init(width: 180, height: 60),
                     pressScaleHorizontalOnly: true,
+                    showDome: false,
                     showShine: true,
                     shineImage: "Shine",
                     shineOpacity: 0.14,
@@ -134,6 +135,7 @@ struct GlassCapsuleIconButton: View {
     var pressScale: CGFloat = 1.08
     var pressScaleHorizontalOnly: Bool = false
     var repeatAction: (() -> Void)? = nil
+    var showDome: Bool = true
     var showShine: Bool = false
     var shineImage: String = "Shine"
     var shineOpacity: Double = 0.04
@@ -159,6 +161,7 @@ struct GlassCapsuleIconButton: View {
             namespace: namespace,
             action: action,
             repeatAction: repeatAction,
+            showDome: showDome,
             pressScale: pressScale,
             showShine: showShine,
             shineImage: shineImage,
