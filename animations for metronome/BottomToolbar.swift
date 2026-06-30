@@ -281,6 +281,8 @@ struct SheetView: View {
             Color.backgroundPrimary.opacity(0.55)
                 .background(.ultraThinMaterial)
         }
+        // Без скрима: фон под шитом не затемняем (как обычный экран приложения).
+        .presentationBackgroundInteraction(.enabled)
         // Тонкая обводка по краю шита.
         .sheetHairlineBorder()
     }

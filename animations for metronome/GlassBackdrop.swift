@@ -22,7 +22,7 @@ struct GlassBackdrop: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 440)
-                .blur(radius: 8)
+                .blur(radius: 12)
                 .opacity(level)
                 // Верхняя кромка картинки начинается под капсулой.
                 // Тулбар: padding.top 8, капсула height 60 → нижняя точка на ~68pt.

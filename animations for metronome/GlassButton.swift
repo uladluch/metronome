@@ -36,6 +36,9 @@ struct GlassButton<Label: View>: View {
     private let shineForcePressed: Bool
     /// На нажатии перекрашивать dome (полусферу) в чёрный.
     private let darkenDomeOnPress: Bool
+    /// Инверсия бликов (dome + inner-shadow) в чёрный — для светлых/белых кнопок,
+    /// иначе белые блики на белом фоне не видны.
+    private let invertHighlights: Bool
     /// Тип dome: true = радиальная полусфера в углу (для кругов), false = линейный градиент сверху (для капсул).
     private let domeAsRadial: Bool
     /// Зум на нажатие только по горизонтали (высота не меняется).
@@ -70,6 +73,7 @@ struct GlassButton<Label: View>: View {
         shineHeightFactor: CGFloat? = nil,   // явный размер блика (доля высоты кнопки)
         shineForcePressed: Bool = false,     // внешнее «нажатие» для блика
         darkenDomeOnPress: Bool = false,     // на нажатии перекрашивать dome в чёрный
+        invertHighlights: Bool = false,      // dome + inner-shadow в чёрный (для белых кнопок)
         domeAsRadial: Bool = true,           // true = радиальная сфера (для кругов), false = линейный градиент (для капсул)
         pressScaleHorizontalOnly: Bool = false, // зум на нажатие только по ширине
         externalPressScale: Bool = false,    // зум применяет внешний владелец (контейнер)
@@ -93,6 +97,7 @@ struct GlassButton<Label: View>: View {
         self.shineHeightFactor = shineHeightFactor
         self.shineForcePressed = shineForcePressed
         self.darkenDomeOnPress = darkenDomeOnPress
+        self.invertHighlights = invertHighlights
         self.domeAsRadial = domeAsRadial
         self.pressScaleHorizontalOnly = pressScaleHorizontalOnly
         self.externalPressScale = externalPressScale
@@ -108,9 +113,12 @@ struct GlassButton<Label: View>: View {
     /// Активное нажатие (своё или внешнее, как в StepZone).
     private var isActivePress: Bool { isPressed || shineForcePressed }
 
-    /// Цвет dome: на нажатии перекрашиваем в чёрный (если включено), иначе белый.
+    /// Базовый цвет бликов: чёрный для инверсных (белых) кнопок, иначе белый.
+    private var highlightColor: Color { invertHighlights ? .black : .white }
+
+    /// Цвет dome: на нажатии перекрашиваем в чёрный (если включено), иначе базовый.
     private var domeColor: Color {
-        (darkenDomeOnPress && isActivePress) ? .black : .white
+        (darkenDomeOnPress && isActivePress) ? .black : highlightColor
     }
     /// Плотность dome: на нажатии плотнее (закрашиваем в чёрный), иначе базовые 0.12.
     private var domeMainOpacity: Double {
@@ -217,7 +225,7 @@ struct GlassButton<Label: View>: View {
                 GeometryReader { g in
                     let s = min(g.size.width, g.size.height)
                     shape
-                        .stroke(Color.white.opacity(0.22), lineWidth: s * 0.083)
+                        .stroke(highlightColor.opacity(0.22), lineWidth: s * 0.083)
                         .blur(radius: s * 0.117)
                         .offset(y: s * 0.05)
                         .mask(

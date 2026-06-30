@@ -56,6 +56,9 @@ extension View {
             .overlay {
                 RoundedRectangle(cornerRadius: cornerRadius, style: .continuous)
                     .stroke(Color.white.opacity(0.2), lineWidth: 1)
+                    // Нижнюю кромку и углы уводим за экран → рамка остаётся только
+                    // сверху и по бокам (внизу шит открыт, лишнего overlay нет).
+                    .padding(.bottom, -80)
                     .ignoresSafeArea()
                     .allowsHitTesting(false)
             }

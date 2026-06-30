@@ -144,6 +144,11 @@ struct GlassCapsuleIconButton: View {
     var shineForcePressed: Bool = false
     var externalPressScale: Bool = false
     var onPressedChange: ((Bool) -> Void)? = nil
+    /// Заливка ПОД стеклом (самый нижний слой). nil — прозрачно (стекло над фоном
+    /// приложения → тёмная кнопка). .white — «инверсия»: clear-стекло над белым → белая кнопка.
+    var baseFill: Color? = nil
+    /// Инверсия бликов (dome + inner-shadow) в чёрный — для белой кнопки.
+    var invertHighlights: Bool = false
     let action: () -> Void
     @ViewBuilder let label: () -> any View
 
@@ -162,6 +167,7 @@ struct GlassCapsuleIconButton: View {
             shineWidthFactor: shineWidthFactor,
             shineHeightFactor: shineHeightFactor,
             shineForcePressed: shineForcePressed,
+            invertHighlights: invertHighlights,
             domeAsRadial: false,
             pressScaleHorizontalOnly: pressScaleHorizontalOnly,
             externalPressScale: externalPressScale,
@@ -171,6 +177,12 @@ struct GlassCapsuleIconButton: View {
             // (с maxWidth:.infinity внутри контейнера центр «уплывал» вправо).
             AnyView(label())
                 .frame(width: size.width, height: size.height)
+        }
+        // Белая (или иная) подложка — самый нижний слой под стеклом.
+        .background {
+            if let baseFill {
+                Capsule().fill(baseFill)
+            }
         }
     }
 }
