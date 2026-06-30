@@ -42,12 +42,15 @@ struct BPMSheet: View {
                 Spacer()
             }
             // Свайп вниз по шиту закрывает его ЦЕЛИКОМ (а не просто прячет клавиатуру).
+            // highPriorityGesture — чтобы перебить системный «свайп = убрать клавиатуру»;
+            // срабатываем по ходу свайпа (onChanged), как только ушли на 40pt вниз.
             .contentShape(Rectangle())
-            .simultaneousGesture(
-                DragGesture(minimumDistance: 20)
-                    .onEnded { value in
-                        if value.translation.height > 60 {
-                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+            .highPriorityGesture(
+                DragGesture(minimumDistance: 15)
+                    .onChanged { value in
+                        if value.translation.height > 40,
+                           abs(value.translation.width) < value.translation.height {
+                            focused = false
                             dismiss()
                         }
                     }
