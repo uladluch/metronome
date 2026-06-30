@@ -69,16 +69,30 @@ struct TopToolbar: View {
 
             Spacer(minLength: 0)
 
-            // Треугольник. Свой контейнер — как у чёрной кнопки.
-            GlassEffectContainer {
-                GlassIconButton(
-                    systemName: rightIcon,
-                    glassID: nil,
-                    namespace: namespace,
-                    showShine: true,
-                    action: onRight
-                )
+            // Правая кнопка — уникальная: LG glass + Ellipse 145 + SF Symbol (БЕЗ dome/shine/inner-shadow).
+            // Слои: стекло → Ellipse 145 → иконка.
+            Button(action: onRight) {
+                ZStack {
+                    // Стекло — чистое clear, 60×60.
+                    Color.clear
+                        .frame(width: 60, height: 60)
+                        .glassEffect(.clear.interactive(), in: Circle())
+
+                    // Ellipse 145 — 60×60 поверх стекла.
+                    Image("Ellipse 145")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 60, height: 60)
+
+                    // Иконка — белая SF Symbol, 22pt, по центру.
+                    Image(systemName: rightIcon)
+                        .font(.system(size: 22, weight: .semibold))
+                        .foregroundStyle(.white)
+                }
+                .frame(width: 60, height: 60)
+                .contentShape(Circle())
             }
+            .buttonStyle(.plain)
         }
         .frame(height: 60)
     }
