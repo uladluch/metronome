@@ -126,7 +126,7 @@ struct ContentView: View {
                                 pressScaleHorizontalOnly: true,
                                 showShine: true,
                                 shineImage: "Shine",
-                                shineOpacity: 0.14,
+                                shineOpacity: 0.10,
                                 // Компактный блик (уже кнопки по ширине) — ездит под
                                 // пальцем по обеим осям, видно как преломляются углы.
                                 shineWidthFactor: 0.5,
@@ -152,31 +152,38 @@ struct ContentView: View {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             toggleGlow()
                         }) {
-                            Text(glowOn ? "Turn off glow" : "Turn on glow")
-                                .font(.headline)
-                                .foregroundStyle(.black)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
-                                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
-                                // Shine 3 ПОВЕРХ всего (над стеклом), под пальцем, по
-                                // горизонтали; обрезается капсулой.
-                                .overlay {
-                                    GeometryReader { g in
-                                        Image("shine 3")
-                                            .resizable()
-                                            .frame(width: g.size.width * 1.6, height: g.size.height * 3)
-                                            .position(
-                                                x: whiteTouchPoint == .zero ? g.size.width / 2 : whiteTouchPoint.x,
-                                                y: g.size.height / 2
-                                            )
-                                            .opacity(whitePressed ? 1 : 0)
-                                            .animation(.easeOut(duration: 0.4), value: whitePressed)
-                                            .animation(.easeOut(duration: 0.55), value: whiteTouchPoint)
-                                            .allowsHitTesting(false)
+                            ZStack {
+                                // Стекло + shine ПОВЕРХ стекла (виден), но это всё ПОД текстом.
+                                Color.clear
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 50)
+                                    .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
+                                    .overlay {
+                                        GeometryReader { g in
+                                            Image("shine 3")
+                                                .resizable()
+                                                .frame(width: g.size.width * 1.6, height: g.size.height * 3)
+                                                .position(
+                                                    x: whiteTouchPoint == .zero ? g.size.width / 2 : whiteTouchPoint.x,
+                                                    y: g.size.height / 2
+                                                )
+                                                .opacity(whitePressed ? 1 : 0)
+                                                .animation(.easeOut(duration: 0.4), value: whitePressed)
+                                                .animation(.easeOut(duration: 0.55), value: whiteTouchPoint)
+                                                .allowsHitTesting(false)
+                                        }
                                     }
-                                }
-                                .clipShape(Capsule())
-                                .contentShape(Capsule())
+                                    .clipShape(Capsule())
+
+                                // Текст — ОТДЕЛЬНЫЙ верхний слой, поверх блика → остаётся
+                                // чёрным (блик его больше не серит).
+                                Text(glowOn ? "Turn off glow" : "Turn on glow")
+                                    .font(.headline)
+                                    .foregroundStyle(.black)
+                            }
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                            .contentShape(Capsule())
                         }
                         .buttonStyle(.plain)
                         // Тот же зум на нажатии, что и у чёрной (pressScale 1.08).

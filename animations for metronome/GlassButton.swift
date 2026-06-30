@@ -25,12 +25,17 @@ struct GlassButton<Label: View>: View {
     private let shineImage: String
     private let shineOpacity: Double
     private let shineHorizontalOnly: Bool
+    /// Насколько блик следует за пальцем по Y: 1 = полностью, 0 = заперт по центру.
+    /// Маленькое значение → «тяжело» тянуть по вертикали (по X следует свободно).
+    private let shineVerticalFollow: CGFloat
     /// Явный размер блика (доля от размера кнопки). Если оба заданы — блик может
     /// вылезать за края и обрезается формой. nil — прежний scaledToFit.
     private let shineWidthFactor: CGFloat?
     private let shineHeightFactor: CGFloat?
     /// Внешнее «нажатие» для блика (когда жест живёт снаружи, как в StepZone).
     private let shineForcePressed: Bool
+    /// На нажатии перекрашивать dome (полусферу) в чёрный.
+    private let darkenDomeOnPress: Bool
     /// Тип dome: true = радиальная полусфера в углу (для кругов), false = линейный градиент сверху (для капсул).
     private let domeAsRadial: Bool
     /// Зум на нажатие только по горизонтали (высота не меняется).
@@ -60,9 +65,11 @@ struct GlassButton<Label: View>: View {
         shineImage: String = "Shine",       // имя ассета блика
         shineOpacity: Double = 0.1,          // прозрачность блика на нажатии
         shineHorizontalOnly: Bool = false,   // блик едет только по горизонтали
+        shineVerticalFollow: CGFloat = 1,    // насколько блик следует по Y (1=полностью, 0=центр)
         shineWidthFactor: CGFloat? = nil,    // явный размер блика (доля ширины кнопки)
         shineHeightFactor: CGFloat? = nil,   // явный размер блика (доля высоты кнопки)
         shineForcePressed: Bool = false,     // внешнее «нажатие» для блика
+        darkenDomeOnPress: Bool = false,     // на нажатии перекрашивать dome в чёрный
         domeAsRadial: Bool = true,           // true = радиальная сфера (для кругов), false = линейный градиент (для капсул)
         pressScaleHorizontalOnly: Bool = false, // зум на нажатие только по ширине
         externalPressScale: Bool = false,    // зум применяет внешний владелец (контейнер)
@@ -81,9 +88,11 @@ struct GlassButton<Label: View>: View {
         self.shineImage = shineImage
         self.shineOpacity = shineOpacity
         self.shineHorizontalOnly = shineHorizontalOnly
+        self.shineVerticalFollow = shineVerticalFollow
         self.shineWidthFactor = shineWidthFactor
         self.shineHeightFactor = shineHeightFactor
         self.shineForcePressed = shineForcePressed
+        self.darkenDomeOnPress = darkenDomeOnPress
         self.domeAsRadial = domeAsRadial
         self.pressScaleHorizontalOnly = pressScaleHorizontalOnly
         self.externalPressScale = externalPressScale
@@ -94,6 +103,18 @@ struct GlassButton<Label: View>: View {
     private var domeOpacity: Double {
         // Dome не меняется на нажатии — постоянная яркость.
         0.12
+    }
+
+    /// Активное нажатие (своё или внешнее, как в StepZone).
+    private var isActivePress: Bool { isPressed || shineForcePressed }
+
+    /// Цвет dome: на нажатии перекрашиваем в чёрный (если включено), иначе белый.
+    private var domeColor: Color {
+        (darkenDomeOnPress && isActivePress) ? .black : .white
+    }
+    /// Плотность dome: на нажатии плотнее (закрашиваем в чёрный), иначе базовые 0.12.
+    private var domeMainOpacity: Double {
+        (darkenDomeOnPress && isActivePress) ? 0.6 : domeOpacity
     }
 
     var body: some View {
@@ -109,6 +130,7 @@ struct GlassButton<Label: View>: View {
             // Полусфера (блик) ПОД стеклом, масштабируется под размер кнопки.
             .background {
                 if showDome {
+                    Group {
                     if domeAsRadial {
                         // Радиальная полусфера в верхнем левом углу (для круглых кнопок).
                         GeometryReader { g in
@@ -116,7 +138,7 @@ struct GlassButton<Label: View>: View {
                             Circle()
                                 .fill(
                                     RadialGradient(
-                                        colors: [.white.opacity(domeOpacity), .white.opacity(0)],
+                                        colors: [domeColor.opacity(domeMainOpacity), domeColor.opacity(0)],
                                         center: .center,
                                         startRadius: 0,
                                         endRadius: s * 0.43
@@ -124,7 +146,7 @@ struct GlassButton<Label: View>: View {
                                 )
                                 .frame(width: s * 0.87, height: s * 0.87)
                                 .offset(x: -s * 0.1, y: -s * 0.1)
-                                .animation(.easeOut(duration: 0.22), value: isPressed)
+                                .animation(.easeOut(duration: 0.22), value: isActivePress)
                         }
                     } else {
                         // Тот же приём, что и для круга: градиент, ОБРЕЗАННЫЙ формой
@@ -136,16 +158,17 @@ struct GlassButton<Label: View>: View {
                                 .fill(
                                     LinearGradient(
                                         stops: [
-                                            .init(color: .white.opacity(domeOpacity), location: 0),
-                                            .init(color: .white.opacity(domeOpacity * 0.5), location: 0.35),
-                                            .init(color: .white.opacity(0), location: 0.72)
+                                            .init(color: domeColor.opacity(domeMainOpacity), location: 0),
+                                            .init(color: domeColor.opacity(domeMainOpacity * 0.5), location: 0.35),
+                                            .init(color: domeColor.opacity(0), location: 0.72)
                                         ],
                                         startPoint: .top,
                                         endPoint: .bottom
                                     )
                                 )
-                                .animation(.easeOut(duration: 0.22), value: isPressed)
+                                .animation(.easeOut(duration: 0.22), value: isActivePress)
                         }
+                    }
                     }
                 }
             }
@@ -169,9 +192,11 @@ struct GlassButton<Label: View>: View {
                         }
                             .position(
                                 x: touchPoint == .zero ? g.size.width / 2 : touchPoint.x,
-                                // Если только по горизонтали — Y фиксируем по центру.
+                                // По Y следуем с коэффициентом: 1 = полностью, меньше —
+                                // «тяжело» (блик далеко от центра по вертикали не уходит).
                                 y: (shineHorizontalOnly || touchPoint == .zero)
-                                    ? g.size.height / 2 : touchPoint.y
+                                    ? g.size.height / 2
+                                    : g.size.height / 2 + (touchPoint.y - g.size.height / 2) * shineVerticalFollow
                             )
                             // Почти прозрачный — лёгкое свечение под стеклом.
                             .opacity((isPressed || shineForcePressed) ? shineOpacity : 0)

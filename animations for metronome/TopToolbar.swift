@@ -99,6 +99,8 @@ struct GlassIconButton: View {
     var showShine: Bool = false
     var shineOpacity: Double = 0.04
     var shineForcePressed: Bool = false
+    /// На нажатии перекрашивать dome в чёрный.
+    var darkenDomeOnPress: Bool = true
     let action: () -> Void
 
     var body: some View {
@@ -110,7 +112,8 @@ struct GlassIconButton: View {
             repeatAction: repeatAction,
             showShine: showShine,
             shineOpacity: shineOpacity,
-            shineForcePressed: shineForcePressed
+            shineForcePressed: shineForcePressed,
+            darkenDomeOnPress: darkenDomeOnPress
         ) {
             Image(systemName: systemName)
                 .font(.system(size: iconSize, weight: .medium))
@@ -136,6 +139,8 @@ struct GlassCapsuleIconButton: View {
     var shineOpacity: Double = 0.04
     var shineWidthFactor: CGFloat? = nil
     var shineHeightFactor: CGFloat? = nil
+    /// Блик «тяжёлый» по Y — далеко по вертикали не уходит (по X следует свободно).
+    var shineVerticalFollow: CGFloat = 0.25
     var shineForcePressed: Bool = false
     var externalPressScale: Bool = false
     var onPressedChange: ((Bool) -> Void)? = nil
@@ -153,6 +158,7 @@ struct GlassCapsuleIconButton: View {
             showShine: showShine,
             shineImage: shineImage,
             shineOpacity: shineOpacity,
+            shineVerticalFollow: shineVerticalFollow,
             shineWidthFactor: shineWidthFactor,
             shineHeightFactor: shineHeightFactor,
             shineForcePressed: shineForcePressed,

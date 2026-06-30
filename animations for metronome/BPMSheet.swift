@@ -2,9 +2,10 @@
 //  BPMSheet.swift
 //  animations for metronome
 //
-//  Шит ввода BPM (правая кнопка нижнего тулбара). На весь экран (.large),
-//  системный тулбар: крестик слева, чек (белый) справа, тайтл «BPM».
+//  Шит ввода BPM (правая кнопка нижнего тулбара). Фиксированная высота 200pt,
+//  системный тулбар: крестик слева, кнопка «Save» справа, без тайтла.
 //  Крупное редактируемое число (дефолт 90), автофокус + хаптик на клавиатуру.
+//  Курсор скрыт, фон — сплошной #1C1C1C. Свайп вниз закрывает шит целиком.
 //  Ввод любого значения разрешён; если при подтверждении > 360 — после закрытия
 //  показываем нотификацию (через onExceedMax → ContentView).
 //
@@ -33,12 +34,24 @@ struct BPMSheet: View {
                     .multilineTextAlignment(.center)
                     .keyboardType(.numberPad)
                     .focused($focused)
+                    .tint(.clear)               // убираем мигающий курсор (caret)
                     .frame(maxWidth: .infinity)
                     .padding(.top, 40)
 
                 Spacer()
             }
-            .navigationTitle("BPM")
+            // Свайп вниз по шиту закрывает его ЦЕЛИКОМ (а не просто прячет клавиатуру).
+            .contentShape(Rectangle())
+            .simultaneousGesture(
+                DragGesture(minimumDistance: 20)
+                    .onEnded { value in
+                        if value.translation.height > 60 {
+                            UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                            dismiss()
+                        }
+                    }
+            )
+            .navigationTitle("")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 // Крестик слева — отмена.
@@ -60,15 +73,15 @@ struct BPMSheet: View {
                         }
                         dismiss()
                     }) {
-                        Image(systemName: "checkmark")
+                        Text("Save")
                     }
                 }
             }
         }
-        // Жёстко фиксированная высота — шит не растягивается под клавиатуру
-        // (фиксированный .height вместо .medium, который iOS тянет до large).
+        // Жёстко фиксированная высота — шит сразу открывается в финальной высоте и
+        // не растягивается под клавиатуру (фиксированный .height вместо .medium).
         .presentationDetents([.height(200)])
-        // Фон шита — вторичный (#1C1C1C).
+        // Фон шита — сплошной вторичный (#1C1C1C).
         .presentationBackground(Color.backgroundSecondary)
         // Тонкая обводка по краю шита.
         .sheetHairlineBorder()
@@ -76,9 +89,10 @@ struct BPMSheet: View {
         .presentationDragIndicator(.visible)
         // Клавиатура не должна менять высоту контента шита.
         .ignoresSafeArea(.keyboard, edges: .bottom)
-        // Дать шиту открыться, затем фокус → клавиатура (200ms).
+        // Фокус СРАЗУ при появлении — клавиатура поднимается ОДНОВРЕМЕННО с презентацией
+        // шита (одно движение, шит сразу появляется в поднятой позиции), а не «в два
+        // яруса» (маленький шит → потом клавиатура его выталкивает).
         .task {
-            try? await Task.sleep(for: .milliseconds(200))
             focused = true
         }
         // Хаптик именно в момент появления клавиатуры (а не на фокус).
