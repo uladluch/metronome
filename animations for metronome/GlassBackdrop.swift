@@ -18,14 +18,15 @@ struct GlassBackdrop: View {
 
     var body: some View {
         ZStack(alignment: .top) {
-            Image("Path")
+            Image("BGShadowActive")
                 .resizable()
                 .scaledToFit()
-                .frame(width: 440)
+                .ignoresSafeArea()
+                .blur(radius: 6)
                 .opacity(level)
                 // Верхняя кромка картинки начинается под капсулой.
                 // Тулбар: padding.top 8, капсула height 60 → нижняя точка на ~68pt.
-                .offset(y: 75)
+                .offset(y: 67)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .ignoresSafeArea()
