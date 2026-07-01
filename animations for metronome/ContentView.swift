@@ -14,8 +14,8 @@ struct ContentView: View {
 
     /// Подсветка (свечение BGShadowActive) вкл/выкл.
     @State private var glowOn = false
-    /// Яркость свечения: 0 — выкл, 1 — включено. Вспыхивает на удар при воспроизведении.
-    @State private var glowLevel: Double = 0
+    /// Яркость свечения: 0.05 — выкл (едва видно), 1 — включено.
+    @State private var glowLevel: Double = 0.05
     /// Счётчик ударов. activeIndex боба = beatIndex % 4.
     @State private var beatIndex = 0
     /// Таймер метронома (бьётся, пока glowOn). Единый источник синхронизации.
@@ -181,7 +181,7 @@ struct ContentView: View {
         } else {
             beatTimer?.invalidate()
             beatTimer = nil
-            withAnimation(.easeInOut(duration: 0.35)) { glowLevel = 0 }
+            withAnimation(.easeInOut(duration: 0.35)) { glowLevel = 0.05 }
         }
     }
 
