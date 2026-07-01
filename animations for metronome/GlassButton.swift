@@ -77,24 +77,6 @@ struct GlassButton<Label: View>: View {
                 }
             }
             .clipShape(shape)
-            // Inner shadow — если включено (по умолчанию отключено).
-            .overlay {
-                if showInnerShadow {
-                    shape
-                        .stroke(Color.white.opacity(0.22), lineWidth: 5)
-                        .blur(radius: 7)
-                        .offset(y: 3)
-                        .mask(
-                            shape.fill(
-                                LinearGradient(
-                                    colors: [.white, .clear],
-                                    startPoint: .top,
-                                    endPoint: .center
-                                )
-                            )
-                        )
-                }
-            }
             .contentShape(shape)
             .onTapGesture {
                 // Если был long-press авто-повтор — лишний шаг по тапу не делаем.
