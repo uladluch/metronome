@@ -103,8 +103,6 @@ struct ContentView: View {
                             shape: Capsule(),
                             namespace: glassNS,
                             action: { showNotificationAction() },
-                            showDome: false,
-                            pressScale: 1.08,
                             glassStyle: .regular
                         ) {
                             Text("Show notification")

@@ -94,8 +94,7 @@ private struct GlassCapsuleButton: View {
             shape: Capsule(),
             glassID: glassID,
             namespace: namespace,
-            action: action,
-            showDome: false
+            action: action
         ) {
             Text("Hello")
                 .font(.headline)
