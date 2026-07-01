@@ -32,7 +32,7 @@ struct GlassButton<Label: View>: View {
         namespace: Namespace.ID,
         action: @escaping () -> Void,
         repeatAction: (() -> Void)? = nil,  // long-press авто-повтор
-        showDome: Bool = true,
+        showDome: Bool = false,
         pressScale: CGFloat = 1.0,          // 1.0 = без увеличения на нажатие
         glassStyle: Glass = AppGlass.style,
         @ViewBuilder label: () -> Label
