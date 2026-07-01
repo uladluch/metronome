@@ -31,20 +31,8 @@ struct ContentView: View {
     @State private var controlsVisible = false
     @State private var hideTask: Task<Void, Never>?
 
-    /// Главный шит — общий для верхних кнопок (шестерёнка/капсула/троеточие) и
-    /// нижней левой кнопки. Уникальный BPM-шит живёт в BottomToolbar (низ-право).
-    @State private var showMainSheet = false
-
-    /// Блик Shine под белой кнопкой (под пальцем, под стеклом).
-    @State private var whitePressed = false
-    @State private var whiteTouchPoint: CGPoint = .zero
-    /// Нажатие чёрной кнопки — зум применяем снаружи, ко всему GlassEffectContainer.
-    @State private var notifPressed = false
-
     /// Показать ли нотификацию.
     @State private var showNotification = false
-    /// Текст нотификации (меняется в зависимости от того, кто её вызвал).
-    @State private var notificationText = "Hello I'm notification"
     /// Отложенное скрытие нотификации (2.5с). DispatchWorkItem — чтобы withAnimation
     /// гарантированно проигрывал transition (внутри Task после await не работает).
     @State private var notificationHideWork: DispatchWorkItem?
@@ -61,16 +49,15 @@ struct ContentView: View {
             // Верхний тулбар + бобы наверху. Между капсулой и бобами — 40pt.
             VStack(spacing: 40) {
                 // Тулбар: шестерёнка + капсула + три точки.
-                // Каждая кнопка тулбара — в собственном GlassEffectContainer
-                // (как чёрная кнопка), общего внешнего контейнера нет — иначе у
-                // Hello получалась вложенность контейнеров и стекло выглядело иначе.
-                TopToolbar(
-                    namespace: glassNS,
-                    onLeft: { showMainSheet = true },
-                    onCenter: { showMainSheet = true },
-                    onRight: { showMainSheet = true }
-                )
-                .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
+                GlassEffectContainer(spacing: 16) {
+                    TopToolbar(
+                        namespace: glassNS,
+                        onLeft: {},
+                        onCenter: {},
+                        onRight: {}
+                    )
+                    .containerRelativeFrame(.horizontal) { length, _ in length - 32 }
+                }
 
                 // Новый контрол — светящиеся бобы. activeIndex и glowLevel — из того
                 // же источника, что и вспышка картинки → синхрон гарантирован.
@@ -88,7 +75,6 @@ struct ContentView: View {
                             namespace: glassNS,
                             alignment: .trailing,
                             visible: controlsVisible,
-                            disabled: tempo <= 40,
                             onShow: showControls,
                             onStep: { step(-1) },
                             onHide: scheduleHide
@@ -104,7 +90,6 @@ struct ContentView: View {
                             namespace: glassNS,
                             alignment: .leading,
                             visible: controlsVisible,
-                            disabled: tempo >= 240,
                             onShow: showControls,
                             onStep: { step(1) },
                             onHide: scheduleHide
@@ -114,110 +99,45 @@ struct ContentView: View {
                     // Две кнопки glow (теперь СНИЗУ).
                     VStack(spacing: 12) {
                         // Тёмная стеклянная кнопка — показать нотификацию.
-                        // Анатомия как у круглых кнопок: shine 1 (Shine), opacity 0.04.
-                        // В GlassEffectContainer (как круглые) — чтобы стекло «переливалось».
-                        // Зум применяем СНАРУЖИ, ко всему контейнеру (externalPressScale),
-                        // иначе масштабирование внутри ломает морфинг стекла и тянет вбок.
-                        GlassEffectContainer {
-                            GlassCapsuleIconButton(
-                                glassID: nil,
-                                namespace: glassNS,
-                                size: .init(width: 240, height: 50),
-                                pressScaleHorizontalOnly: true,
-                                showShine: true,
-                                shineImage: "Shine",
-                                shineOpacity: 0.10,
-                                // Компактный блик (уже кнопки по ширине) — ездит под
-                                // пальцем по обеим осям, видно как преломляются углы.
-                                shineWidthFactor: 0.5,
-                                shineHeightFactor: 2.2,
-                                externalPressScale: true,
-                                onPressedChange: { pressed in
-                                    withAnimation(.easeOut(duration: pressed ? 0.12 : 0.3)) {
-                                        notifPressed = pressed
-                                    }
-                                },
-                                action: { showNotificationAction() }
-                            ) {
-                                Text("Show notification")
-                                    .font(.headline)
-                                    .foregroundStyle(.white)
-                            }
+                        GlassButton(
+                            shape: Capsule(),
+                            namespace: glassNS,
+                            action: { showNotificationAction() },
+                            showDome: false,
+                            pressScale: 1.08,
+                            glassStyle: .regular
+                        ) {
+                            Text("Show notification")
+                                .font(.headline)
+                                .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
                         }
-                        // Горизонтальный зум всего контейнера — симметрично, по центру.
-                        .scaleEffect(x: notifPressed ? 1.08 : 1.0, y: 1.0)
 
                         // Белая кнопка (тот же функционал), чёрный шрифт.
                         Button(action: {
                             UIImpactFeedbackGenerator(style: .light).impactOccurred()
                             toggleGlow()
                         }) {
-                            ZStack {
-                                // Стекло + shine ПОВЕРХ стекла (виден), но это всё ПОД текстом.
-                                Color.clear
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 50)
-                                    .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
-                                    .overlay {
-                                        GeometryReader { g in
-                                            Image("shine 3")
-                                                .resizable()
-                                                .frame(width: g.size.width * 1.6, height: g.size.height * 3)
-                                                .position(
-                                                    x: whiteTouchPoint == .zero ? g.size.width / 2 : whiteTouchPoint.x,
-                                                    y: g.size.height / 2
-                                                )
-                                                .opacity(whitePressed ? 1 : 0)
-                                                .animation(.easeOut(duration: 0.4), value: whitePressed)
-                                                .animation(.easeOut(duration: 0.55), value: whiteTouchPoint)
-                                                .allowsHitTesting(false)
-                                        }
-                                    }
-                                    .clipShape(Capsule())
-
-                                // Текст — ОТДЕЛЬНЫЙ верхний слой, поверх блика → остаётся
-                                // чёрным (блик его больше не серит).
-                                Text(glowOn ? "Turn off glow" : "Turn on glow")
-                                    .font(.headline)
-                                    .foregroundStyle(.black)
-                            }
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 50)
-                            .contentShape(Capsule())
+                            Text(glowOn ? "Turn off glow" : "Turn on glow")
+                                .font(.headline)
+                                .foregroundStyle(.black)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
+                                .glassEffect(.regular.tint(.white).interactive(), in: Capsule())
+                                .contentShape(Capsule())
                         }
                         .buttonStyle(.plain)
-                        // Тот же зум на нажатии, что и у чёрной (pressScale 1.08).
-                        .scaleEffect(whitePressed ? 1.08 : 1.0)
-                        .simultaneousGesture(
-                            DragGesture(minimumDistance: 0)
-                                .onChanged { v in
-                                    whiteTouchPoint = v.location
-                                    if !whitePressed {
-                                        withAnimation(.easeOut(duration: 0.12)) { whitePressed = true }
-                                    }
-                                }
-                                .onEnded { _ in
-                                    withAnimation(.easeOut(duration: 0.3)) { whitePressed = false }
-                                }
-                        )
                     }
                     .frame(width: 240)
                 }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
             .offset(y: 40)  // опущено ниже
 
-            // Нижний тулбар — прижат к низу. Левая кнопка открывает тот же главный шит.
-            BottomToolbar(
-                onMainSheet: { showMainSheet = true },
-                onBPMOverflow: {
-                    // Небольшая задержка — чтобы баннер влетел уже после закрытия шита.
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.45) {
-                        showNotificationAction("Maximum value can't exceed 360")
-                    }
-                }
-            )
-            .frame(maxHeight: .infinity, alignment: .bottom)
-            .padding(.bottom, 8)
+            // Нижний тулбар — прижат к низу.
+            BottomToolbar()
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, 8)
 
             // Нотификация — ВСЕГДА в дереве, анимируем opacity (+ лёгкий scale/offset)
             // через состояние. Анимация СВОЙСТВ работает в обе стороны железно, в
@@ -226,15 +146,15 @@ struct ContentView: View {
             HStack(spacing: 12) {
                 Image(systemName: "bell.fill")
                     .font(.system(size: 18, weight: .semibold))
-                    .foregroundStyle(.black)
-                Text(notificationText)
+                    .foregroundStyle(.white)
+                Text("Hello I'm notification")
                     .font(.headline)
-                    .foregroundStyle(.black)
+                    .foregroundStyle(.white)
                 Spacer(minLength: 0)
             }
             .padding(.horizontal, 24)              // внутренний отступ контента
             .frame(width: 360, height: 60)         // фиксированная ширина
-            .glassEffect(.regular.tint(.white), in: Capsule())  // белое стекло, чёрный шрифт
+            .glassEffect(.regular, in: Capsule())   // капсула — полностью скруглённая
             .shadow(color: .black.opacity(0.25), radius: 20, y: 8)  // глубина
             .padding(.top, 8)                       // отступ от верха
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)  // центр X, верх
@@ -244,12 +164,6 @@ struct ContentView: View {
             .scaleEffect(showNotification ? 1 : 0.9, anchor: .top)
             .offset(y: showNotification ? 0 : -120)
             .allowsHitTesting(showNotification)     // скрытая не перехватывает тапы
-        }
-        // Главный шит — общий для верхних кнопок и нижней левой.
-        .sheet(isPresented: $showMainSheet) {
-            SheetView()
-                .presentationDetents([.large])           // только .large (не medium)
-                .presentationDragIndicator(.visible)     // grabber сверху
         }
         // Клавиатура из BPM-шита не должна двигать контент под ним (иначе кнопки
         // и рулер прыгают при разворачивании/сворачивании шита).
@@ -302,10 +216,9 @@ struct ContentView: View {
         scheduleHide()
     }
 
-    /// Показать нотификацию (с заданным текстом) и скрыть через 2.5s.
+    /// Показать нотификацию и скрыть через 2.5s.
     /// Apple-style: вход и выход — одна и та же красивая пружина (зеркально).
-    private func showNotificationAction(_ text: String = "Hello I'm notification") {
-        notificationText = text
+    private func showNotificationAction() {
         notificationHideWork?.cancel()
         withAnimation(.spring(response: 0.5, dampingFraction: 0.72)) {
             showNotification = true

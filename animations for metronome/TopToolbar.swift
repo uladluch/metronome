@@ -16,83 +16,35 @@ struct TopToolbar: View {
     let onCenter: () -> Void
     let onRight: () -> Void
 
-    private let leftIcon = "circle"
-    private let rightIcon = "triangle"
-
-    /// Нажатие капсулы Hello — зум применяем снаружи, к её GlassEffectContainer.
-    @State private var helloPressed = false
+    private let leftIcon = "gearshape"
+    private let rightIcon = "ellipsis"
 
     var body: some View {
         HStack(spacing: 0) {
-            // Шестерёнка (пока без действия). Свой контейнер — как у чёрной кнопки.
-            GlassEffectContainer {
-                GlassIconButton(
-                    systemName: leftIcon,
-                    glassID: nil,
-                    namespace: namespace,
-                    showShine: true,
-                    action: onLeft
-                )
-            }
+            // Шестерёнка (пока без действия).
+            GlassIconButton(
+                systemName: leftIcon,
+                glassID: nil,
+                namespace: namespace,
+                action: onLeft
+            )
 
             Spacer(minLength: 0)
 
-            // Капсула Hello — те же слои/эффекты, что у чёрной кнопки
-            // (переливание, компактный блик, горизонтальный зум), но БЕЗ dome.
-            // Только оригинального размера 180×60. Зум — снаружи контейнера.
-            GlassEffectContainer {
-                GlassCapsuleIconButton(
-                    glassID: nil,
-                    namespace: namespace,
-                    size: .init(width: 180, height: 60),
-                    pressScaleHorizontalOnly: true,
-                    showDome: false,
-                    showShine: true,
-                    shineImage: "Shine",
-                    shineOpacity: 0.14,
-                    shineWidthFactor: 0.5,
-                    shineHeightFactor: 2.2,
-                    externalPressScale: true,
-                    onPressedChange: { pressed in
-                        withAnimation(.easeOut(duration: pressed ? 0.12 : 0.3)) {
-                            helloPressed = pressed
-                        }
-                    },
-                    action: onCenter
-                ) {
-                    Text("Hello")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                }
-            }
-            .scaleEffect(x: helloPressed ? 1.08 : 1.0, y: 1.0)
+            GlassCapsuleButton(
+                glassID: nil,
+                namespace: namespace,
+                action: onCenter
+            )
 
             Spacer(minLength: 0)
 
-            // Правая кнопка — уникальная: LG glass + Ellipse 145 + SF Symbol (БЕЗ dome/shine/inner-shadow).
-            // Слои: стекло → Ellipse 145 → иконка.
-            Button(action: onRight) {
-                ZStack {
-                    // Стекло — чистое clear, 60×60.
-                    Color.clear
-                        .frame(width: 60, height: 60)
-                        .glassEffect(.clear.interactive(), in: Circle())
-
-                    // Ellipse 145 — 60×60 поверх стекла.
-                    Image("Ellipse 145")
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 60, height: 60)
-
-                    // Иконка — белая SF Symbol, 22pt, по центру.
-                    Image(systemName: rightIcon)
-                        .font(.system(size: 22, weight: .semibold))
-                        .foregroundStyle(.white)
-                }
-                .frame(width: 60, height: 60)
-                .contentShape(Circle())
-            }
-            .buttonStyle(.plain)
+            GlassIconButton(
+                systemName: rightIcon,
+                glassID: nil,
+                namespace: namespace,
+                action: onRight
+            )
         }
         .frame(height: 60)
     }
@@ -109,13 +61,7 @@ struct GlassIconButton: View {
     let namespace: Namespace.ID
     var size: CGFloat = 60
     var iconSize: CGFloat = 22
-    var iconColor: Color = .white
     var repeatAction: (() -> Void)? = nil
-    var showShine: Bool = false
-    var shineOpacity: Double = 0.04
-    var shineForcePressed: Bool = false
-    /// На нажатии перекрашивать dome в чёрный.
-    var darkenDomeOnPress: Bool = true
     let action: () -> Void
 
     var body: some View {
@@ -124,49 +70,24 @@ struct GlassIconButton: View {
             glassID: glassID,
             namespace: namespace,
             action: action,
-            repeatAction: repeatAction,
-            showShine: showShine,
-            shineOpacity: shineOpacity,
-            shineForcePressed: shineForcePressed,
-            darkenDomeOnPress: darkenDomeOnPress
+            repeatAction: repeatAction
         ) {
             Image(systemName: systemName)
                 .font(.system(size: iconSize, weight: .medium))
-                .foregroundStyle(iconColor)
+                .foregroundStyle(.white)
                 .frame(width: size, height: size)
         }
     }
 }
 
-// MARK: - Обёртки над GlassButton для стандартных форм
+// MARK: - Центральная капсула 180×60
 
-/// Капсула с параметрами круглых кнопок (для чёрной кнопки в ContentView).
-struct GlassCapsuleIconButton: View {
+/// Стеклянная капсула-кнопка 180×60 (обёртка над GlassButton).
+private struct GlassCapsuleButton: View {
 
     let glassID: String?
     let namespace: Namespace.ID
-    var size: CGSize = .init(width: 240, height: 50)
-    var pressScale: CGFloat = 1.08
-    var pressScaleHorizontalOnly: Bool = false
-    var repeatAction: (() -> Void)? = nil
-    var showDome: Bool = true
-    var showShine: Bool = false
-    var shineImage: String = "Shine"
-    var shineOpacity: Double = 0.04
-    var shineWidthFactor: CGFloat? = nil
-    var shineHeightFactor: CGFloat? = nil
-    /// Блик «тяжёлый» по Y — далеко по вертикали не уходит (по X следует свободно).
-    var shineVerticalFollow: CGFloat = 0.25
-    var shineForcePressed: Bool = false
-    var externalPressScale: Bool = false
-    var onPressedChange: ((Bool) -> Void)? = nil
-    /// Заливка ПОД стеклом (самый нижний слой). nil — прозрачно (стекло над фоном
-    /// приложения → тёмная кнопка). .white — «инверсия»: clear-стекло над белым → белая кнопка.
-    var baseFill: Color? = nil
-    /// Инверсия бликов (dome + inner-shadow) в чёрный — для белой кнопки.
-    var invertHighlights: Bool = false
     let action: () -> Void
-    @ViewBuilder let label: () -> any View
 
     var body: some View {
         GlassButton(
@@ -174,33 +95,12 @@ struct GlassCapsuleIconButton: View {
             glassID: glassID,
             namespace: namespace,
             action: action,
-            repeatAction: repeatAction,
-            showDome: showDome,
-            pressScale: pressScale,
-            showShine: showShine,
-            shineImage: shineImage,
-            shineOpacity: shineOpacity,
-            shineVerticalFollow: shineVerticalFollow,
-            shineWidthFactor: shineWidthFactor,
-            shineHeightFactor: shineHeightFactor,
-            shineForcePressed: shineForcePressed,
-            invertHighlights: invertHighlights,
-            domeAsRadial: false,
-            pressScaleHorizontalOnly: pressScaleHorizontalOnly,
-            externalPressScale: externalPressScale,
-            onPressedChange: onPressedChange
+            showDome: false
         ) {
-            // Явная фиксированная ширина — чтобы пивот зума был точно по центру
-            // (с maxWidth:.infinity внутри контейнера центр «уплывал» вправо).
-            AnyView(label())
-                .frame(width: size.width, height: size.height)
-        }
-        // Белая (или иная) подложка — самый нижний слой под стеклом.
-        .background {
-            if let baseFill {
-                Capsule().fill(baseFill)
-            }
+            Text("Hello")
+                .font(.headline)
+                .foregroundStyle(.white)
+                .frame(width: 180, height: 60)
         }
     }
 }
-
