@@ -12,10 +12,10 @@ struct ContentView: View {
     /// Namespace для GlassButton-обёрток.
     @Namespace private var glassNS
 
-    /// Подсветка (свечение Path) вкл/выкл.
+    /// Подсветка (свечение BGShadowActive) вкл/выкл.
     @State private var glowOn = false
-    /// Яркость свечения: 0.5 — приглушено (выкл), 1 — ярко (вкл). Вспыхивает на удар.
-    @State private var glowLevel: Double = 0.5
+    /// Яркость свечения: 0 — выкл, 1 — включено. Вспыхивает на удар при воспроизведении.
+    @State private var glowLevel: Double = 0
     /// Счётчик ударов. activeIndex боба = beatIndex % 4.
     @State private var beatIndex = 0
     /// Таймер метронома (бьётся, пока glowOn). Единый источник синхронизации.
@@ -183,7 +183,7 @@ struct ContentView: View {
         } else {
             beatTimer?.invalidate()
             beatTimer = nil
-            withAnimation(.easeInOut(duration: 0.35)) { glowLevel = 0.5 }
+            withAnimation(.easeInOut(duration: 0.35)) { glowLevel = 0 }
         }
     }
 
@@ -205,7 +205,7 @@ struct ContentView: View {
     private func flashBeat() {
         glowLevel = 1.0  // мгновенно — резкая «атака» удара
         withAnimation(.easeOut(duration: 0.25)) {
-            glowLevel = 0.5  // быстрое затухание к следующему удару
+            glowLevel = 1.0  // остаётся включено, так как метроном бьётся
         }
     }
 
